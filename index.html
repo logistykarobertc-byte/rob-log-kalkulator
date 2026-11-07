@@ -81,7 +81,7 @@
     <!-- MAIN CONTENT -->
     <main class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
 
-        <!-- ================= TAB 1: 3 OFFERS WITH 8 ITEMS + TASKS FOR 12 GROUPS ================= -->
+        <!-- ================= TAB 1: 3 OFFERS WITH 8 ITEMS ================= -->
         <div id="tab-offers" class="tab-content space-y-8">
             
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 text-xs text-slate-300 space-y-2">
@@ -89,63 +89,18 @@
                     <i class="fa-solid fa-circle-info"></i>
                     <span>Instrukcja dla ucznia / grupy:</span>
                 </div>
-                <p>Zapoznaj się z katalogami ofertowymi trzech dostawców. <strong>Zasada transportu:</strong> Dostawa jest darmowa (0 zł) przy zamówieniu całopojazdowym LUB gdy wartość towaru przekracza <strong>4500 zł</strong>. Jeśli wartość towaru wynosi do 4500 zł, doliczany jest transport w wysokości <strong>5,80 zł/km</strong> (Betonex: 150 km = 870 zł, Bud-Mat: 90 km = 522 zł, Kronos: 135 km = 783 zł).</p>
+                <p>Zapoznaj się z rozbudowanymi katalogami ofertowymi trzech dostawców (po 8 artykułów). <strong>Zasada transportu:</strong> Dostawa jest darmowa (0 zł) przy zamówieniu całopojazdowym lub gdy wartość towaru przekracza <strong>4500 zł</strong>. Jeśli wartość towaru wynosi do 4500 zł (i nie jest to transport całopojazdowy), doliczany jest koszt transportu w wysokości <strong>5,80 zł/km</strong> (loco / EXW) </p>
             </div>
 
-            <!-- BUTTON TO TOGGLE TASKS FOR 12 GROUPS -->
-            <div class="bg-blue-950/40 border border-blue-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                    <h3 class="text-sm font-bold text-blue-300"><i class="fa-solid fa-users-rectangle mr-2"></i> Szukasz wytycznych dla swojej grupy?</h3>
-                    <p class="text-xs text-slate-300">Sprawdź tabelę przydziału asortymentu i ilości dla 12 grup ćwiczeniowych.</p>
-                </div>
-                <button onclick="toggleGroupTasks()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow transition-all flex items-center gap-2 shrink-0">
-                    <i class="fa-solid fa-list-check"></i> Pokaż / Ukryj Tabela Zadań (12 Grup)
-                </button>
-            </div>
-
-            <!-- COLLAPSIBLE GROUP TASKS TABLE -->
-            <div id="group-tasks-container" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4">
-                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2">
-                    <i class="fa-solid fa-table mr-1.5"></i> Tabela Przydziału Zadań dla 12 Grup
-                </h3>
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-xs text-left text-slate-300">
-                        <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-slate-800">
-                            <tr>
-                                <th class="p-2.5 text-center">Grupa</th>
-                                <th class="p-2.5">Przydzielone Artykuły (Lp.)</th>
-                                <th class="p-2.5">Ilości do zamówienia</th>
-                                <th class="p-2.5 text-center">Próg >4500 zł?</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800 font-medium">
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 1</td><td class="p-2.5">1, 2, 3</td><td class="p-2.5 text-slate-200">1000× Cegła, 2000× Cement, 500× Pustak</td><td class="p-2.5 text-center text-emerald-400 font-bold">TAK</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 2</td><td class="p-2.5">4, 5, 6</td><td class="p-2.5 text-slate-200">5000× Piasek, 100× Zaprawa, 30× Styropian</td><td class="p-2.5 text-center text-emerald-400 font-bold">TAK</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 3</td><td class="p-2.5">7, 8</td><td class="p-2.5 text-slate-200">150× Blacha, 80× Gips</td><td class="p-2.5 text-center text-emerald-400 font-bold">TAK</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 4</td><td class="p-2.5">1, 4</td><td class="p-2.5 text-slate-200">500× Cegła, 3000× Piasek</td><td class="p-2.5 text-center text-red-400 font-bold">NIE</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 5</td><td class="p-2.5">2, 5</td><td class="p-2.5 text-slate-200">1000× Cement, 50× Zaprawa</td><td class="p-2.5 text-center text-red-400 font-bold">NIE</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 6</td><td class="p-2.5">3, 6</td><td class="p-2.5 text-slate-200">250× Pustak, 15× Styropian</td><td class="p-2.5 text-center text-red-400 font-bold">NIE</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 7</td><td class="p-2.5">1, 8</td><td class="p-2.5 text-slate-200">1200× Cegła, 100× Gips</td><td class="p-2.5 text-center text-red-400 font-bold">NIE</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 8</td><td class="p-2.5">2, 7</td><td class="p-2.5 text-slate-200">1500× Cement, 100× Blacha</td><td class="p-2.5 text-center text-emerald-400 font-bold">TAK</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 9</td><td class="p-2.5">3, 4, 5</td><td class="p-2.5 text-slate-200">300× Pustak, 2000× Piasek, 60× Zaprawa</td><td class="p-2.5 text-center text-red-400 font-bold">NIE</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 10</td><td class="p-2.5">6, 8</td><td class="p-2.5 text-slate-200">20× Styropian, 50× Gips</td><td class="p-2.5 text-center text-emerald-400 font-bold">TAK</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 11</td><td class="p-2.5">1, 3, 7</td><td class="p-2.5 text-slate-200">400× Cegła, 200× Pustak, 50× Blacha</td><td class="p-2.5 text-center text-red-400 font-bold">NIE</td></tr>
-                            <tr><td class="p-2.5 text-center font-bold text-amber-400">Grupa 12</td><td class="p-2.5">2, 6</td><td class="p-2.5 text-slate-200">2500× Cement, 35× Styropian</td><td class="p-2.5 text-center text-emerald-400 font-bold">TAK</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 3 OFFERS CARDS -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                <!-- OFFER 1: BETONEX -->
+                <!-- OFFER 1: BETONEX (150 km) -->
                 <div class="bg-slate-900 rounded-2xl border-2 border-amber-500/40 shadow-2xl overflow-hidden flex flex-col justify-between">
                     <div>
                         <div class="bg-gradient-to-r from-blue-950 via-slate-900 to-slate-950 p-5 border-b-4 border-amber-400 relative">
                             <div class="flex justify-between items-start mb-2">
                                 <h2 class="text-xl font-extrabold text-white font-display">BETONEX Sp. z o.o.</h2>
-                                <span class="text-[10px] bg-amber-400 text-slate-950 font-bold px-2 py-0.5 rounded">DPA (Z wyładunkiem)</span>
+                                <span class="text-[10px] bg-amber-400 text-slate-950 font-bold px-2 py-0.5 rounded">DPA / FRANCO / EXW / LOCO</span>
                             </div>
                             <div class="text-[11px] text-slate-300 space-x-2">
                                 <span>NIP: 9450010021</span> • <span class="text-amber-400">WWW.BETONEX.PL</span>
@@ -155,6 +110,7 @@
                             </div>
                         </div>
 
+                        <!-- Cennik (8 pozycji) -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-xs text-left text-slate-300">
                                 <thead class="text-[10px] uppercase bg-blue-950 text-amber-300 border-b border-slate-800">
@@ -179,14 +135,15 @@
                             </table>
                         </div>
 
+                        <!-- Parametry do macierzy -->
                         <div class="p-4 bg-slate-950/90 border-t-2 border-amber-500/30 space-y-2">
                             <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider block border-b border-slate-800 pb-1">
                                 <i class="fa-solid fa-list-check mr-1"></i> Parametry do Macierzy Oceny:
                             </span>
                             <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-slate-300">
-                                <div class="col-span-2">• <strong>Koszt dostawy:</strong> 0 zł (>4500 zł / całopojazdowa) / 870 zł (150 km poniżej)</div>
+                                <div class="col-span-2">• <strong>Koszt dostawy:</strong> 0 zł (powyżej 4500 zł / całopojazdowa) / 870,00 zł (150 km × 5,80 zł poniżej)</div>
                                 <div>• <strong>Jakość materiałów:</strong> 95 / 100</div>
-                                <div>• <strong>Czas dostawy:</strong> 1 dzień</div>
+                                <div>• <strong>Czas dostawy:</strong> do 3 dni</div>
                                 <div>• <strong>Wartość użytkowa:</strong> 90 / 100</div>
                                 <div>• <strong>Gwarancje/reklamacje:</strong> 95 / 100</div>
                                 <div>• <strong>Kondycja finansowa:</strong> 90 / 100</div>
@@ -196,16 +153,17 @@
                                 <div class="col-span-2">• <strong>Odległość (lokalizacja):</strong> 150 km</div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
-                <!-- OFFER 2: BUD-MAT -->
+                <!-- OFFER 2: BUD-MAT (90 km) -->
                 <div class="bg-slate-900 rounded-2xl border-2 border-red-500/40 shadow-2xl overflow-hidden flex flex-col justify-between">
                     <div>
                         <div class="bg-gradient-to-r from-red-950 via-slate-900 to-slate-950 p-5 border-b-4 border-red-500 relative">
                             <div class="flex justify-between items-start mb-2">
                                 <h2 class="text-xl font-extrabold text-white font-display">BUD-MAT Sp. z o.o.</h2>
-                                <span class="text-[10px] bg-red-600 text-white font-bold px-2 py-0.5 rounded">Franco Magazyn</span>
+                                <span class="text-[10px] bg-red-600 text-white font-bold px-2 py-0.5 rounded">DPA / FRANCO / EXW / LOCO</span>
                             </div>
                             <div class="text-[11px] text-slate-300 space-x-2">
                                 <span>NIP: 8940021544</span> • <span class="text-red-400">WWW.BUD-MAT.PL</span>
@@ -215,6 +173,7 @@
                             </div>
                         </div>
 
+                        <!-- Cennik (8 pozycji) -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-xs text-left text-slate-300">
                                 <thead class="text-[10px] uppercase bg-red-950 text-red-200 border-b border-slate-800">
@@ -239,14 +198,15 @@
                             </table>
                         </div>
 
+                        <!-- Parametry do macierzy -->
                         <div class="p-4 bg-slate-950/90 border-t-2 border-red-500/30 space-y-2">
                             <span class="text-[11px] font-bold text-red-400 uppercase tracking-wider block border-b border-slate-800 pb-1">
                                 <i class="fa-solid fa-list-check mr-1"></i> Parametry do Macierzy Oceny:
                             </span>
                             <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-slate-300">
-                                <div class="col-span-2">• <strong>Koszt dostawy:</strong> 0 zł (>4500 zł / całopojazdowa) / 522 zł (90 km poniżej)</div>
+                                <div class="col-span-2">• <strong>Koszt dostawy:</strong> 0 zł (powyżej 4500 zł / całopojazdowa) / 522,00 zł (90 km × 5,80 zł poniżej)</div>
                                 <div>• <strong>Jakość materiałów:</strong> 85 / 100</div>
-                                <div>• <strong>Czas dostawy:</strong> 3 dni</div>
+                                <div>• <strong>Czas dostawy:</strong> do 2 dni</div>
                                 <div>• <strong>Wartość użytkowa:</strong> 80 / 100</div>
                                 <div>• <strong>Gwarancje/reklamacje:</strong> 75 / 100</div>
                                 <div>• <strong>Kondycja finansowa:</strong> 85 / 100</div>
@@ -256,16 +216,17 @@
                                 <div class="col-span-2">• <strong>Odległość (lokalizacja):</strong> 90 km</div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
-                <!-- OFFER 3: KRONOS -->
+                <!-- OFFER 3: KRONOS (135 km) -->
                 <div class="bg-slate-900 rounded-2xl border-2 border-emerald-500/40 shadow-2xl overflow-hidden flex flex-col justify-between">
                     <div>
                         <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 p-5 border-b-4 border-emerald-500 relative">
                             <div class="flex justify-between items-start mb-2">
                                 <h2 class="text-xl font-extrabold text-white font-display">KRONOS Sp. z o.o.</h2>
-                                <span class="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded">Loco Magazyn</span>
+                                <span class="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded">DPA / FRANCO / EXW / LOCO</span>
                             </div>
                             <div class="text-[11px] text-slate-300 space-x-2">
                                 <span>NIP: 5210098765</span> • <span class="text-emerald-400">WWW.KRONOS-BUD.PL</span>
@@ -275,6 +236,7 @@
                             </div>
                         </div>
 
+                        <!-- Cennik (8 pozycji) -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-xs text-left text-slate-300">
                                 <thead class="text-[10px] uppercase bg-emerald-950 text-emerald-200 border-b border-slate-800">
@@ -299,14 +261,15 @@
                             </table>
                         </div>
 
+                        <!-- Parametry do macierzy -->
                         <div class="p-4 bg-slate-950/90 border-t-2 border-emerald-500/30 space-y-2">
                             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block border-b border-slate-800 pb-1">
                                 <i class="fa-solid fa-list-check mr-1"></i> Parametry do Macierzy Oceny:
                             </span>
                             <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-slate-300">
-                                <div class="col-span-2">• <strong>Koszt dostawy:</strong> 0 zł (>4500 zł / całopojazdowa) / 783 zł (135 km poniżej)</div>
+                                <div class="col-span-2">• <strong>Koszt dostawy:</strong> 0 zł (powyżej 4500 zł / całopojazdowa) / 783,00 zł (135 km × 5,80 zł poniżej)</div>
                                 <div>• <strong>Jakość materiałów:</strong> 80 / 100</div>
-                                <div>• <strong>Czas dostawy:</strong> 5 dni</div>
+                                <div>• <strong>Czas dostawy:</strong> do 5 dni</div>
                                 <div>• <strong>Wartość użytkowa:</strong> 85 / 100</div>
                                 <div>• <strong>Gwarancje/reklamacje:</strong> 80 / 100</div>
                                 <div>• <strong>Kondycja finansowa:</strong> 75 / 100</div>
@@ -316,13 +279,14 @@
                                 <div class="col-span-2">• <strong>Odległość (lokalizacja):</strong> 135 km</div>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
             </div>
         </div>
 
-        <!-- ================= TAB 2: CALCULATOR ================= -->
+        <!-- ================= TAB 2: CALCULATOR (8 ITEMS) + HELPER FOLDER ================= -->
         <div id="tab-calc" class="tab-content hidden space-y-6">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6">
                 
@@ -331,7 +295,7 @@
                         <h2 class="text-xl font-bold text-white font-display flex items-center gap-2">
                             <i class="fa-solid fa-calculator text-amber-400"></i> Kalkulator Wartości Zamówienia (8 pozycji)
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Wpisz minima logistyczne i ceny z zestawu grupy. Jeśli wartość towaru > 4500 zł lub zaznaczono transport całopojazdowy, koszt dostawy = 0 zł.</p>
+                        <p class="text-xs text-slate-400 mt-1">Wpisz samodzielnie minima logistyczne i ceny jednostkowe. Jeśli wartość towaru przekracza 4500 zł lub zaznaczono dostawę całopojazdową, transport wynosi 0 zł; w przeciwnym razie doliczane jest 5,80 zł/km.</p>
                     </div>
                     <div>
                         <button onclick="toggleHelperFolder()" id="helper-btn" class="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow transition-all flex items-center gap-2">
@@ -344,35 +308,70 @@
                 <div id="helper-folder" class="hidden bg-slate-950 border-2 border-blue-500/40 rounded-xl p-4 space-y-3">
                     <div class="flex items-center justify-between text-xs text-blue-400 font-bold border-b border-blue-900/50 pb-2">
                         <span><i class="fa-solid fa-book-open mr-1.5"></i> POMOCNICZY FOLDER DANYCH (Zasada: >4500 zł lub całopojazdowa = 0 zł, inaczej 5,80 zł/km)</span>
+                        <span class="text-[10px] text-slate-400">Stawka transportowa za km = 5,80 zł</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <!-- Helper Betonex -->
                         <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-1">
                             <div class="font-bold text-amber-400">1. BETONEX Sp. z o.o. (150 km)</div>
-                            <div class="text-slate-300">• Transport poniżej 4500 zł: <strong>870,00 zł</strong></div>
+                            <div class="text-slate-300">• Transport: 0 zł (gdy >4500 zł lub całopojazdowa)</div>
+                            <div class="text-slate-300">• Transport poniżej: <strong>870,00 zł</strong> (150 km × 5,80 zł)</div>
+                            <div class="text-slate-300">• 1. Cegła: min 1000 × 1,29 zł</div>
+                            <div class="text-slate-300">• 2. Cement: min 2000 × 2,15 zł</div>
+                            <div class="text-slate-300">• 3. Pustak: min 500 × 4,60 zł</div>
+                            <div class="text-slate-300">• 4. Piasek: min 5000 × 0,32 zł</div>
+                            <div class="text-slate-300">• 5. Zaprawa: min 100 × 14,50 zł</div>
+                            <div class="text-slate-300">• 6. Styropian: min 30 × 185,00 zł</div>
+                            <div class="text-slate-300">• 7. Blacha: min 150 × 38,20 zł</div>
+                            <div class="text-slate-300">• 8. Gips: min 80 × 24,00 zł</div>
                         </div>
+                        <!-- Helper Bud-Mat -->
                         <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-1">
                             <div class="font-bold text-red-400">2. BUD-MAT Sp. z o.o. (90 km)</div>
-                            <div class="text-slate-300">• Transport poniżej 4500 zł: <strong>522,00 zł</strong></div>
+                            <div class="text-slate-300">• Transport: 0 zł (gdy >4500 zł lub całopojazdowa)</div>
+                            <div class="text-slate-300">• Transport poniżej: <strong>522,00 zł</strong> (90 km × 5,80 zł)</div>
+                            <div class="text-slate-300">• 1. Cegła: min 1200 × 1,35 zł</div>
+                            <div class="text-slate-300">• 2. Cement: min 2500 × 2,10 zł</div>
+                            <div class="text-slate-300">• 3. Pustak: min 600 × 4,50 zł</div>
+                            <div class="text-slate-300">• 4. Piasek: min 6000 × 0,35 zł</div>
+                            <div class="text-slate-300">• 5. Zaprawa: min 120 × 13,80 zł</div>
+                            <div class="text-slate-300">• 6. Styropian: min 25 × 190,00 zł</div>
+                            <div class="text-slate-300">• 7. Blacha: min 120 × 37,50 zł</div>
+                            <div class="text-slate-300">• 8. Gips: min 100 × 22,50 zł</div>
                         </div>
+                        <!-- Helper Kronos -->
                         <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-1">
                             <div class="font-bold text-emerald-400">3. KRONOS Sp. z o.o. (135 km)</div>
-                            <div class="text-slate-300">• Transport poniżej 4500 zł: <strong>783,00 zł</strong></div>
+                            <div class="text-slate-300">• Transport: 0 zł (gdy >4500 zł lub całopojazdowa)</div>
+                            <div class="text-slate-300">• Transport poniżej: <strong>783,00 zł</strong> (135 km × 5,80 zł)</div>
+                            <div class="text-slate-300">• 1. Cegła: min 800 × 1,30 zł</div>
+                            <div class="text-slate-300">• 2. Cement: min 1500 × 2,20 zł</div>
+                            <div class="text-slate-300">• 3. Pustak: min 400 × 4,55 zł</div>
+                            <div class="text-slate-300">• 4. Piasek: min 4000 × 0,33 zł</div>
+                            <div class="text-slate-300">• 5. Zaprawa: min 90 × 14,00 zł</div>
+                            <div class="text-slate-300">• 6. Styropian: min 35 × 180,00 zł</div>
+                            <div class="text-slate-300">• 7. Blacha: min 100 × 39,00 zł</div>
+                            <div class="text-slate-300">• 8. Gips: min 60 × 25,00 zł</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- CALCULATOR CARDS -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="calc-containers"></div>
+                <!-- CALCULATOR CARDS WITH OPTIONS -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="calc-containers">
+                    <!-- Dynamic rendering by JS -->
+                </div>
             </div>
         </div>
 
         <!-- ================= TAB 3: EVALUATION MATRIX ================= -->
         <div id="tab-matrix" class="tab-content hidden space-y-6">
+            
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4">
+                
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
                     <div>
                         <h2 class="text-xl font-bold text-white font-display">Wielokryterialna Macierz Oceny Dostawców</h2>
-                        <p class="text-xs text-slate-400">Wpisz dane surowe z ofert. Macierz przeliczy wartości na punkty (0-100) oraz wyliczy końcowy wynik ważony!</p>
+                        <p class="text-xs text-slate-400">Wpisz <strong>dane surowe</strong> z ofert. Macierz samodzielnie przeliczy wartości na punkty (0-100) oraz wyliczy końcowy wynik ważony!</p>
                     </div>
                     <div>
                         <button onclick="clearMatrix()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5">
@@ -381,6 +380,7 @@
                     </div>
                 </div>
 
+                <!-- Matrix Table -->
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-xs text-left border-collapse">
                         <thead>
@@ -388,18 +388,26 @@
                                 <th class="p-3 w-8 text-center font-bold">Lp.</th>
                                 <th class="p-3 font-bold">Kryterium wyboru dostawcy</th>
                                 <th class="p-3 w-24 text-center font-bold text-amber-400">Waga</th>
+                                
+                                <!-- Supplier A -->
                                 <th class="p-3 w-28 text-center font-bold bg-blue-950/50 text-blue-300">A: Wartość surowa</th>
                                 <th class="p-3 w-20 text-center font-bold bg-blue-900/30 text-blue-400">A: Pkt</th>
                                 <th class="p-3 w-24 text-center font-bold bg-blue-900/60 text-blue-200">A: Wynik ważony</th>
+
+                                <!-- Supplier B -->
                                 <th class="p-3 w-28 text-center font-bold bg-red-950/50 text-red-300">B: Wartość surowa</th>
                                 <th class="p-3 w-20 text-center font-bold bg-red-900/30 text-red-400">B: Pkt</th>
                                 <th class="p-3 w-24 text-center font-bold bg-red-900/60 text-red-200">B: Wynik ważony</th>
+
+                                <!-- Supplier C -->
                                 <th class="p-3 w-28 text-center font-bold bg-emerald-950/50 text-emerald-300">C: Wartość surowa</th>
                                 <th class="p-3 w-20 text-center font-bold bg-emerald-900/30 text-emerald-400">C: Pkt</th>
                                 <th class="p-3 w-24 text-center font-bold bg-emerald-900/60 text-emerald-200">C: Wynik ważony</th>
                             </tr>
                         </thead>
-                        <tbody id="matrix-tbody" class="divide-y divide-slate-800 text-slate-200 font-medium"></tbody>
+                        <tbody id="matrix-tbody" class="divide-y divide-slate-800 text-slate-200 font-medium">
+                            <!-- Dynamic Rows Generated by JS -->
+                        </tbody>
                         <tfoot class="bg-slate-950 border-t-2 border-slate-700 text-sm font-bold">
                             <tr>
                                 <td colspan="2" class="p-3 text-right text-white">Suma (NAJWYŻSZA OCENA WYGRYWA):</td>
@@ -414,20 +422,25 @@
                         </tfoot>
                     </table>
                 </div>
+
+                <!-- Final Verdict Banner -->
                 <div id="verdict-banner" class="hidden p-4 rounded-xl text-xs flex justify-between items-center"></div>
+
             </div>
         </div>
 
         <!-- ================= TAB 4: SUBMIT & EMAIL GENERATOR ================= -->
         <div id="tab-send" class="tab-content hidden space-y-6">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 max-w-3xl mx-auto">
+                
                 <div class="border-b border-slate-800 pb-4">
                     <h2 class="text-xl font-bold text-white font-display flex items-center gap-2">
                         <i class="fa-solid fa-paper-plane text-emerald-400"></i> Generowanie i Wysyłka Analizy do Nauczyciela
                     </h2>
-                    <p class="text-xs text-slate-400 mt-1">Wpisz dane grupy i wyślij raport na adres: <strong class="text-amber-400">logistyka.robert.c@gmail.com</strong></p>
+                    <p class="text-xs text-slate-400 mt-1">Wpisz dane swojej grupy, sprawdź podsumowanie wyników i kliknij przycisk, aby wysłać raport bezpośrednio na adres: <strong class="text-amber-400">logistyka.robert.c@gmail.com</strong></p>
                 </div>
 
+                <!-- Form Inputs for Students -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div class="space-y-1.5">
                         <label class="block font-semibold text-slate-300">Numer Grupy / Zespołu:</label>
@@ -439,22 +452,27 @@
                     </div>
                 </div>
 
+                <!-- Live Summary Box for Email -->
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-xs">
                     <div class="font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between border-b border-slate-800 pb-2">
                         <span><i class="fa-solid fa-file-lines mr-1.5 text-blue-400"></i> Podgląd raportu do wysyłki:</span>
                         <span class="text-emerald-400 font-mono">Odbiorca: logistyka.robert.c@gmail.com</span>
                     </div>
-                    <div id="email-preview" class="space-y-2 text-slate-300 font-mono bg-slate-900/60 p-3 rounded-lg border border-slate-800/80"></div>
+                    <div id="email-preview" class="space-y-2 text-slate-300 font-mono bg-slate-900/60 p-3 rounded-lg border border-slate-800/80">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
 
+                <!-- Action Button -->
                 <div class="pt-2 flex flex-col sm:flex-row gap-4 items-center justify-between">
                     <div class="text-[11px] text-slate-400">
-                        <i class="fa-solid fa-circle-info text-amber-400 mr-1"></i> Przycisk otworzy program pocztowy z gotową wiadomością.
+                        <i class="fa-solid fa-circle-info text-amber-400 mr-1"></i> Przycisk otworzy Twój program pocztowy z gotową wiadomością.
                     </div>
                     <button onclick="sendEmailReport()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2">
                         <i class="fa-solid fa-envelope-circle-check text-base"></i> Wyślij Analizę do Nauczyciela
                     </button>
                 </div>
+
             </div>
         </div>
 
@@ -532,16 +550,13 @@
             }
         ];
 
-        function toggleGroupTasks() {
-            const el = document.getElementById('group-tasks-container');
-            el.classList.toggle('hidden');
-        }
-
+        // Toggle Helper Folder Accordion
         function toggleHelperFolder() {
             const folder = document.getElementById('helper-folder');
             folder.classList.toggle('hidden');
         }
 
+        // Render Calculator Tab (Empty inputs for 8 items with Full-load toggle)
         function renderCalculators() {
             const container = document.getElementById('calc-containers');
             container.innerHTML = calcData.map((sup, supIndex) => `
@@ -549,9 +564,10 @@
                     <div>
                         <h3 class="text-sm font-extrabold text-white mb-2 pb-2 border-b border-slate-800 flex justify-between items-center">
                             <span>${sup.supplier}</span>
-                            <span class="text-[10px] bg-${sup.color}-500/20 text-${sup.color}-400 px-2 py-0.5 rounded border border-${sup.color}-500/30">${sup.distance} km</span>
+                            <span class="text-[10px] bg-${sup.color}-500/20 text-${sup.color}-400 px-2 py-0.5 rounded border border-${sup.color}-500/30">Dostawca ${String.fromCharCode(65 + supIndex)} (${sup.distance} km)</span>
                         </h3>
                         
+                        <!-- Full-load / Całopojazdowa Toggle -->
                         <div class="bg-slate-900/80 p-2 rounded-lg border border-slate-800 mb-3 text-xs flex items-center justify-between">
                             <span class="text-slate-300 text-[11px]">Dostawa całopojazdowa:</span>
                             <label class="inline-flex items-center cursor-pointer">
@@ -611,6 +627,7 @@
             const isFullLoad = document.getElementById(`full-load-${supIndex}`).checked;
             const distance = calcData[supIndex].distance;
             
+            // Reguła: darmowa dostawa (0 zł) jeśli > 4500 zł LUB całopojazdowa
             let shippingCost = 0;
             if (supGoodsTotal <= 4500 && !isFullLoad) {
                 shippingCost = distance * 5.80;
@@ -620,6 +637,7 @@
             document.getElementById(`calc-total-${supIndex}`).innerText = `${supGoodsTotal.toFixed(2)} zł`;
         }
 
+        // Render input matrix
         function renderMatrix() {
             const tbody = document.getElementById('matrix-tbody');
             tbody.innerHTML = criteria.map((c, index) => `
@@ -627,19 +645,32 @@
                     <td class="p-3 text-center text-slate-400 font-bold">${c.id}</td>
                     <td class="p-3 font-semibold text-white">${c.name}</td>
                     <td class="p-3 text-center text-amber-400 font-bold font-mono">${c.weight.toFixed(2)}</td>
-                    <td class="p-2 bg-blue-950/20"><input type="number" id="input-a-${index}" oninput="calculateMatrix()" step="0.01" placeholder="Wpisz" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white focus:border-blue-400 focus:outline-none"></td>
+                    
+                    <!-- Supplier A -->
+                    <td class="p-2 bg-blue-950/20">
+                        <input type="number" id="input-a-${index}" oninput="calculateMatrix()" step="0.01" placeholder="Wpisz dane" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white focus:border-blue-400 focus:outline-none">
+                    </td>
                     <td class="p-2 text-center font-mono font-bold text-blue-400 bg-blue-900/30" id="pts-a-${index}">0</td>
                     <td class="p-3 text-center font-mono font-bold text-blue-200 bg-blue-900/60" id="weighted-a-${index}">0.00</td>
-                    <td class="p-2 bg-red-950/20"><input type="number" id="input-b-${index}" oninput="calculateMatrix()" step="0.01" placeholder="Wpisz" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white focus:border-red-400 focus:outline-none"></td>
+
+                    <!-- Supplier B -->
+                    <td class="p-2 bg-red-950/20">
+                        <input type="number" id="input-b-${index}" oninput="calculateMatrix()" step="0.01" placeholder="Wpisz dane" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white focus:border-red-400 focus:outline-none">
+                    </td>
                     <td class="p-2 text-center font-mono font-bold text-red-400 bg-red-900/30" id="pts-b-${index}">0</td>
                     <td class="p-3 text-center font-mono font-bold text-red-200 bg-red-900/60" id="weighted-b-${index}">0.00</td>
-                    <td class="p-2 bg-emerald-950/20"><input type="number" id="input-c-${index}" oninput="calculateMatrix()" step="0.01" placeholder="Wpisz" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white focus:border-emerald-400 focus:outline-none"></td>
+
+                    <!-- Supplier C -->
+                    <td class="p-2 bg-emerald-950/20">
+                        <input type="number" id="input-c-${index}" oninput="calculateMatrix()" step="0.01" placeholder="Wpisz dane" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-center text-white focus:border-emerald-400 focus:outline-none">
+                    </td>
                     <td class="p-2 text-center font-mono font-bold text-emerald-400 bg-emerald-900/30" id="pts-c-${index}">0</td>
                     <td class="p-3 text-center font-mono font-bold text-emerald-200 bg-emerald-900/60" id="weighted-c-${index}">0.00</td>
                 </tr>
             `).join('');
         }
 
+        // Automatic Points & Weighted Score Calculation
         function calculateMatrix() {
             let totalA = 0, totalB = 0, totalC = 0;
 
@@ -668,6 +699,7 @@
                         ptsC = (!isNaN(rawC) && rawC > 0) ? (minCost / rawC) * 100 : (rawC === 0 && minCost === 0 ? 100 : 0);
                     }
                 } else if (c.type === 'distance') {
+                    // Im większa odległość w km, tym więcej punktów
                     const validDist = [rawA, rawB, rawC].filter(v => !isNaN(v) && v > 0);
                     const minDistance = validDist.length > 0 ? Math.min(...validDist) : 0;
                     
@@ -703,6 +735,7 @@
             updateEmailPreview();
         }
 
+        // Clear Matrix Inputs
         function clearMatrix() {
             criteria.forEach((c, index) => {
                 document.getElementById(`input-a-${index}`).value = '';
@@ -712,6 +745,7 @@
             calculateMatrix();
         }
 
+        // Show Dynamic Winner Verdict
         let currentWinnerName = "Brak danych";
         let currentWinnerScore = "0.00";
 
@@ -741,16 +775,17 @@
                     <strong class="text-emerald-400 text-sm flex items-center gap-2">
                         <i class="fa-solid fa-trophy"></i> Wynik Podsumowujący:
                     </strong>
-                    <span>Zgodnie z przeliczonymi punktami najkorzystniejszym dostawcą jest: <strong>${winner}</strong> z wynikiem <strong>${score.toFixed(2)} pkt</strong>.</span>
+                    <span>Zgodnie z przeliczonymi automatycznie punktami najkorzystniejszym dostawcą jest: <strong>${winner}</strong> z wynikiem <strong>${score.toFixed(2)} pkt</strong>.</span>
                 </div>
             `;
         }
 
+        // Update Email Preview Box
         function updateEmailPreview() {
             const groupNum = document.getElementById('group-number').value || "[Brak numeru grupy]";
             const students = document.getElementById('group-students').value || "[Brak nazwisk uczniów]";
             const scoreA = document.getElementById('score-a').innerText;
-            const scoreB = document.getElementById('score-b'].innerText;
+            const scoreB = document.getElementById('score-b').innerText;
             const scoreC = document.getElementById('score-c').innerText;
 
             const preview = document.getElementById('email-preview');
@@ -765,6 +800,7 @@
             `;
         }
 
+        // Send Email Report Action
         function sendEmailReport() {
             const groupNum = document.getElementById('group-number').value;
             const students = document.getElementById('group-students').value;
@@ -797,6 +833,7 @@
             window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
         }
 
+        // Navigation Switcher
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
@@ -817,6 +854,7 @@
             }
         }
 
+        // Init
         document.addEventListener('DOMContentLoaded', () => {
             renderCalculators();
             renderMatrix();

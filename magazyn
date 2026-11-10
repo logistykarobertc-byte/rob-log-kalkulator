@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hurtownia "Smakołyk" Sp. z o.o. - Symulator WMS</title>
+    <!-- Ikona favicon w karcie przeglądarki (zielony listek) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2316a34a%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z%22/><path d=%22M2 21c0-3 1.85-5.36 5.08-6C9.5 14.5 12 13 13 10%22/></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #print-modal, #print-modal * { visibility: visible; }
+            #print-modal { position: absolute; left: 0; top: 0; width: 100%; background: white !important; color: black !important; padding: 10px; box-shadow: none !important; }
+            .print-no-shadow { box-shadow: none !important; border: 1px solid #000 !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+    <div id="app" class="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+        <!-- Nagłówek Firmowy z zielonym listkiem w logo -->
+        <header class="flex flex-col lg:flex-row justify-between items-center bg-slate-800 p-5 rounded-xl border border-slate-700 gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-3 bg-emerald-600 rounded-lg text-white"><i data-lucide="leaf" class="w-7 h-7"></i></div>
+                <div>
+                    <h1 class="text-xl font-bold text-white">Hurtownia Spożywcza „Smakołyk” Sp. z o.o.</h1>
+                    <p class="text-xs text-slate-400">ul. Gdańska 25/34, 14-260 Lubawa | NIP: 744-785-12-10</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-semibold">Grupa Zespołowa:</label>
+                    <select id="group-select" onchange="changeGroup(this.value)" class="bg-slate-700 text-white px-3 py-1.5 rounded-lg border border-slate-600 font-bold text-sm">
+                        <!-- Generowane dynamicznie -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-semibold">Magazynier 1:</label>
+                    <input type="text" id="op1-name" value="Jan Kowalski" oninput="op1Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 uppercase font-semibold">Magazynier 2:</label>
+                    <input type="text" id="op2-name" value="Anna Nowak" oninput="op2Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
+                </div>
+                <div>
+                    <button onclick="resetWarehouse()" class="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-2 rounded-lg font-semibold transition mt-4" title="Wyczyść cały stan i zacznij od nowa">Reset</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Nawigacja -->
+        <div class="flex flex-wrap border-b border-slate-700 gap-1">
+            <button onclick="setTab('pzyczenie')" id="tab-pzyczenie" class="px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-blue-600 text-white text-sm">
+                <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> 1. Przyjęcie & Zbiorczy PZ
+            </button>
+            <button onclick="setTab('składowanie')" id="tab-składowanie" class="px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-slate-800 text-slate-400 hover:text-white text-sm">
+                <i data-lucide="boxes" class="w-4 h-4"></i> 2. Stan Magazynowy & Mapa
+            </button>
+            <button onclick="setTab('kompletacja')" id="tab-kompletacja" class="px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-slate-800 text-slate-400 hover:text-white text-sm">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i> 3. Kompletacja & WZ (Marża 15%)
+            </button>
+            <button onclick="setTab('wydanie')" id="tab-wydanie" class="px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-slate-800 text-slate-400 hover:text-white text-sm">
+                <i data-lucide="arrow-up-from-line" class="w-4 h-4"></i> 4. Dokumenty WZ
+            </button>
+        </div>
+
+        <main id="tab-content"></main>
+    </div>
+
+    <!-- Modal drukowania / Podglądu ogólnego -->
+    <div id="print-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+        <div class="bg-white text-slate-900 p-6 rounded-xl max-w-3xl w-full space-y-4 shadow-xl print-no-shadow max-h-[90vh] overflow-y-auto">
+            <div id="print-content" class="space-y-4"></div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                <button onclick="closePrintModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded text-sm font-semibold">Zamknij</button>
+                <button id="modal-print-btn" onclick="window.print()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm font-semibold flex items-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Drukuj / Zapisz jako PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GROUP_TASKS = {
+            1: {
+                correctSupplier: "Młyny Polskie S.A.",
+                client: "Supermarket 'Biedronka' DC",
+                address: "ul. Logistyczna 5, 86-300 Grudziądz",
+                taskText: "Przyjmij dostawę od dostawcy **Młyny Polskie S.A.** (WZ Dostawcy):<br>• [IND-101] Mąka Pszenna typ 450 - 500 kg (Cena jedn. netto: 3,50 zł/kg, Regał A-01-01)<br>• [IND-102] Ryż brązowy 2x 250g - 100 op. (Cena jedn. netto: 4,00 zł/op., Regał A-01-02).<br>⚠️ *Uwaga kontrolna:* Dostawa w pełni zgodna ilościowo i jakościowo z dokumentem WZ dostawcy.",
+                incomingItems: [
+                    { id: '1-1', index: 'IND-101', name: 'Mąka Pszenna typ 450', qty: 500, unit: 'kg', zone: 'Strefa A', code: 'A-01-01' },
+                    { id: '1-2', index: 'IND-102', name: 'Ryż brązowy 2x 250g', qty: 100, unit: 'op.', zone: 'Strefa A', code: 'A-01-02' }
+                ],
+                orderItems: [
+                    { name: 'Czekolada mleczna z orzechami 200g XXL', qty: 120, unit: 'szt.', code: 'B-01-01' },
+                    { name: 'Czekolada deserowa 73% 100g', qty: 300, unit: 'szt.', code: 'B-01-02' }
+                ]
+            },
+            2: {
+                correctSupplier: "Fabryka Słodyczy 'Łakocie' Sp. z o.o.",
+                client: "Hurtownia Gastronomiczna 'HORECA'",
+                address: "ul. Polna 88, 87-100 Toruń",
+                taskText: "Przyjmij dostawę od dostawcy **Fabryka Słodyczy 'Łakocie' Sp. z o.o.**:<br>• [IND-201] Czekolada mleczna z orzechami 200g XXL - 200 szt. (Cena jedn. netto: 6,00 zł/szt., Regał B-01-01)<br>• [IND-202] Czekolada deserowa 73% 100g - 500 szt. (Cena jedn. netto: 4,50 zł/szt., Regał B-01-02).<br>⚠️ *Uwaga kontrolna:* Wykryto nadwyżkę – na palecie dostarczono 210 szt. czekolady mlecznej zamiast 200 szt. Wprowadź stan faktyczny do PZ.",
+                incomingItems: [
+                    { id: '2-1', index: 'IND-201', name: 'Czekolada mleczna z orzechami 200g XXL', qty: 200, unit: 'szt.', zone: 'Strefa B', code: 'B-01-01' },
+                    { id: '2-2', index: 'IND-202', name: 'Czekolada deserowa 73% 100g', qty: 500, unit: 'szt.', zone: 'Strefa B', code: 'B-01-02' }
+                ],
+                orderItems: [
+                    { name: 'Majonez Dekoracyjny 800ml', qty: 450, unit: 'szt.', code: 'C-01-01' },
+                    { name: 'Ketchup łagodny 400ml', qty: 600, unit: 'szt.', code: 'C-01-02' }
+                ]
+            },
+            3: {
+                correctSupplier: "Przetwórstwo Spożywcze 'Rolnik' S.A.",
+                client: "Delikatesy 'Centrum'",
+                address: "ul. Kościuszki 15, 87-300 Brodnica",
+                taskText: "Przyjmij dostawę od dostawcy **Przetwórstwo Spożywcze 'Rolnik' S.A.**:<br>• [IND-301] Majonez Dekoracyjny 800ml - 800 szt. (Cena jedn. netto: 8,00 zł/szt., Regał C-01-01)<br>• [IND-302] Ketchup łagodny 400ml - 1000 szt. (Cena jedn. netto: 5,00 zł/szt., Regał C-01-02).<br>⚠️ *Uwaga kontrolna:* Dostawa bez niezgodności, pełna zgodność z dokumentem WZ.",
+                incomingItems: [
+                    { id: '3-1', index: 'IND-301', name: 'Majonez Dekoracyjny 800ml', qty: 800, unit: 'szt.', zone: 'Strefa C', code: 'C-01-01' },
+                    { id: '3-2', index: 'IND-302', name: 'Ketchup łagodny 400ml', qty: 1000, unit: 'szt.', zone: 'Strefa C', code: 'C-01-02' }
+                ],
+                orderItems: [
+                    { name: 'Kasza Bulgur 4x 200g', qty: 180, unit: 'op.', code: 'A-02-01' },
+                    { name: 'Ogórek konserwowy "Nasz Ogród" 0.8l', qty: 220, unit: 'słoik', code: 'C-02-01' }
+                ]
+            },
+            4: {
+                correctSupplier: "Agrofirma 'Złote Ziarno' Sp. z o.o.",
+                client: "Piekarnia-Cukiernia 'Kłos'",
+                address: "ul. Olsztyńska 41, 14-100 Ostróda",
+                taskText: "Przyjmij dostawę od dostawcy **Agrofirma 'Złote Ziarno' Sp. z o.o.**:<br>• [IND-401] Kasza Bulgur 4x 200g - 300 op. (Cena jedn. netto: 3,00 zł/op., Regał A-02-01)<br>• [IND-402] Ogórek konserwowy słoik 0.8l - 400 szt. (Cena jedn. netto: 7,00 zł/szt., Regał C-02-01)<br>• [IND-403] Oliwka w zalewie 400ml - 1000 szt. (Cena jedn. netto: 9,00 zł/szt., Regał C-02-02).<br>⚠️ *Uwaga kontrolna:* Wykryto niedobór i uszkodzenie – brakuje 20 szt. słoików ogórków w transporcie, a 15 słoików uległo stłuczeniu (stan jakościowy: uszkodzenie zbiorcze).",
+                incomingItems: [
+                    { id: '4-1', index: 'IND-401', name: 'Kasza Bulgur 4x 200g', qty: 300, unit: 'op.', zone: 'Strefa A', code: 'A-02-01' },
+                    { id: '4-2', index: 'IND-402', name: 'Ogórek konserwowy "Nasz Ogród" 0.8l', qty: 400, unit: 'słoik', zone: 'Strefa C', code: 'C-02-01' },
+                    { id: '4-3', index: 'IND-403', name: 'Oliwka w zalewie 400ml', qty: 1000, unit: 'słoik', zone: 'Strefa C', code: 'C-02-02' }
+                ],
+                orderItems: [
+                    { name: 'Kasza gryczana 1kg', qty: 350, unit: 'op.', code: 'A-03-01' },
+                    { name: 'Cukier biały "Polski Kryształ" 1kg', qty: 300, unit: 'op.', code: 'A-03-03' }
+                ]
+            },
+            5: {
+                correctSupplier: "Cukrownia 'Polska-Kryształ' S.A.",
+                client: "Restauracja 'Pod Gwiazdami'",
+                address: "ul. Zamkowa 3, 14-260 Lubawa",
+                taskText: "Przyjmij dostawę od dostawcy **Cukrownia 'Polska-Kryształ' S.A.**:<br>• [IND-501] Kasza gryczana 1kg - 600 op. (Cena jedn. netto: 5,50 zł/op., Regał A-03-01)<br>• [IND-502] Mąka ryżowa 'PaRyżAnka' 1kg - 400 op. (Cena jedn. netto: 6,50 zł/op., Regał A-03-02)<br>• [IND-503] Cukier biały 'Polski Kryształ' 1kg - 500 op. (Cena jedn. netto: 4,20 zł/op., Regał A-03-03).<br>⚠️ *Uwaga kontrolna:* Dostawa w pełni zgodna z WZ dostawcy.",
+                incomingItems: [
+                    { id: '5-1', index: 'IND-501', name: 'Kasza gryczana 1kg', qty: 600, unit: 'op.', zone: 'Strefa A', code: 'A-03-01' },
+                    { id: '5-2', index: 'IND-502', name: 'Mąka ryżowa "PaRyżAnka" 1kg', qty: 400, unit: 'op.', zone: 'Strefa A', code: 'A-03-02' },
+                    { id: '5-3', index: 'IND-503', name: 'Cukier biały "Polski Kryształ" 1kg', qty: 500, unit: 'op.', zone: 'Strefa A', code: 'A-03-03' }
+                ],
+                orderItems: [
+                    { name: 'Ketchup pikantny 400ml', qty: 500, unit: 'szt.', code: 'C-03-01' },
+                    { name: 'Pieczarka marynowana "Pieczara" 800ml', qty: 350, unit: 'słoik', code: 'C-03-02' }
+                ]
+            },
+            6: {
+                correctSupplier: "Pomorskie Przetwórstwo Warzyw 'Vita'",
+                client: "Market 'Dino'",
+                address: "ul. Wybickiego 10, 13-300 Nowe Miasto Lubawskie",
+                taskText: "Przyjmij dostawę od dostawcy **Pomorskie Przetwórstwo Warzyw 'Vita'**:<br>• [IND-601] Ketchup pikantny 400ml - 800 szt. (Cena jedn. netto: 4,80 zł/szt., Regał C-03-01)<br>• [IND-602] Pieczarka marynowana 'Pieczara' 800ml - 600 słoików (Cena jedn. netto: 6,20 zł/słoik, Regał C-03-02).<br>⚠️ *Uwaga kontrolna:* Wykryto niedobór ilościowy – dostarczono 780 szt. ketchupu pikantnego zamiast 800 szt. z dokumentu WZ dostawcy.",
+                incomingItems: [
+                    { id: '6-1', index: 'IND-601', name: 'Ketchup pikantny 400ml', qty: 800, unit: 'szt.', zone: 'Strefa C', code: 'C-03-01' },
+                    { id: '6-2', index: 'IND-602', name: 'Pieczarka marynowana "Pieczara" 800ml', qty: 600, unit: 'słoik', zone: 'Strefa C', code: 'C-03-02' }
+                ],
+                orderItems: [
+                    { name: 'Galaretka wiśniowa "GALA" 120g', qty: 150, unit: 'op.', code: 'B-02-01' },
+                    { name: 'Galaretka pomarańczowa "GALA" 120g', qty: 250, unit: 'op.', code: 'B-02-02' }
+                ]
+            },
+            7: {
+                correctSupplier: "Zakłady Spożywcze 'GALA' Sp. z o.o.",
+                client: "Pizzeria 'Mamma Mia'",
+                address: "ul. Kościuszki 44, 14-200 Iława",
+                taskText: "Przyjmij dostawę od dostawcy **Zakłady Spożywcze 'GALA' Sp. z o.o.**:<br>• [IND-701] Galaretka wiśniowa 'GALA' 120g - 300 op. (Cena jedn. netto: 2,50 zł/op., Regał B-02-01)<br>• [IND-702] Galaretka pomarańczowa 'GALA' 120g - 400 op. (Cena jedn. netto: 2,50 zł/op., Regał B-02-02).<br>⚠️ *Uwaga kontrolna:* Podczas rozładunku zauważono niewielkie uszkodzenie zbiorcze (zgniecione kartony) w części galaretek pomarańczowych (ok. 30 op.).",
+                incomingItems: [
+                    { id: '7-1', index: 'IND-701', name: 'Galaretka wiśniowa "GALA" 120g', qty: 300, unit: 'op.', zone: 'Strefa B', code: 'B-02-01' },
+                    { id: '7-2', index: 'IND-702', name: 'Galaretka pomarańczowa "GALA" 120g', qty: 400, unit: 'op.', zone: 'Strefa B', code: 'B-02-02' }
+                ],
+                orderItems: [
+                    { name: 'Papryka konserwowa "PAPRYK" 900ml', qty: 250, unit: 'słoik', code: 'C-04-01' },
+                    { name: 'Sos do Spaghetti 800ml', qty: 200, unit: 'słoik', code: 'C-04-02' }
+                ]
+            },
+            8: {
+                correctSupplier: "Przetwórstwo Warzywne 'PAPRYK'",
+                client: "Sklep Spożywczy 'U Edka'",
+                address: "ul. Długa 12, 14-200 Iława",
+                taskText: "Przyjmij dostawę od dostawcy **Przetwórstwo Warzywne 'PAPRYK'**:<br>• [IND-801] Papryka konserwowa 'PAPRYK' 900ml - 400 słoików (Cena jedn. netto: 8,50 zł/słoik, Regał C-04-01)<br>• [IND-802] Sos do Spaghetti 800ml - 350 słoików (Cena jedn. netto: 7,20 zł/słoik, Regał C-04-02).<br>⚠️ *Uwaga kontrolna:* Dostawa kompletna, brak niezgodności.",
+                incomingItems: [
+                    { id: '8-1', index: 'IND-801', name: 'Papryka konserwowa "PAPRYK" 900ml', qty: 400, unit: 'słoik', zone: 'Strefa C', code: 'C-04-01' },
+                    { id: '8-2', index: 'IND-802', name: 'Sos do Spaghetti 800ml', qty: 350, unit: 'słoik', zone: 'Strefa C', code: 'C-04-02' }
+                ],
+                orderItems: [
+                    { name: 'Mąka Pszenna typ 450', qty: 350, unit: 'kg', code: 'A-01-01' },
+                    { name: 'Ryż brązowy 2x 250g', qty: 60, unit: 'op.', code: 'A-01-02' }
+                ]
+            }
+        };
+
+        const masterCatalog = [
+            { index: "IND-101", name: "Mąka Pszenna typ 450", unit: "kg", defaultCode: "A-01-01" },
+            { index: "IND-102", name: "Ryż brązowy 2x 250g", unit: "op.", defaultCode: "A-01-02" },
+            { index: "IND-201", name: "Czekolada mleczna z orzechami 200g XXL", unit: "szt.", defaultCode: "B-01-01" },
+            { index: "IND-202", name: "Czekolada deserowa 73% 100g", unit: "szt.", defaultCode: "B-01-02" },
+            { index: "IND-301", name: "Majonez Dekoracyjny 800ml", unit: "szt.", defaultCode: "C-01-01" },
+            { index: "IND-302", name: "Ketchup łagodny 400ml", unit: "szt.", defaultCode: "C-01-02" },
+            { index: "IND-401", name: "Kasza Bulgur 4x 200g", unit: "op.", defaultCode: "A-02-01" },
+            { index: "IND-402", name: "Ogórek konserwowy \"Nasz Ogród\" 0.8l", unit: "słoik", defaultCode: "C-02-01" },
+            { index: "IND-403", name: "Oliwka w zalewie 400ml", unit: "słoik", defaultCode: "C-02-02" },
+            { index: "IND-501", name: "Kasza gryczana 1kg", unit: "op.", defaultCode: "A-03-01" },
+            { index: "IND-502", name: "Mąka ryżowa \"PaRyżAnka\" 1kg", unit: "op.", defaultCode: "A-03-02" },
+            { index: "IND-503", name: "Cukier biały \"Polski Kryształ\" 1kg", unit: "op.", defaultCode: "A-03-03" },
+            { index: "IND-601", name: "Ketchup pikantny 400ml", unit: "szt.", defaultCode: "C-03-01" },
+            { index: "IND-602", name: "Pieczarka marynowana \"Pieczara\" 800ml", unit: "słoik", defaultCode: "C-03-02" },
+            { index: "IND-701", name: "Galaretka wiśniowa \"GALA\" 120g", unit: "op.", defaultCode: "B-02-01" },
+            { index: "IND-702", name: "Galaretka pomarańczowa \"GALA\" 120g", unit: "op.", defaultCode: "B-02-02" },
+            { index: "IND-801", name: "Papryka konserwowa \"PAPRYK\" 900ml", unit: "słoik", defaultCode: "C-04-01" },
+            { index: "IND-802", name: "Sos do Spaghetti 800ml", unit: "słoik", defaultCode: "C-04-02" }
+        ];
+
+        const availableSuppliersList = [
+            "Młyny Polskie S.A.",
+            "Fabryka Słodyczy 'Łakocie' Sp. z o.o.",
+            "Przetwórstwo Spożywcze 'Rolnik' S.A.",
+            "Agrofirma 'Złote Ziarno' Sp. z o.o.",
+            "Cukrownia 'Polska-Kryształ' S.A.",
+            "Pomorskie Przetwórstwo Warzyw 'Vita'",
+            "Zakłady Spożywcze 'GALA' Sp. z o.o.",
+            "Przetwórstwo Warzywne 'PAPRYK'",
+            "Inny Dostawca Krajowy Sp. z o.o."
+        ];
+
+        let currentGroup = 1;
+        let activeTab = 'pzyczenie';
+        let op1Name = 'Jan Kowalski';
+        let op2Name = 'Anna Nowak';
+        let inventory = JSON.parse(localStorage.getItem('smakolyk_inventory')) || [];
+        let pzHistory = JSON.parse(localStorage.getItem('smakolyk_pz')) || [];
+        let wzHistory = JSON.parse(localStorage.getItem('smakolyk_wz')) || [];
+        
+        let pzRowsCount = 1;
+        let pickRowsCount = 1;
+        let savedPZFormState = { supplier: '', rows: [] };
+        let savedPickFormState = [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initGroupSelect();
+            render();
+            lucide.createIcons();
+        });
+
+        function saveState() {
+            localStorage.setItem('smakolyk_inventory', JSON.stringify(inventory));
+            localStorage.setItem('smakolyk_pz', JSON.stringify(pzHistory));
+            localStorage.setItem('smakolyk_wz', JSON.stringify(wzHistory));
+        }
+
+        function resetWarehouse() {
+            if(confirm("Czy na pewno chcesz wyczyścić wszystkie dane i stany magazynowe?")) {
+                localStorage.clear();
+                inventory = [];
+                pzHistory = [];
+                wzHistory = [];
+                pzRowsCount = 1;
+                pickRowsCount = 1;
+                savedPZFormState = { supplier: '', rows: [] };
+                savedPickFormState = [];
+                render();
+            }
+        }
+
+        function initGroupSelect() {
+            const select = document.getElementById('group-select');
+            select.innerHTML = '';
+            for(let i=1; i<=8; i++) {
+                select.innerHTML += `<option value="${i}">Grupa ${i}</option>`;
+            }
+        }
+
+        function changeGroup(val) {
+            currentGroup = parseInt(val);
+            pzRowsCount = 1;
+            pickRowsCount = 1;
+            savedPZFormState = { supplier: '', rows: [] };
+            savedPickFormState = [];
+            render();
+        }
+
+        function setTab(tab) {
+            activeTab = tab;
+            ['pzyczenie', 'składowanie', 'kompletacja', 'wydanie'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if(t === tab) {
+                    btn.className = "px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-blue-600 text-white text-sm";
+                } else {
+                    btn.className = "px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-slate-800 text-slate-400 hover:text-white text-sm";
+                }
+            });
+            render();
+        }
+
+        function render() {
+            const main = document.getElementById('tab-content');
+            if(activeTab === 'pzyczenie') renderPrzyjecie(main);
+            else if(activeTab === 'składowanie') renderSkladowanie(main);
+            else if(activeTab === 'kompletacja') renderKompletacja(main);
+            else if(activeTab === 'wydanie') renderWydanie(main);
+            lucide.createIcons();
+        }
+
+        function capturePZFormState() {
+            const supElem = document.getElementById('supplier-select');
+            const supVal = supElem ? supElem.value : '';
+            
+            const rowsData = [];
+            const itemSelects = document.querySelectorAll('.pz-item-select');
+            const codeInputs = document.querySelectorAll('.pz-code-input');
+            const wzInputs = document.querySelectorAll('.pz-wz-input');
+            const pzInputs = document.querySelectorAll('.pz-pz-input');
+            const priceInputs = document.querySelectorAll('.pz-price-input');
+            const qualSelects = document.querySelectorAll('.pz-qual-select');
+
+            for(let i = 0; i < itemSelects.length; i++) {
+                rowsData.push({
+                    itemIdx: itemSelects[i].value,
+                    code: codeInputs[i] ? codeInputs[i].value : '',
+                    wz: wzInputs[i] ? wzInputs[i].value : '',
+                    pz: pzInputs[i] ? pzInputs[i].value : '',
+                    price: priceInputs[i] ? priceInputs[i].value : '',
+                    qual: qualSelects[i] ? qualSelects[i].value : ''
+                });
+            }
+            savedPZFormState = { supplier: supVal, rows: rowsData };
+        }
+
+        function onPZItemChange(rowIdx, selectElem) {
+            const selectedIdx = selectElem.value;
+            const rowContainer = document.getElementById(`pz-row-${rowIdx}`);
+            if(rowContainer && selectedIdx !== "") {
+                const codeInput = rowContainer.querySelector('.pz-code-input');
+                if(codeInput) {
+                    codeInput.value = masterCatalog[selectedIdx].defaultCode;
+                }
+            }
+            capturePZFormState();
+        }
+
+        function renderPZRowsHTML() {
+            let html = '';
+            for(let r = 0; r < pzRowsCount; r++) {
+                const state = savedPZFormState.rows[r] || { itemIdx: '', code: '', wz: '', pz: '', price: '', qual: 'Zgodna / Bez zastrzeżeń' };
+                html += `
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 space-y-3 relative pz-row-container" id="pz-row-${r}">
+                        <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-1">
+                            <span class="font-bold text-blue-300">Pozycja dostawy #${r + 1}</span>
+                            ${r > 0 ? `<button type="button" onclick="removePZRow(${r})" class="text-red-400 hover:text-red-300 font-semibold text-[11px]">Usuń wiersz</button>` : ''}
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-6 gap-3 items-center">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs text-slate-400 mb-1">Asortyment i indeks:</label>
+                                <select class="pz-item-select w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-xs text-white font-bold" required onchange="onPZItemChange(${r}, this)">
+                                    <option value="">-- Wybierz asortyment z listy --</option>
+                                    ${masterCatalog.map((cat, cIdx) => `
+                                        <option value="${cIdx}" ${state.itemIdx == cIdx ? 'selected' : ''}>[${cat.index}] ${cat.name} (${cat.unit})</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Regał WMS (sztywny):</label>
+                                <input type="text" class="pz-code-input w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-yellow-400 font-mono font-bold" readonly value="${state.code}" placeholder="Automatyczny regał">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Ilość WZ:</label>
+                                <input type="number" class="pz-wz-input w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-xs text-white font-bold" placeholder="WZ" value="${state.wz}" required min="0">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Ilość PZ:</label>
+                                <input type="number" class="pz-pz-input w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-xs text-emerald-400 font-bold" placeholder="PZ" value="${state.pz}" required min="0">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Cena netto dostawcy:</label>
+                                <input type="number" step="0.01" class="pz-price-input w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-xs text-amber-400 font-bold" placeholder="0.00" value="${state.price}" required min="0">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Stan jakościowy:</label>
+                            <select class="pz-qual-select w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-[11px] text-white">
+                                <option value="Zgodna / Bez zastrzeżeń" ${state.qual === 'Zgodna / Bez zastrzeżeń' ? 'selected' : ''}>Zgodna / Bez zastrzeżeń</option>
+                                <option value="Uszkodzenie zbiorcze" ${state.qual === 'Uszkodzenie zbiorcze' ? 'selected' : ''}>Uszkodzenie zbiorcze</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            }
+            return html;
+        }
+
+        function addPZRow() {
+            capturePZFormState();
+            pzRowsCount++;
+            renderPrzyjecie(document.getElementById('tab-content'));
+        }
+
+        function removePZRow(index) {
+            if(pzRowsCount > 1) {
+                capturePZFormState();
+                savedPZFormState.rows.splice(index, 1);
+                pzRowsCount--;
+                renderPrzyjecie(document.getElementById('tab-content'));
+            }
+        }
+
+        function renderPrzyjecie(container) {
+            const groupData = GROUP_TASKS[currentGroup];
+            const existingPZ = pzHistory.find(p => p.group === currentGroup);
+            const currentSup = savedPZFormState.supplier || '';
+
+            let html = `
+                <div class="space-y-6">
+                    <div class="bg-blue-950/60 p-5 rounded-xl border border-blue-600/50 space-y-2">
+                        <h3 class="text-sm font-bold text-blue-300 flex items-center gap-2">
+                            <i data-lucide="book-open" class="w-4 h-4"></i> Treść zadania logistycznego dla Grupy ${currentGroup}:
+                        </h3>
+                        <p class="text-sm text-slate-200 leading-relaxed">${groupData.taskText}</p>
+                    </div>
+
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-6">
+                        <div class="border-b border-slate-700 pb-4">
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="clipboard-check" class="text-blue-400"></i> Kontrola Przyjęcia & Zbiorczy Dokument PZ - Grupa ${currentGroup}
+                            </h2>
+                            <p class="text-sm text-slate-400">Wybierz dostawcę oraz asortyment z listy – lokalizacja regału przypisze się automatycznie. Uzupełnij ilości oraz ceny netto.</p>
+                        </div>
+
+                        <!-- Wybór dostawcy -->
+                        <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 max-w-xl space-y-2">
+                            <label class="block text-xs font-bold text-slate-300 uppercase">Wybierz dostawcę (zgodnie z treścią zadania):</label>
+                            <select id="supplier-select" onchange="capturePZFormState()" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-xs text-white font-semibold" ${existingPZ ? 'disabled' : ''}>
+                                <option value="">-- Wybierz dostawcę --</option>
+                                ${availableSuppliersList.map(sup => `
+                                    <option value="${sup}" ${(existingPZ && existingPZ.supplier === sup) || (!existingPZ && currentSup === sup) ? 'selected' : ''}>${sup}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+
+                        ${existingPZ ? `
+                            <div class="space-y-3">
+                                <span class="bg-emerald-900/80 text-emerald-300 text-xs px-3 py-2 rounded font-semibold border border-emerald-600/50 flex items-center gap-2 inline-flex"><i data-lucide="check" class="w-4 h-4"></i> Dokument PZ (${existingPZ.pzNumber}) został wystawiony.</span>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-sm border-collapse bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
+                                        <thead>
+                                            <tr class="bg-slate-800 text-slate-400 text-xs">
+                                                <th class="p-2.5">Indeks</th>
+                                                <th class="p-2.5">Asortyment</th>
+                                                <th class="p-2.5">Regał (sztywny)</th>
+                                                <th class="p-2.5">WZ</th>
+                                                <th class="p-2.5">PZ</th>
+                                                <th class="p-2.5">Cena netto</th>
+                                                <th class="p-2.5">Wartość netto</th>
+                                                <th class="p-2.5">Jakość</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-800 text-xs">
+                                            ${existingPZ.items.map(i => `
+                                                <tr>
+                                                    <td class="p-2.5 font-mono text-amber-400 font-bold">${i.index}</td>
+                                                    <td class="p-2.5 font-bold text-white">${i.name}</td>
+                                                    <td class="p-2.5 font-mono">${i.code}</td>
+                                                    <td class="p-2.5">${i.wzQty} ${i.unit}</td>
+                                                    <td class="p-2.5 text-emerald-400 font-bold">${i.pzQty} ${i.unit}</td>
+                                                    <td class="p-2.5">${i.netPrice.toFixed(2)} zł</td>
+                                                    <td class="p-2.5 font-bold">${i.totalNetValue.toFixed(2)} zł</td>
+                                                    <td class="p-2.5 text-[10px]">${i.quality}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="space-y-4" id="pz-rows-wrapper">
+                                ${renderPZRowsHTML()}
+                            </div>
+                            <button type="button" onclick="addPZRow()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-2 rounded font-semibold transition flex justify-center items-center gap-1 border border-slate-600">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> + Dodaj kolejną pozycję dostawy PZ
+                            </button>
+                        `}
+
+                        <div class="pt-4 border-t border-slate-700 flex justify-end gap-3">
+                            ${existingPZ ? 
+                                `<button onclick="printPZ('${existingPZ.pzNumber}')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2.5 rounded-lg font-semibold transition flex items-center gap-2">
+                                    <i data-lucide="printer" class="w-4 h-4"></i> Drukuj Zbiorczy PZ (PDF)
+                                </button>` :
+                                `<button onclick="issueCollectivePZ()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-5 py-2.5 rounded-lg font-semibold transition flex items-center gap-2">
+                                    <i data-lucide="file-check" class="w-4 h-4"></i> Wystaw Zbiorczy Dokument PZ
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function issueCollectivePZ() {
+            const supplierSelect = document.getElementById('supplier-select');
+            const selectedSupplier = supplierSelect ? supplierSelect.value : "";
+
+            if(!selectedSupplier) {
+                return alert("Wybierz dostawcę z listy zgodnie z treścią zadania logistycznego!");
+            }
+
+            const itemSelects = document.querySelectorAll('.pz-item-select');
+            const codeInputs = document.querySelectorAll('.pz-code-input');
+            const wzInputs = document.querySelectorAll('.pz-wz-input');
+            const pzInputs = document.querySelectorAll('.pz-pz-input');
+            const priceInputs = document.querySelectorAll('.pz-price-input');
+            const qualSelects = document.querySelectorAll('.pz-qual-select');
+
+            const rowData = [];
+
+            for(let i = 0; i < itemSelects.length; i++) {
+                const itemIdxVal = itemSelects[i].value;
+                const codeVal = codeInputs[i].value.trim();
+                const wzVal = wzInputs[i].value;
+                const pzVal = pzInputs[i].value;
+                const priceVal = priceInputs[i].value;
+                const qualVal = qualSelects[i].value;
+
+                if(itemIdxVal === "" || codeVal === "" || wzVal === "" || pzVal === "" || priceVal === "") {
+                    return alert(`Wypełnij wszystkie pola dla pozycji #${i+1}!`);
+                }
+
+                const catalogItem = masterCatalog[parseInt(itemIdxVal)];
+                const wzQty = parseInt(wzVal);
+                const pzQty = parseInt(pzVal);
+                const netPrice = parseFloat(priceVal);
+
+                if(isNaN(wzQty) || wzQty < 0 || isNaN(pzQty) || pzQty < 0 || isNaN(netPrice) || netPrice < 0) {
+                    return alert(`Podaj poprawne wartości liczbowe dla pozycji #${i+1}!`);
+                }
+
+                const totalNetValue = pzQty * netPrice;
+
+                rowData.push({
+                    id: `item-${i}-${Date.now()}`,
+                    index: catalogItem.index,
+                    name: catalogItem.name,
+                    unit: catalogItem.unit,
+                    code: codeVal,
+                    wzQty: wzQty,
+                    pzQty: pzQty,
+                    netPrice: netPrice,
+                    totalNetValue: totalNetValue,
+                    quality: qualVal
+                });
+
+                if(pzQty > 0) {
+                    inventory.push({
+                        id: `inv-${i}-${Date.now()}`,
+                        index: catalogItem.index,
+                        name: catalogItem.name,
+                        qty: pzQty,
+                        unit: catalogItem.unit,
+                        zone: codeVal.substring(0, 1).toUpperCase() === 'A' ? 'Strefa A' : (codeVal.substring(0, 1).toUpperCase() === 'B' ? 'Strefa B' : 'Strefa C'),
+                        code: codeVal,
+                        sourceGroup: currentGroup,
+                        netPrice: netPrice,
+                        quality: qualVal
+                    });
+                }
+            }
+
+            const pzNum = `PZ/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
+            const pzRecord = {
+                pzNumber: pzNum,
+                group: currentGroup,
+                supplier: selectedSupplier,
+                items: rowData,
+                op1: op1Name,
+                op2: op2Name,
+                approver: `Kierownik Magazynu (Smakołyk)`,
+                date: new Date().toLocaleString()
+            };
+
+            pzHistory.push(pzRecord);
+            saveState();
+            savedPZFormState = { supplier: '', rows: [] };
+            render();
+            printPZ(pzNum);
+        }
+
+        function printPZ(pzNumber) {
+            const pz = pzHistory.find(p => p.pzNumber === pzNumber);
+            if(!pz) return;
+
+            const grandTotal = pz.items.reduce((sum, i) => sum + i.totalNetValue, 0);
+
+            document.getElementById('modal-print-btn').style.display = 'flex';
+            document.getElementById('print-content').innerHTML = `
+                <div class="space-y-3 font-sans text-xs text-black bg-white p-2">
+                    <div class="flex justify-between border-b border-black pb-2">
+                        <div>
+                            <h3 class="font-bold text-sm">Hurtownia Spożywcza „Smakołyk” Sp. z o.o.</h3>
+                            <p class="text-[9px] text-gray-600">ul. Gdańska 25/34, 14-260 Lubawa | NIP: 744-785-12-10</p>
+                        </div>
+                        <div class="text-right">
+                            <h2 class="text-base font-bold text-blue-800">DOKUMENT PZ (ZBIORCZY)</h2>
+                            <p class="text-xs font-mono font-bold">${pz.pzNumber}</p>
+                            <p class="text-[9px] text-gray-500">Data: ${pz.date}</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 p-2 rounded text-[11px] space-y-1">
+                        <p><strong>Operacja:</strong> Przyjęcie Zewnętrzne dostawy – Grupa ${pz.group}</p>
+                        <p><strong>Dostawca:</strong> <span class="text-blue-900 font-bold">${pz.supplier || 'Brak danych'}</span></p>
+                    </div>
+                    <table class="w-full text-left border-collapse border border-black">
+                        <thead>
+                            <tr class="bg-gray-200 text-black">
+                                <th class="p-1.5 border border-black">Indeks</th>
+                                <th class="p-1.5 border border-black">Asortyment</th>
+                                <th class="p-1.5 border border-black">Regał (sztywny)</th>
+                                <th class="p-1.5 border border-black">WZ</th>
+                                <th class="p-1.5 border border-black">PZ</th>
+                                <th class="p-1.5 border border-black">Cena netto</th>
+                                <th class="p-1.5 border border-black">Wartość netto</th>
+                                <th class="p-1.5 border border-black">Jakość</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${pz.items.map(i => `
+                                <tr>
+                                    <td class="p-1.5 border border-black font-mono font-bold">${i.index}</td>
+                                    <td class="p-1.5 border border-black font-bold">${i.name}</td>
+                                    <td class="p-1.5 border border-black font-mono">${i.code}</td>
+                                    <td class="p-1.5 border border-black">${i.wzQty} ${i.unit}</td>
+                                    <td class="p-1.5 border border-black font-bold text-blue-900">${i.pzQty} ${i.unit}</td>
+                                    <td class="p-1.5 border border-black">${i.netPrice.toFixed(2)} zł</td>
+                                    <td class="p-1.5 border border-black font-bold">${i.totalNetValue.toFixed(2)} zł</td>
+                                    <td class="p-1.5 border border-black text-[10px]">${i.quality}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="text-right font-bold text-sm pt-1">
+                        Razem Wartość Netto PZ: <span class="text-blue-900">${grandTotal.toFixed(2)} zł</span>
+                    </div>
+                    <div class="grid grid-cols-3 pt-6 gap-2 text-center text-[10px]">
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold">${pz.op1}</p>
+                            <p class="text-gray-600">Magazynier 1</p>
+                        </div>
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold">${pz.op2}</p>
+                            <p class="text-gray-600">Magazynier 2</p>
+                        </div>
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold">${pz.approver}</p>
+                            <p class="text-gray-600">Zatwierdził (Kierownik)</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('print-modal').classList.remove('hidden');
+        }
+
+        function renderSkladowanie(container) {
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i data-lucide="database" class="text-emerald-400"></i> Stan Centralny Hurtowni „Smakołyk”
+                        </h2>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-900/50 text-slate-400">
+                                        <th class="p-2">Indeks</th>
+                                        <th class="p-2">Miejsce WMS (Regał)</th>
+                                        <th class="p-2">Towar</th>
+                                        <th class="p-2">Ilość na stanie</th>
+                                        <th class="p-2">Cena netto zakupu</th>
+                                        <th class="p-2">Grupa</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-700">
+                                    ${inventory.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">Magazyn pusty. Wykonaj przyjęcie PZ w Zakładce 1.</td></tr>' : ''}
+                                    ${inventory.map(i => `
+                                        <tr>
+                                            <td class="p-2 font-mono text-amber-400 font-bold">${i.index || 'IND-???'}</td>
+                                            <td class="p-2 font-mono text-yellow-400 font-bold">${i.code}</td>
+                                            <td class="p-2 font-semibold text-white">${i.name}</td>
+                                            <td class="p-2 text-emerald-400 font-bold">${i.qty} ${i.unit}</td>
+                                            <td class="p-2 text-amber-300">${(i.netPrice || 0).toFixed(2)} zł</td>
+                                            <td class="p-2 text-xs">Grupa ${i.sourceGroup}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i data-lucide="map" class="text-amber-400"></i> Strefy Magazynowe
+                        </h2>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            ${['A', 'B', 'C'].map(zone => `
+                                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-2">
+                                    <div class="font-bold text-slate-400 border-b border-slate-800 pb-1">Strefa ${zone}</div>
+                                    <div class="space-y-1">
+                                        ${[1, 2, 3, 4].map(slot => {
+                                            const codePrefix = `${zone}-0${slot}`;
+                                            const occupied = inventory.filter(i => i.code.startsWith(codePrefix));
+                                            return `
+                                                <div class="p-1.5 rounded flex justify-between items-center ${occupied.length > 0 ? 'bg-emerald-950/80 border border-emerald-600/50 text-emerald-200' : 'bg-slate-800/40 text-slate-500 border border-slate-700/50'}">
+                                                    <span class="font-mono text-[10px]">${codePrefix}</span>
+                                                    <span class="text-[10px] truncate max-w-[80px]">${occupied.length > 0 ? occupied.map(o=>o.name).join(', ') : 'Wolne'}</span>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- ZAKŁADKA 3: KOMPLETACJA ---
+        function renderKompletacja(container) {
+            const currentGroupData = GROUP_TASKS[currentGroup];
+
+            const clientsList = [
+                { name: "Sklep Spożywczy 'U Edka'", address: "ul. Długa 12, 14-200 Iława" },
+                { name: "Supermarket 'Biedronka' DC", address: "ul. Logistyczna 5, 86-300 Grudziądz" },
+                { name: "Hurtownia Gastronomiczna 'HORECA'", address: "ul. Polna 88, 87-100 Toruń" },
+                { name: "Delikatesy 'Centrum'", address: "ul. Kościuszki 15, 87-300 Brodnica" },
+                { name: "Piekarnia-Cukiernia 'Kłos'", address: "ul. Olsztyńska 41, 14-100 Ostróda" },
+                { name: "Restauracja 'Pod Gwiazdami'", address: "ul. Zamkowa 3, 14-260 Lubawa" },
+                { name: "Market 'Dino'", address: "ul. Wybickiego 10, 13-300 Nowe Miasto Lubawskie" },
+                { name: "Pizzeria 'Mamma Mia'", address: "ul. Kościuszki 44, 14-200 Iława" }
+            ];
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-purple-950/60 p-4 rounded-xl border border-purple-500/50 space-y-2">
+                        <h3 class="text-xs font-bold text-purple-300 flex items-center gap-2 uppercase tracking-wide">
+                            <i data-lucide="package-check" class="w-4 h-4"></i> Dyspozycja kompletacji dla Grupy ${currentGroup} – Co należy skompletować:
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 text-xs">
+                            <div><span class="text-slate-400">Odbiorca:</span> <strong class="text-white">${currentGroupData.client}</strong> (${currentGroupData.address})</div>
+                            <div><span class="text-slate-400">Asortyment do pobrania z regałów:</span> 
+                                <strong class="text-amber-300">${currentGroupData.orderItems.map(i => `${i.name} (${i.qty} ${i.unit} z regału ${i.code})`).join(' | ')}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+                            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <i data-lucide="shopping-cart" class="text-purple-400"></i> Formularz Kompletacji WZ
+                                </h2>
+                                <button type="button" onclick="showOrderPreview()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow">
+                                    <i data-lucide="eye" class="w-4 h-4"></i> Podgląd zamówienia
+                                </button>
+                            </div>
+                            
+                            <form onsubmit="handlePick(event)" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-slate-400 mb-1">Klient / Odbiorca:</label>
+                                        <select id="client-select" onchange="updateClientAddress(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white font-bold" required>
+                                            ${clientsList.map(c => `
+                                                <option value="${c.name}" data-address="${c.address}" ${c.name === currentGroupData.client ? 'selected' : ''}>${c.name}</option>
+                                            `).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-slate-400 mb-1">Dokładny adres dostawy:</label>
+                                        <input type="text" id="client-address" required value="${currentGroupData.address}" readonly class="w-full bg-slate-950 border border-slate-700 text-slate-300 rounded p-2 text-xs font-mono">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-slate-400 mb-1">Środek transportu (Wpisz ręcznie):</label>
+                                        <input type="text" id="transport-vehicle" required placeholder="np. Bus chłodnia [NEL 5521]" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-slate-400 mb-1">Nośnik logistyczny:</label>
+                                        <select id="pick-carrier" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white">
+                                            <option value="Paleta EURO (EPAL)">Paleta EURO (EPAL)</option>
+                                            <option value="Karton zbiorczy">Karton zbiorczy</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 pt-2">
+                                    <label class="block text-xs font-bold text-purple-300 uppercase tracking-wider">Pozycje towarowe do kompletacji (wybór z magazynu, cena z marżą 15%):</label>
+                                    <div id="pick-rows-container" class="space-y-3">
+                                        ${renderPickRowsHTML()}
+                                    </div>
+                                    <button type="button" onclick="addPickRow()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs py-2 rounded font-semibold transition flex justify-center items-center gap-1 border border-slate-600">
+                                        <i data-lucide="plus-circle" class="w-4 h-4"></i> + Dodaj kolejny towar do zamówienia
+                                    </button>
+                                </div>
+
+                                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 rounded-lg transition flex justify-center items-center gap-2">
+                                    <i data-lucide="tag"></i> Skompletuj Zamówienie, Generuj WZ i Etykietę GS1
+                                </button>
+                            </form>
+                        </div>
+
+                        <div id="label-preview" class="bg-slate-800 p-6 rounded-xl border border-slate-700 flex flex-col justify-center items-center min-h-[350px] text-center">
+                            <i data-lucide="printer" class="w-12 h-12 text-slate-600 mb-2"></i>
+                            <p class="text-slate-400 text-sm">Wypełnij formularz po lewej stronie,<br>aby wygenerować zbiorcze WZ i etykietę GS1.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function updateClientAddress(clientName) {
+            const clientsList = [
+                { name: "Sklep Spożywczy 'U Edka'", address: "ul. Długa 12, 14-200 Iława" },
+                { name: "Supermarket 'Biedronka' DC", address: "ul. Logistyczna 5, 86-300 Grudziądz" },
+                { name: "Hurtownia Gastronomiczna 'HORECA'", address: "ul. Polna 88, 87-100 Toruń" },
+                { name: "Delikatesy 'Centrum'", address: "ul. Kościuszki 15, 87-300 Brodnica" },
+                { name: "Piekarnia-Cukiernia 'Kłos'", address: "ul. Olsztyńska 41, 14-100 Ostróda" },
+                { name: "Restauracja 'Pod Gwiazdami'", address: "ul. Zamkowa 3, 14-260 Lubawa" },
+                { name: "Market 'Dino'", address: "ul. Wybickiego 10, 13-300 Nowe Miasto Lubawskie" },
+                { name: "Pizzeria 'Mamma Mia'", address: "ul. Kościuszki 44, 14-200 Iława" }
+            ];
+            const found = clientsList.find(c => c.name === clientName);
+            if(found) {
+                document.getElementById('client-address').value = found.address;
+            }
+        }
+
+        function showOrderPreview() {
+            const groupData = GROUP_TASKS[currentGroup];
+            const selectedClientSelect = document.getElementById('client-select');
+            const activeClientName = selectedClientSelect ? selectedClientSelect.value : groupData.client;
+            const transportVal = document.getElementById('transport-vehicle') ? (document.getElementById('transport-vehicle').value || 'Nie wpisano') : 'Nie wpisano';
+            const waybillNo = `LP/2026/${Math.floor(10000 + Math.random() * 90000)}`;
+            
+            const clientsList = [
+                { name: "Sklep Spożywczy 'U Edka'", address: "ul. Długa 12, 14-200 Iława" },
+                { name: "Supermarket 'Biedronka' DC", address: "ul. Logistyczna 5, 86-300 Grudziądz" },
+                { name: "Hurtownia Gastronomiczna 'HORECA'", address: "ul. Polna 88, 87-100 Toruń" },
+                { name: "Delikatesy 'Centrum'", address: "ul. Kościuszki 15, 87-300 Brodnica" },
+                { name: "Piekarnia-Cukiernia 'Kłos'", address: "ul. Olsztyńska 41, 14-100 Ostróda" },
+                { name: "Restauracja 'Pod Gwiazdami'", address: "ul. Zamkowa 3, 14-260 Lubawa" },
+                { name: "Market 'Dino'", address: "ul. Wybickiego 10, 13-300 Nowe Miasto Lubawskie" },
+                { name: "Pizzeria 'Mamma Mia'", address: "ul. Kościuszki 44, 14-200 Iława" }
+            ];
+            const cObj = clientsList.find(c => c.name === activeClientName) || { address: groupData.address };
+
+            document.getElementById('modal-print-btn').style.display = 'none';
+            document.getElementById('print-content').innerHTML = `
+                <div class="space-y-4 font-sans text-xs text-black">
+                    <div class="border-b border-black pb-2 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-base text-amber-800">Specyfikacja Zamówienia Klienta (Grupa ${currentGroup})</h3>
+                            <p class="text-gray-600 text-xs">Oficjalne zamówienie przypisane do realizacji w WMS</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-amber-50 p-3 rounded border border-amber-300 space-y-1.5">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><span class="text-[10px] text-amber-800 font-bold uppercase block">Zamawiający / Odbiorca:</span> <strong class="text-sm text-amber-950">${activeClientName}</strong></div>
+                            <div><span class="text-[10px] text-amber-800 font-bold uppercase block">Adres dostawy:</span> <span class="text-amber-950 font-semibold">${cObj.address}</span></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-amber-200">
+                            <div><span class="text-[10px] text-amber-800 font-bold uppercase block">Środek transportu:</span> <strong class="text-amber-950">${transportVal}</strong></div>
+                            <div><span class="text-[10px] text-amber-800 font-bold uppercase block">Nr Listu Przewozowego:</span> <strong class="font-mono text-blue-800">${waybillNo}</strong></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-black mb-2">Wykaz zamawianego towaru i dokładne ilości:</h4>
+                        <table class="w-full text-left border-collapse border border-black">
+                            <thead>
+                                <tr class="bg-gray-200 text-black">
+                                    <th class="p-1.5 border border-black">Asortyment</th>
+                                    <th class="p-1.5 border border-black">Zamówiona ilość</th>
+                                    <th class="p-1.5 border border-black">Jednostka</th>
+                                    <th class="p-1.5 border border-black">Dedykowany regał WMS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${groupData.orderItems.map(item => `
+                                    <tr>
+                                        <td class="p-1.5 border border-black font-bold">${item.name}</td>
+                                        <td class="p-1.5 border border-black font-bold text-blue-900">${item.qty}</td>
+                                        <td class="p-1.5 border border-black">${item.unit}</td>
+                                        <td class="p-1.5 border border-black font-mono font-bold">${item.code}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            document.getElementById('print-modal').classList.remove('hidden');
+        }
+
+        function capturePickFormState() {
+            savedPickFormState = [];
+            const selects = document.querySelectorAll('.pick-item-select');
+            const qtyInputs = document.querySelectorAll('.pick-qty-input');
+            const priceInputs = document.querySelectorAll('.pick-price-input');
+            for(let i = 0; i < selects.length; i++) {
+                savedPickFormState.push({
+                    itemVal: selects[i].value,
+                    qtyVal: qtyInputs[i] ? qtyInputs[i].value : '',
+                    priceVal: priceInputs[i] ? priceInputs[i].value : ''
+                });
+            }
+        }
+
+        function renderPickRowsHTML() {
+            let html = '';
+            for(let r = 0; r < pickRowsCount; r++) {
+                const state = savedPickFormState[r] || { itemVal: '', qtyVal: '', priceVal: '' };
+                html += `
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-2 relative" id="pick-row-${r}">
+                        <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-1">
+                            <span>Pozycja zamówienia #${r + 1}</span>
+                            ${r > 0 ? `<button type="button" onclick="removePickRow(${r})" class="text-red-400 hover:text-red-300 font-semibold text-[11px]">Usuń</button>` : ''}
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] text-slate-400 mb-1">Towar z magazynu (z indeksem i regałem):</label>
+                                <select class="pick-item-select w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-xs text-white" required>
+                                    <option value="">-- Wybierz towar z zapasów --</option>
+                                    ${inventory.map((i, idx) => `
+                                        <option value="${idx}" ${state.itemVal == idx ? 'selected' : ''}>[${i.index || 'IND'}] ${i.name} (Reg: ${i.code} | Stan: ${i.qty} ${i.unit} | Zakup: ${(i.netPrice||0).toFixed(2)} zł)</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-1">Ilość:</label>
+                                <input type="number" class="pick-qty-input w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-xs text-white font-bold" placeholder="Ilość" value="${state.qtyVal}" required min="1">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-1">Cena netto (z marżą 15%):</label>
+                                <input type="number" step="0.01" class="pick-price-input w-full bg-slate-800 border border-slate-600 rounded p-1.5 text-xs text-purple-300 font-bold" placeholder="Cena z marżą" value="${state.priceVal}" required>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            return html;
+        }
+
+        function addPickRow() {
+            capturePickFormState();
+            pickRowsCount++;
+            renderKompletacja(document.getElementById('tab-content'));
+        }
+
+        function removePickRow(index) {
+            if(pickRowsCount > 1) {
+                capturePickFormState();
+                savedPickFormState.splice(index, 1);
+                pickRowsCount--;
+                renderKompletacja(document.getElementById('tab-content'));
+            }
+        }
+
+        function handlePick(e) {
+            e.preventDefault();
+            const client = document.getElementById('client-select').value;
+            const address = document.getElementById('client-address').value;
+            const transport = document.getElementById('transport-vehicle').value;
+            const carrier = document.getElementById('pick-carrier').value;
+
+            const selects = document.querySelectorAll('.pick-item-select');
+            const qtyInputs = document.querySelectorAll('.pick-qty-input');
+            const priceInputs = document.querySelectorAll('.pick-price-input');
+
+            const pickedItems = [];
+
+            for(let i = 0; i < selects.length; i++) {
+                const indexVal = selects[i].value;
+                const qtyVal = parseInt(qtyInputs[i].value);
+                const priceVal = parseFloat(priceInputs[i].value);
+
+                if(!indexVal && indexVal !== "0") return alert(`Wybierz towar dla pozycji #${i+1}`);
+                if(isNaN(qtyVal) || qtyVal <= 0) return alert(`Podaj poprawną ilość dla pozycji #${i+1}`);
+                if(isNaN(priceVal) || priceVal < 0) return alert(`Podaj poprawną cenę sprzedaży z marżą dla pozycji #${i+1}`);
+
+                const stockItem = inventory[parseInt(indexVal)];
+                if(!stockItem) return alert(`Błąd wyboru towaru dla pozycji #${i+1}`);
+
+                if(qtyVal > stockItem.qty) {
+                    alert(`⚠️ OSTRZEŻENIE O BRAKU ZAPASU!\n\nPróbujesz pobrać ${qtyVal} ${stockItem.unit} towaru '${stockItem.name}', ale w magazynie centralnym jest dostępnych tylko ${stockItem.qty} ${stockItem.unit}.`);
+                    return;
+                }
+
+                const totalSellingNetValue = priceVal * qtyVal;
+
+                pickedItems.push({
+                    stockIndex: parseInt(indexVal),
+                    index: stockItem.index || 'IND-???',
+                    name: stockItem.name,
+                    qty: qtyVal,
+                    unit: stockItem.unit,
+                    code: stockItem.code,
+                    netPrice: priceVal,
+                    totalNetValue: totalSellingNetValue
+                });
+            }
+
+            for(let item of pickedItems) {
+                const stockItem = inventory[item.stockIndex];
+                if(stockItem) {
+                    stockItem.qty -= item.qty;
+                }
+            }
+            inventory = inventory.filter(i => i.qty > 0);
+            savedPickFormState = [];
+
+            const orderNo = `ZAM/${Math.floor(1000 + Math.random() * 9000)}`;
+            const wzNumber = `WZ/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
+            const waybillNo = `LP/2026/${Math.floor(10000 + Math.random() * 90000)}`;
+            const sscc = `(00) 5901234 ${Math.floor(100000000 + Math.random() * 900000000)}`;
+
+            const wzData = {
+                wzNumber: wzNumber,
+                waybillNo: waybillNo,
+                group: currentGroup,
+                client: client,
+                address: address,
+                transport: transport,
+                items: pickedItems,
+                orderNo: orderNo,
+                carrier: carrier,
+                sscc: sscc,
+                op1: op1Name,
+                op2: op2Name,
+                approver: `Kierownik Magazynu (Smakołyk)`,
+                date: new Date().toLocaleString()
+            };
+
+            wzHistory.push(wzData);
+            saveState();
+
+            const preview = document.getElementById('label-preview');
+            preview.className = "bg-slate-800 p-6 rounded-xl border border-slate-700 flex flex-col items-center justify-start space-y-4";
+            preview.innerHTML = `
+                <div class="bg-white text-black p-4 rounded shadow-lg text-left font-mono w-full border-2 border-black space-y-2 text-xs" id="label-box">
+                    <div class="border-b border-black pb-1 flex justify-between items-center">
+                        <div>
+                            <strong class="text-xs block">Smakołyk Sp. z o.o., Lubawa</strong>
+                            <span class="text-[9px]">ETYKIETA LOGISTYCZNA & ZBIORCZE WZ</span>
+                        </div>
+                        <span class="font-bold text-sm">${carrier}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 block">ODBIORCA I ADRES DOSTAWY:</span>
+                        <strong class="text-xs block uppercase">${client}</strong>
+                        <span class="text-[10px]">${address}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 border-t border-b border-gray-300 py-1">
+                        <div>
+                            <span class="text-[10px] text-gray-500 block">TRANSPORT / LIST:</span>
+                            <strong>${transport}</strong><br>
+                            <span class="text-[9px] text-blue-800">LP: ${waybillNo}</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-gray-500 block">DOKUMENT WZ:</span>
+                            <strong class="text-blue-700">${wzNumber}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-gray-500 block mb-1">POBRANE ASORTYMENTY Z REGAŁÓW:</span>
+                        <ul class="space-y-1">
+                            ${pickedItems.map(pi => `
+                                <li class="text-[11px]">
+                                    • <strong class="text-amber-800">[${pi.index}]</strong> <strong>${pi.name}</strong> - ${pi.qty} ${pi.unit} <span class="bg-yellow-200 px-1 font-bold">(Regał: ${pi.code})</span><br>
+                                    <span class="text-[9px] text-gray-600">Cena jedn. netto (z marżą): ${pi.netPrice.toFixed(2)} zł | Wartość: ${pi.totalNetValue.toFixed(2)} zł</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    <div class="pt-2 text-center border-t border-black">
+                        <div class="bg-black text-white p-1.5 tracking-widest font-bold text-sm mb-1">||| | |||| | | |||| ||| |||</div>
+                        <span class="text-[9px]">${sscc}</span>
+                    </div>
+                    <div class="text-[9px] text-gray-600 flex justify-between pt-1 border-t border-gray-200">
+                        <span>Kompletowali: ${op1Name}, ${op2Name}</span>
+                        <span>Data: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 w-full justify-center">
+                    <button onclick="printLabelOnly('${wzNumber}')" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-2 rounded font-semibold transition flex items-center gap-1 flex-1 justify-center">
+                        <i data-lucide="tag" class="w-4 h-4"></i> Drukuj Etykietę GS1 (PDF)
+                    </button>
+                    <button onclick="printWZ('${wzNumber}')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded font-semibold transition flex items-center gap-1 flex-1 justify-center">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Drukuj Dokument WZ (PDF)
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function printLabelOnly(wzNumber) {
+            const wz = wzHistory.find(w => w.wzNumber === wzNumber);
+            if(!wz) return;
+
+            document.getElementById('modal-print-btn').style.display = 'flex';
+            document.getElementById('print-content').innerHTML = `
+                <div class="bg-white text-black p-4 rounded text-left font-mono w-full border-2 border-black space-y-2 text-xs">
+                    <div class="border-b-2 border-black pb-1 flex justify-between items-center">
+                        <div>
+                            <strong class="text-xs block">Hurtownia Spożywcza „Smakołyk” Sp. z o.o.</strong>
+                            <span class="text-[9px] text-gray-600">ul. Gdańska 25/34, 14-260 Lubawa</span>
+                        </div>
+                        <span class="font-bold text-xs bg-black text-white px-2 py-0.5 rounded">${wz.carrier}</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-500 block uppercase">Odbiorca i adres dostawy:</span>
+                        <strong class="text-xs block uppercase">${wz.client}</strong>
+                        <span class="text-[10px] text-gray-800">${wz.address}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 border-t border-b border-gray-400 py-1">
+                        <div>
+                            <span class="text-[9px] text-gray-500 block uppercase">Transport / List:</span>
+                            <strong class="text-[11px]">${wz.transport}</strong><br>
+                            <span class="text-[10px] font-bold text-blue-900">LP: ${wz.waybillNo}</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-gray-500 block uppercase">Dokument WZ:</span>
+                            <strong class="text-blue-700 text-xs">${wz.wzNumber}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[9px] text-gray-500 block uppercase mb-1">Zawartość logistyczna:</span>
+                        <ul class="space-y-0.5">
+                            ${wz.items.map(pi => `
+                                <li class="text-[11px] flex justify-between border-b border-gray-100 pb-0.5">
+                                    <span>• <strong class="font-bold">[${pi.index}]</strong> <strong>${pi.name}</strong></span>
+                                    <span><strong>${pi.qty} ${pi.unit}</strong> <span class="bg-yellow-200 px-1 font-mono">(Regał: ${pi.code})</span></span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    <div class="pt-2 text-center border-t-2 border-black space-y-1">
+                        <div class="bg-black text-white p-1 tracking-widest font-bold text-sm">||| | |||| | | |||| ||| |||</div>
+                        <span class="text-[10px] font-mono font-bold">${wz.sscc}</span>
+                    </div>
+                    <div class="text-[9px] text-gray-600 flex justify-between pt-1 border-t border-gray-300">
+                        <span>Magazynierzy: ${wz.op1}, ${wz.op2}</span>
+                        <span>Data: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('print-modal').classList.remove('hidden');
+        }
+
+        function renderWydanie(container) {
+            container.innerHTML = `
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i data-lucide="file-text" class="text-blue-400"></i> Rejestr Dokumentów Wydania Zewnętrznego (WZ)
+                    </h2>
+                    <p class="text-sm text-slate-400">Wszystkie wydane dokumenty WZ z uwzględnieniem cen sprzedaży netto (z marżą).</p>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/50 text-slate-400">
+                                    <th class="p-3">Nr WZ / List</th>
+                                    <th class="p-3">Klient i Adres</th>
+                                    <th class="p-3">Transport</th>
+                                    <th class="p-3">Towary, Indeksy i Wartości</th>
+                                    <th class="p-3">Magazynierzy</th>
+                                    <th class="p-3">Akcje</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700">
+                                ${wzHistory.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">Brak wystawionych dokumentów WZ.</td></tr>' : ''}
+                                ${wzHistory.map(wz => `
+                                    <tr>
+                                        <td class="p-3 font-mono text-xs">
+                                            <span class="text-blue-400 font-bold block">${wz.wzNumber}</span>
+                                            <span class="text-slate-400 text-[10px]">LP: ${wz.waybillNo || 'Brak'}</span>
+                                        </td>
+                                        <td class="p-3 text-white text-xs">
+                                            <strong class="block">${wz.client}</strong>
+                                            <span class="text-slate-400 text-[11px]">${wz.address}</span>
+                                        </td>
+                                        <td class="p-3 text-slate-300 text-xs">${wz.transport}</td>
+                                        <td class="p-3 text-slate-300 text-xs">
+                                            ${wz.items.map(i => `<span class="text-amber-400 font-mono font-bold">[${i.index}]</span> ${i.name} (${i.qty} ${i.unit}) – ${i.totalNetValue.toFixed(2)} zł`).join('<br>')}
+                                        </td>
+                                        <td class="p-3 text-xs text-slate-300">${wz.op1}, ${wz.op2}</td>
+                                        <td class="p-3 space-y-1">
+                                            <button onclick="printWZ('${wz.wzNumber}')" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs px-2 py-1 rounded flex items-center justify-center gap-1 font-semibold">
+                                                <i data-lucide="printer" class="w-3 h-3"></i> Drukuj WZ
+                                            </button>
+                                            <button onclick="printLabelOnly('${wz.wzNumber}')" class="w-full bg-purple-700 hover:bg-purple-600 text-white text-xs px-2 py-1 rounded flex items-center justify-center gap-1 font-semibold">
+                                                <i data-lucide="tag" class="w-3 h-3"></i> Etykieta GS1
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function printWZ(wzNumber) {
+            const wz = wzHistory.find(w => w.wzNumber === wzNumber);
+            if(!wz) return;
+
+            const grandTotalNet = wz.items.reduce((sum, i) => sum + i.totalNetValue, 0);
+
+            document.getElementById('modal-print-btn').style.display = 'flex';
+            document.getElementById('print-content').innerHTML = `
+                <div class="space-y-3 font-sans text-xs text-black bg-white p-2">
+                    <div class="flex justify-between border-b border-black pb-2">
+                        <div>
+                            <h3 class="font-bold text-sm">Hurtownia Spożywcza „Smakołyk” Sp. z o.o.</h3>
+                            <p class="text-[9px] text-gray-600">ul. Gdańska 25/34, 14-260 Lubawa | NIP: 744-785-12-10</p>
+                        </div>
+                        <div class="text-right">
+                            <h2 class="text-base font-bold text-blue-800">DOKUMENT WZ</h2>
+                            <p class="text-xs font-mono font-bold">${wz.wzNumber}</p>
+                            <p class="text-[9px] text-gray-500">Data: ${wz.date}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 bg-gray-100 p-2 rounded text-[11px]">
+                        <div>
+                            <span class="text-[9px] text-gray-500 block uppercase">Nabywca / Adres dostawy:</span>
+                            <strong class="uppercase block">${wz.client}</strong>
+                            <span class="text-[10px] text-gray-700">${wz.address}</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div>
+                                <span class="text-[9px] text-gray-500 block uppercase">Zamówienie / List:</span>
+                                <strong>${wz.orderNo}</strong> <span class="text-blue-800 font-mono text-[9px]">(LP: ${wz.waybillNo || 'Brak'})</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-gray-500 block uppercase">Środek transportu:</span>
+                                <strong class="text-blue-900">${wz.transport}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="w-full text-left border-collapse border border-black">
+                        <thead>
+                            <tr class="bg-gray-200 text-black">
+                                <th class="p-1.5 border border-black">Lp.</th>
+                                <th class="p-1.5 border border-black">Indeks</th>
+                                <th class="p-1.5 border border-black">Nazwa towaru</th>
+                                <th class="p-1.5 border border-black">Regał (sztywny)</th>
+                                <th class="p-1.5 border border-black">Ilość</th>
+                                <th class="p-1.5 border border-black">Cena jedn. netto (z marżą)</th>
+                                <th class="p-1.5 border border-black">Wartość netto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${wz.items.map((i, idx) => `
+                                <tr>
+                                    <td class="p-1.5 border border-black">${idx + 1}</td>
+                                    <td class="p-1.5 border border-black font-mono font-bold">${i.index}</td>
+                                    <td class="p-1.5 border border-black font-bold">${i.name}</td>
+                                    <td class="p-1.5 border border-black font-mono">${i.code}</td>
+                                    <td class="p-1.5 border border-black font-bold text-blue-900">${i.qty} ${i.unit}</td>
+                                    <td class="p-1.5 border border-black">${i.netPrice.toFixed(2)} zł</td>
+                                    <td class="p-1.5 border border-black font-bold">${i.totalNetValue.toFixed(2)} zł</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="text-right font-bold text-sm pt-1">
+                        Razem Wartość Netto WZ: <span class="text-blue-900">${grandTotalNet.toFixed(2)} zł</span>
+                    </div>
+                    <div class="bg-gray-100 p-1.5 rounded text-center text-[10px]">
+                        <p class="text-gray-700">Nośnik: <strong>${wz.carrier}</strong> | Kod SSCC: <span class="font-mono">${wz.sscc}</span></p>
+                    </div>
+                    <div class="grid grid-cols-4 pt-4 gap-2 text-center text-[10px]">
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold">${wz.op1}</p>
+                            <p class="text-gray-600 text-[9px]">Magazynier 1</p>
+                        </div>
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold">${wz.op2}</p>
+                            <p class="text-gray-600 text-[9px]">Magazynier 2</p>
+                        </div>
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold">${wz.approver}</p>
+                            <p class="text-gray-600 text-[9px]">Zatwierdził</p>
+                        </div>
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold text-gray-400">&nbsp;</p>
+                            <p class="text-gray-600 text-[9px]">Podpis Odbiorcy</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('print-modal').classList.add('hidden');
+            document.getElementById('print-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closePrintModal() {
+            document.getElementById('print-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

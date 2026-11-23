@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CMR &amp; Zlecenie Transportowe — Generator Edukacyjny</title>
+<style>
+  :root {
+    --bg-app: #eef2f6;
+    --bg-surface: #ffffff;
+    --ink: #0f172a;
+    --muted: #475569;
+    --border: #cbd5e1;
+    --brand: #1e3a8a;
+    --brand-dark: #0f172a;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-app);
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.3;
+  }
+
+  /* Górny pasek logo */
+  .top-brand-bar {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 7px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .brand-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-oval {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 12px;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+  }
+
+  .brand-name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .brand-meta {
+    font-size: 11px;
+    color: #cbd5e1;
+  }
+
+  /* Pasek nawigacji i akcji */
+  .nav-bar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    padding: 9px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+  }
+
+  .nav-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 7px;
+    border: 1px solid #cbd5e1;
+  }
+
+  .nav-tab {
+    border: none;
+    background: transparent;
+    color: #334155;
+    padding: 6px 13px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .nav-tab.active {
+    background: var(--brand);
+    color: #ffffff;
+  }
+
+  .nav-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn {
+    border: 1px solid #94a3b8;
+    background: #ffffff;
+    color: #0f172a;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn:hover {
+    background: #f8fafc;
+  }
+
+  .btn-primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    background: #172554;
+  }
+
+  .btn-clear {
+    border-color: #dc2626;
+    color: #b91c1c;
+    background: #fef2f2;
+  }
+
+  .btn-clear:hover {
+    background: #fee2e2;
+  }
+
+  .copy-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #94a3b8;
+    font-size: 13px;
+    font-weight: 600;
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  /* Główny układ: lewy panel edycji + prawy podgląd A4 */
+  .main-grid {
+    display: grid;
+    grid-template-columns: minmax(360px, 445px) minmax(0, 1fr);
+    gap: 18px;
+    padding: 16px 18px 36px;
+    align-items: start;
+  }
+
+  @media (max-width: 1120px) {
+    .main-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-panel {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 14px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  }
+
+  .form-group-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    padding: 10px 11px;
+    margin-bottom: 11px;
+    background: #f8fafc;
+  }
+
+  .form-group-title {
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--brand);
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .row-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .row-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .inp-box {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .inp-box label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .inp-box input,
+  .inp-box textarea,
+  .inp-box select {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 6px 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: #0f172a;
+    background: #ffffff;
+  }
+
+  .inp-box textarea {
+    min-height: 50px;
+    resize: vertical;
+  }
+
+  .item-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+
+  .item-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+
+  .totals-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin-top: 6px;
+  }
+
+  .total-pill {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 6px 8px;
+  }
+
+  .total-pill .k {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+  }
+
+  .total-pill .v {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 2px;
+  }
+
+  .pad-wrap {
+    border: 1px dashed #64748b;
+    border-radius: 6px;
+    background: #ffffff;
+    padding: 6px;
+  }
+
+  canvas.pad {
+    width: 100%;
+    height: 78px;
+    display: block;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #ffffff;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .pad-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+    font-size: 11px;
+    color: #475569;
+  }
+
+  /* Panel podglądu na żywo */
+  .preview-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  /* =====================================================================
+     ARKUSZ A4 — LIST PRZEWOZOWY CMR (4 KOLOROWE EGZEMPLARZE)
+     ===================================================================== */
+  .cmr-page {
+    --accent-cmr: #c62828;
+    --tint-cmr: #fdecec;
+    --soft-cmr: #fff8f8;
+    width: 210mm;
+    min-height: 297mm;
+    background: #ffffff;
+    border: 2px solid var(--accent-cmr);
+    padding: 4.5mm 5mm;
+    color: #0f172a;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cmr-page.egz-2 {
+    --accent-cmr: #1565c0;
+    --tint-cmr: #e8f1fc;
+    --soft-cmr: #f5f9ff;
+  }
+
+  .cmr-page.egz-3 {
+    --accent-cmr: #2e7d32;
+    --tint-cmr: #e9f6ea;
+    --soft-cmr: #f4fbf5;
+  }
+
+  .cmr-page.egz-4 {
+    --accent-cmr: #111111;
+    --tint-cmr: #eceef1;
+    --soft-cmr: #f8f9fa;
+  }
+
+  .cmr-top-strip {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 5px;
+    margin-bottom: 3.5px;
+    font-size: 6.3pt;
+    line-height: 1.15;
+  }
+
+  .cmr-strip-box {
+    border: 1.2px solid var(--accent-cmr);
+    background: var(--soft-cmr);
+    padding: 2px 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cmr-strip-tag {
+    border: 1.5px solid var(--accent-cmr);
+    background: #ffffff;
+    color: var(--accent-cmr);
+    padding: 1px 5px;
+    font-weight: 800;
+    font-size: 6.4pt;
+    white-space: nowrap;
+  }
+
+  .cmr-head {
+    display: grid;
+    grid-template-columns: 1.48fr 0.86fr;
+    border: 1.8px solid var(--accent-cmr);
+    margin-bottom: 3.5px;
+  }
+
+  .cmr-head-left {
+    padding: 3.5px 6px;
+    border-right: 1.5px solid var(--accent-cmr);
+  }
+
+  .cmr-head-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cmr-oval-badge {
+    border: 2.2px solid var(--accent-cmr);
+    border-radius: 999px;
+    padding: 1px 10px;
+    font-size: 11.5pt;
+    font-weight: 900;
+    color: var(--accent-cmr);
+    background: #ffffff;
+  }
+
+  .cmr-main-h1 {
+    font-size: 10.5pt;
+    font-weight: 900;
+    color: var(--accent-cmr);
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .cmr-main-sub {
+    font-size: 6pt;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .cmr-conv-note {
+    font-size: 5.8pt;
+    line-height: 1.16;
+    color: #1f2937;
+    border-top: 0.8px solid var(--accent-cmr);
+    margin-top: 2.5px;
+    padding-top: 2px;
+  }
+
+  .cmr-head-right {
+    background: var(--tint-cmr);
+    padding: 3.5px 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cmr-num-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.2px solid var(--accent-cmr);
+    padding-bottom: 2px;
+    font-size: 7.4pt;
+    font-weight: 900;
+    color: var(--accent-cmr);
+  }
+
+  .cmr-copy-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .cmr-copy-circle {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-cmr);
+    color: #ffffff;
+    font-size: 9pt;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .cmr-copy-name {
+    font-size: 7pt;
+    font-weight: 900;
+    color: var(--accent-cmr);
+    line-height: 1.15;
+  }
+
+  .cmr-copy-desc {
+    font-size: 5.9pt;
+    color: #1e293b;
+  }
+
+  .cmr-upper-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-left: 1.5px solid var(--accent-cmr);
+    border-top: 1.5px solid var(--accent-cmr);
+  }
+
+  .cmr-upper-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cmr-cell {
+    border-right: 1.5px solid var(--accent-cmr);
+    border-bottom: 1.5px solid var(--accent-cmr);
+    padding: 2.5px 5px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .cmr-cell.carrier-box {
+    border-right: 2.6px solid var(--accent-cmr);
+    border-top: 2.4px solid var(--accent-cmr);
+    border-bottom: 2.4px solid var(--accent-cmr);
+    background: var(--soft-cmr);
+  }
+
+  .cmr-cell.carrier-box + .cmr-cell.carrier-box {
+    border-top: none;
+  }
+
+  .cmr-cell-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 1.5px;
+  }
+
+  .cmr-idx {
+    background: var(--accent-cmr);
+    color: #ffffff;
+    font-size: 6.6pt;
+    font-weight: 800;
+    padding: 0.5px 3.5px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .cmr-cap {
+    font-size: 6.1pt;
+    line-height: 1.12;
+    color: #1e293b;
+  }
+
+  .cmr-cap strong {
+    color: var(--accent-cmr);
+  }
+
+  .cmr-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    resize: none;
+    outline: none;
+  }
+
+  .h-1-2 { height: 26.5mm; }
+  .h-3-5 { height: 18mm; }
+  .h-16 { height: 24mm; }
+  .h-17 { height: 17.5mm; }
+  .h-18 { height: 21.5mm; }
+  .h-19 { height: 20.5mm; }
+
+  .cmr-goods-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border-left: 1.5px solid var(--accent-cmr);
+    border-right: 1.5px solid var(--accent-cmr);
+    border-bottom: 1.5px solid var(--accent-cmr);
+    margin-top: 2.5px;
+  }
+
+  .cmr-goods-tbl th,
+  .cmr-goods-tbl td {
+    border: 1px solid var(--accent-cmr);
+    padding: 2px 3.5px;
+    vertical-align: top;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .cmr-goods-tbl th {
+    font-size: 5.8pt;
+    line-height: 1.1;
+    background: var(--tint-cmr);
+    font-weight: 700;
+  }
+
+  .cmr-goods-tbl td {
+    height: 10.6mm;
+    background: #ffffff;
+  }
+
+  .cmr-goods-inp {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #0f172a;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    resize: none;
+    outline: none;
+  }
+
+  .cmr-lower-grid {
+    display: grid;
+    grid-template-columns: 1.12fr 1fr;
+    border-left: 1.5px solid var(--accent-cmr);
+    border-right: 1.5px solid var(--accent-cmr);
+    border-bottom: 1.5px solid var(--accent-cmr);
+    margin-top: 2.5px;
+  }
+
+  .cmr-lower-left {
+    border-right: 1.5px solid var(--accent-cmr);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cmr-lower-row {
+    border-bottom: 1px solid var(--accent-cmr);
+    padding: 2px 5px;
+    min-height: 9.5mm;
+  }
+
+  .cmr-lower-row:last-child {
+    border-bottom: none;
+  }
+
+  .cmr-lower-right {
+    border-left: 2.5px solid var(--accent-cmr);
+    background: var(--soft-cmr);
+    padding: 2.5px 4px;
+  }
+
+  .cmr-pay-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 5.9pt;
+    background: #ffffff;
+  }
+
+  .cmr-pay-tbl th,
+  .cmr-pay-tbl td {
+    border: 1px solid var(--accent-cmr);
+    padding: 2px 3px;
+    height: 5.2mm;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .cmr-pay-tbl th {
+    background: var(--tint-cmr);
+    font-weight: 800;
+  }
+
+  .cmr-signs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-left: 1.5px solid var(--accent-cmr);
+    border-right: 1.5px solid var(--accent-cmr);
+    border-bottom: 1.8px solid var(--accent-cmr);
+    margin-top: 2.5px;
+    min-height: 27mm;
+  }
+
+  .cmr-sign-box {
+    border-right: 1px solid var(--accent-cmr);
+    padding: 2.5px 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+  }
+
+  .cmr-sign-box.carrier-box {
+    border: 2.6px solid var(--accent-cmr);
+    background: var(--soft-cmr);
+  }
+
+  .cmr-sign-box:last-child {
+    border-right: none;
+  }
+
+  .sig-preview-img {
+    max-height: 14mm;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+    margin: 2px auto 0;
+  }
+
+  /* =====================================================================
+     ARKUSZ A4 — ZLECENIE TRANSPORTU DROGOWEGO
+     ===================================================================== */
+  .order-page {
+    width: 210mm;
+    min-height: 297mm;
+    background: #ffffff;
+    border: 1.5px solid #1e293b;
+    padding: 7mm 8mm;
+    color: #0f172a;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 8.5pt;
+  }
+
+  .ord-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 5px;
+    margin-bottom: 6px;
+  }
+
+  .ord-title {
+    font-size: 14.5pt;
+    font-weight: 900;
+    margin: 0;
+  }
+
+  .ord-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .ord-card {
+    border: 1px solid #475569;
+    padding: 5px 7px;
+    background: #ffffff;
+  }
+
+  .ord-card-title {
+    font-size: 7.4pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #1e3a8a;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 2px;
+    margin-bottom: 4px;
+  }
+
+  .ord-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 7.8pt;
+  }
+
+  .ord-tbl th,
+  .ord-tbl td {
+    border: 1px solid #475569;
+    padding: 4px 5px;
+    vertical-align: top;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .ord-tbl th {
+    background: #f1f5f9;
+    font-weight: 800;
+    text-align: left;
+  }
+
+  .ord-bottom-calc {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .ord-vat-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+  }
+
+  .ord-vat-tbl th,
+  .ord-vat-tbl td {
+    border: 1px solid #475569;
+    padding: 4px 6px;
+  }
+
+  .ord-vat-tbl th {
+    background: #f8fafc;
+    text-align: left;
+    width: 55%;
+  }
+
+  .ord-signs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .ord-sign-box {
+    border: 1px solid #475569;
+    padding: 6px 8px;
+    min-height: 35mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .ord-foot {
+    margin-top: 6px;
+    padding-top: 4px;
+    border-top: 1px solid #cbd5e1;
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    color: #475569;
+  }
+
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    html, body {
+      background: #ffffff !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .top-brand-bar,
+    .nav-bar,
+    .form-panel {
+      display: none !important;
+    }
+
+    .main-grid {
+      display: block !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .preview-col {
+      display: block !important;
+      gap: 0 !important;
+    }
+
+    .cmr-page,
+    .order-page {
+      box-shadow: none !important;
+      margin: 0 !important;
+      width: 210mm !important;
+      min-height: 297mm !important;
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .cmr-page:last-child,
+    .order-page:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Pasek logo -->
+  <div class="top-brand-bar">
+    <div class="brand-left">
+      <span class="logo-oval">CMR</span>
+      <div>
+        <div class="brand-name">CMR &amp; Zlecenie Transportowe — Generator Edukacyjny</div>
+        <div class="brand-meta">Format A4 • 4 egzemplarze CMR + Zlecenie transportowe • Podgląd na żywo</div>
+      </div>
+    </div>
+    <span class="brand-meta">PL / DE / EN</span>
+  </div>
+
+  <!-- Pasek narzędzi -->
+  <div class="nav-bar">
+    <div class="nav-tabs">
+      <button type="button" class="nav-tab active" id="btnTabCmr" onclick="setMode('cmr')">
+        List przewozowy CMR (4 egz.)
+      </button>
+      <button type="button" class="nav-tab" id="btnTabOrder" onclick="setMode('order')">
+        Zlecenie transportowe
+      </button>
+    </div>
+
+    <div class="nav-actions">
+      <select id="copyFilter" class="copy-select" onchange="changeCopyFilter()">
+        <option value="all">Wszystkie 4 egzemplarze</option>
+        <option value="1">1. Czerwony — Nadawca</option>
+        <option value="2">2. Niebieski — Odbiorca</option>
+        <option value="3">3. Zielony — Przewoźnik</option>
+        <option value="4">4. Czarny — Rozliczeniowy</option>
+      </select>
+
+      <button type="button" class="btn btn-clear" onclick="resetActiveForm()">
+        Wyczyść pola
+      </button>
+
+      <button type="button" class="btn btn-primary" onclick="window.print()">
+        Drukuj / Zapisz PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <!-- FORMULARZ (LEWA STRONA) -->
+    <aside class="form-panel">
+
+      <!-- FORMULARZ CMR -->
+      <div id="formCmr">
+        <div class="form-group-card">
+          <div class="form-group-title">1. Dane podstawowe (1–5)</div>
+          <div class="row-2">
+            <div class="inp-box">
+              <label for="f_cmr_no">CMR No</label>
+              <input type="text" id="f_cmr_no" data-cmr="cmr_no" placeholder="Numer listu CMR" />
+            </div>
+            <div class="inp-box">
+              <label for="f_cmr_5">5. Załączone dokumenty</label>
+              <input type="text" id="f_cmr_5" data-cmr="cmr_5" placeholder="np. Faktura, WZ" />
+            </div>
+          </div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_cmr_1">1. Nadawca (nazwisko lub nazwa, adres, kraj)</label>
+              <textarea id="f_cmr_1" data-cmr="cmr_1"></textarea>
+            </div>
+          </div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_cmr_2">2. Odbiorca (nazwisko lub nazwa, adres, kraj)</label>
+              <textarea id="f_cmr_2" data-cmr="cmr_2"></textarea>
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="inp-box">
+              <label for="f_cmr_3">3. Miejsce przeznaczenia</label>
+              <input type="text" id="f_cmr_3" data-cmr="cmr_3" placeholder="Miejscowość, kraj" />
+            </div>
+            <div class="inp-box">
+              <label for="f_cmr_4">4. Miejsce i data załadowania</label>
+              <input type="text" id="f_cmr_4" data-cmr="cmr_4" placeholder="Miejscowość, kraj, data" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-card">
+          <div class="form-group-title">
+            <span>2. Ładunek i ADR (6–12)</span>
+            <button type="button" class="btn" style="padding:2px 8px;font-size:11px;" onclick="addCargoItem()">
+              + Dodaj pozycję ładunku
+            </button>
+          </div>
+          <div id="cargoEditorContainer"></div>
+          <div class="totals-row">
+            <div class="total-pill">
+              <div class="k">Pozycji</div>
+              <div class="v" id="sumCargoCount">5</div>
+            </div>
+            <div class="total-pill">
+              <div class="k">Suma masy brutto</div>
+              <div class="v" id="sumCargoWeight">0,00 kg</div>
+            </div>
+            <div class="total-pill">
+              <div class="k">Suma objętości</div>
+              <div class="v" id="sumCargoVol">0,00 m³</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-card">
+          <div class="form-group-title">3. Przewoźnik i uwagi (16–21)</div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_cmr_16">16. Przewoźnik (nazwa, adres, kraj, nr rej.)</label>
+              <textarea id="f_cmr_16" data-cmr="cmr_16"></textarea>
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="inp-box">
+              <label for="f_cmr_17">17. Kolejni przewoźnicy</label>
+              <input type="text" id="f_cmr_17" data-cmr="cmr_17" />
+            </div>
+            <div class="inp-box">
+              <label for="f_cmr_21">21. Wystawiono w / dnia</label>
+              <input type="text" id="f_cmr_21" data-cmr="cmr_21" placeholder="Miejscowość, data" />
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="inp-box">
+              <label for="f_cmr_18">18. Zastrzeżenia przewoźnika</label>
+              <textarea id="f_cmr_18" data-cmr="cmr_18"></textarea>
+            </div>
+            <div class="inp-box">
+              <label for="f_cmr_19">19. Postanowienia specjalne</label>
+              <textarea id="f_cmr_19" data-cmr="cmr_19"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-card">
+          <div class="form-group-title">4. Podpis ucznia / nadawcy (22)</div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_cmr_22">22. Imię i nazwisko / pieczęć nadawcy</label>
+              <input type="text" id="f_cmr_22" data-cmr="cmr_22" placeholder="np. Jan Kowalski — uczeń" />
+            </div>
+          </div>
+          <div class="pad-wrap">
+            <canvas id="padCmr" class="pad" width="410" height="78"></canvas>
+            <div class="pad-footer">
+              <span>Podpis odręczny (mysz / dotyk)</span>
+              <button type="button" class="btn" style="padding:2px 7px;font-size:10px;" onclick="wipePad('cmr')">
+                Wyczyść podpis
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULARZ ZLECENIA TRANSPORTOWEGO -->
+      <div id="formOrder" style="display:none;">
+        <div class="form-group-card">
+          <div class="form-group-title">1. Numer i data wystawienia</div>
+          <div class="row-2">
+            <div class="inp-box">
+              <label for="f_ord_no">Nr zlecenia</label>
+              <input type="text" id="f_ord_no" data-ord="ord_no" />
+            </div>
+            <div class="inp-box">
+              <label for="f_ord_date">Wystawiony (miejscowość, data)</label>
+              <input type="text" id="f_ord_date" data-ord="ord_date" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-card">
+          <div class="form-group-title">2. Zleceniodawca i Zleceniobiorca</div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_ord_client">Zleceniodawca</label>
+              <textarea id="f_ord_client" data-ord="ord_client"></textarea>
+            </div>
+          </div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_ord_carrier">Zleceniobiorca</label>
+              <textarea id="f_ord_carrier" data-ord="ord_carrier"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-card">
+          <div class="form-group-title">
+            <span>3. Ładunki i akcje</span>
+            <button type="button" class="btn" style="padding:2px 8px;font-size:11px;" onclick="addActionRow()">
+              + Dodaj akcję
+            </button>
+          </div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_ord_cargo">Ładunki</label>
+              <textarea id="f_ord_cargo" data-ord="ord_cargo"></textarea>
+            </div>
+          </div>
+          <div id="actionsEditorContainer"></div>
+        </div>
+
+        <div class="form-group-card">
+          <div class="form-group-title">4. Pojazd/kierowca, uwagi i warunki</div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_ord_vehicle">Pojazd / kierowca</label>
+              <input type="text" id="f_ord_vehicle" data-ord="ord_vehicle" />
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="inp-box">
+              <label for="f_ord_remarks">Uwagi</label>
+              <textarea id="f_ord_remarks" data-ord="ord_remarks"></textarea>
+            </div>
+            <div class="inp-box">
+              <label for="f_ord_terms">Warunki</label>
+              <textarea id="f_ord_terms" data-ord="ord_terms"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-card">
+          <div class="form-group-title">5. Płatność netto / termin i VAT</div>
+          <div class="row-3">
+            <div class="inp-box">
+              <label for="f_ord_net">Kwota netto (PLN)</label>
+              <input type="number" step="0.01" min="0" id="f_ord_net" data-ord="ord_net" oninput="calcVatSummary()" />
+            </div>
+            <div class="inp-box">
+              <label for="f_ord_vat_sel">Stawka VAT</label>
+              <select id="f_ord_vat_sel" onchange="handleVatSelect()">
+                <option value="23">23%</option>
+                <option value="8">8%</option>
+                <option value="5">5%</option>
+                <option value="0">0%</option>
+                <option value="np">NP</option>
+                <option value="custom">Inna %</option>
+              </select>
+            </div>
+            <div class="inp-box">
+              <label for="f_ord_vat_inp">VAT własny (%)</label>
+              <input type="number" step="0.1" min="0" id="f_ord_vat_inp" value="23" oninput="calcVatSummary()" />
+            </div>
+          </div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_ord_pay_terms">Płatność netto / termin</label>
+              <input type="text" id="f_ord_pay_terms" data-ord="ord_pay_terms" />
+            </div>
+          </div>
+          <div class="totals-row">
+            <div class="total-pill">
+              <div class="k">Netto</div>
+              <div class="v" id="uiOrdNet">0,00 PLN</div>
+            </div>
+            <div class="total-pill">
+              <div class="k" id="uiOrdVatLbl">VAT (23%)</div>
+              <div class="v" id="uiOrdVat">0,00 PLN</div>
+            </div>
+            <div class="total-pill">
+              <div class="k">Brutto</div>
+              <div class="v" id="uiOrdGross">0,00 PLN</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-card">
+          <div class="form-group-title">6. Podpisy stron</div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_ord_client_sign">Podpis zleceniodawcy (imię i nazwisko / uczeń)</label>
+              <input type="text" id="f_ord_client_sign" data-ord="ord_client_sign" />
+            </div>
+          </div>
+          <div class="pad-wrap" style="margin-bottom:8px;">
+            <canvas id="padOrder" class="pad" width="410" height="78"></canvas>
+            <div class="pad-footer">
+              <span>Podpis odręczny zleceniodawcy</span>
+              <button type="button" class="btn" style="padding:2px 7px;font-size:10px;" onclick="wipePad('order')">
+                Wyczyść podpis
+              </button>
+            </div>
+          </div>
+          <div class="row-1">
+            <div class="inp-box">
+              <label for="f_ord_carrier_sign">Podpis zleceniobiorcy</label>
+              <input type="text" id="f_ord_carrier_sign" data-ord="ord_carrier_sign" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- PODGLĄD NA ŻYWO (PRAWA STRONA) -->
+    <main class="preview-col">
+      <div id="cmrPreview" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:18px;"></div>
+      <div id="orderPreview" style="display:none;width:100%;flex-direction:column;align-items:center;gap:18px;"></div>
+    </main>
+  </div>
+
+<script>
+(function() {
+  const COPIES = [
+    { n: 1, cls: "egz-1", name: "EGZEMPLARZ DLA NADAWCY", desc: "Exemplar für den Absender • Copy for sender" },
+    { n: 2, cls: "egz-2", name: "EGZEMPLARZ DLA ODBIORCY", desc: "Exemplar für den Empfänger • Copy for consignee" },
+    { n: 3, cls: "egz-3", name: "EGZEMPLARZ DLA PRZEWOŹNIKA", desc: "Exemplar für den Frachtführer • Copy for carrier" },
+    { n: 4, cls: "egz-4", name: "EGZEMPLARZ ROZLICZENIOWY PRZEWOŹNIKA", desc: "Exemplar für Abrechnung • Copy for carrier accounting" }
+  ];
+
+  const DEFAULT_CARRIER_SIGN = "Agnieszka Sokołowska, Piotr Sokołowski Transport Ciężarowy S.C. (ul. Przemysłowa 7/2, 14-260 Lubawa, NIP: 744-527-12-70)";
+
+  const appState = {
+    mode: "cmr",
+    copyFilter: "all",
+    cmr: {
+      cmr_no: "",
+      cmr_1: "",
+      cmr_2: "",
+      cmr_3: "",
+      cmr_4: "",
+      cmr_5: "",
+      cmr_16: "",
+      cmr_17: "",
+      cmr_18: "",
+      cmr_19: "",
+      cmr_21: "",
+      cmr_22: ""
+    },
+    cargo: Array.from({ length: 5 }, () => ({
+      marks: "",
+      qty: "",
+      pack: "",
+      goods: "",
+      stat: "",
+      weight: "",
+      vol: "",
+      adr: ""
+    })),
+    cmrSig: "",
+    order: {
+      ord_no: "",
+      ord_date: "",
+      ord_client: "",
+      ord_carrier: "",
+      ord_cargo: "",
+      ord_vehicle: "",
+      ord_remarks: "",
+      ord_terms: "",
+      ord_net: "",
+      ord_vat: "23",
+      ord_pay_terms: "",
+      ord_client_sign: "",
+      ord_carrier_sign: DEFAULT_CARRIER_SIGN
+    },
+    actions: [
+      { kind: "załadunek", placeDate: "", contact: "" },
+      { kind: "rozładunek", placeDate: "", contact: "" }
+    ],
+    orderSig: ""
+  };
+
+  function esc(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function fmtNum(n) {
+    const val = Number.isFinite(n) ? n : 0;
+    return val.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function toNum(v) {
+    if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+    const n = parseFloat(String(v || "").replace(/\s+/g, "").replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function autoFitText(el, maxPt, minPt) {
+    if (!el || !el.parentElement) return;
+    let pt = maxPt;
+    el.style.fontSize = pt + "pt";
+    el.style.lineHeight = "1.15";
+    const maxH = Math.max(12, el.parentElement.clientHeight - 15);
+    let i = 0;
+    while (pt > minPt && i < 40) {
+      if (el.scrollHeight <= maxH + 1 && el.scrollWidth <= el.clientWidth + 1) break;
+      pt = Math.max(minPt, +(pt - 0.35).toFixed(2));
+      el.style.fontSize = pt + "pt";
+      i++;
+    }
+  }
+
+  function runAutoFit() {
+    requestAnimationFrame(() => {
+      document.querySelectorAll("[data-max-pt]").forEach((el) => {
+        const maxPt = parseFloat(el.getAttribute("data-max-pt")) || 9;
+        const minPt = parseFloat(el.getAttribute("data-min-pt")) || 6.4;
+        autoFitText(el, maxPt, minPt);
+      });
+    });
+  }
+
+  window.setMode = function(m) {
+    appState.mode = m;
+    const isCmr = m === "cmr";
+    document.getElementById("btnTabCmr").classList.toggle("active", isCmr);
+    document.getElementById("btnTabOrder").classList.toggle("active", !isCmr);
+    document.getElementById("formCmr").style.display = isCmr ? "block" : "none";
+    document.getElementById("formOrder").style.display = isCmr ? "none" : "block";
+    document.getElementById("copyFilter").style.display = isCmr ? "inline-block" : "none";
+    document.getElementById("cmrPreview").style.display = isCmr ? "flex" : "none";
+    document.getElementById("orderPreview").style.display = isCmr ? "none" : "flex";
+    runAutoFit();
+  };
+
+  window.changeCopyFilter = function() {
+    appState.copyFilter = document.getElementById("copyFilter").value;
+    drawCmrPages();
+  };
+
+  window.addCargoItem = function() {
+    appState.cargo.push({ marks: "", qty: "", pack: "", goods: "", stat: "", weight: "", vol: "", adr: "" });
+    drawCargoForm();
+    drawCmrPages();
+  };
+
+  window.removeCargoItem = function(index) {
+    if (appState.cargo.length <= 1) return;
+    appState.cargo.splice(index, 1);
+    drawCargoForm();
+    drawCmrPages();
+  };
+
+  window.updateCargoVal = function(index, key, val) {
+    if (!appState.cargo[index]) return;
+    appState.cargo[index][key] = val;
+    refreshCargoTotals();
+    document.querySelectorAll(`[data-cg-r="${index}"][data-cg-c="${key}"]`).forEach((el) => {
+      if (el.value !== val) el.value = val;
+    });
+    runAutoFit();
+  };
+
+  function refreshCargoTotals() {
+    let w = 0;
+    let v = 0;
+    appState.cargo.forEach((row) => {
+      w += toNum(row.weight);
+      v += toNum(row.vol);
+    });
+    document.getElementById("sumCargoCount").textContent = String(appState.cargo.length);
+    document.getElementById("sumCargoWeight").textContent = fmtNum(w) + " kg";
+    document.getElementById("sumCargoVol").textContent = fmtNum(v) + " m³";
+  }
+
+  function drawCargoForm() {
+    const host = document.getElementById("cargoEditorContainer");
+    if (!host) return;
+    host.innerHTML = appState.cargo.map((row, i) => `
+      <div class="item-card">
+        <div class="item-card-top">
+          <span>Pozycja ładunku ${i + 1}</span>
+          ${appState.cargo.length > 1 ? `<button type="button" class="btn" style="padding:2px 7px;font-size:10px;" onclick="removeCargoItem(${i})">Usuń</button>` : ""}
+        </div>
+        <div class="row-2">
+          <div class="inp-box">
+            <label>6. Cechy i numery</label>
+            <input type="text" value="${esc(row.marks)}" oninput="updateCargoVal(${i}, 'marks', this.value)" />
+          </div>
+          <div class="inp-box">
+            <label>7. Ilość sztuk</label>
+            <input type="text" value="${esc(row.qty)}" oninput="updateCargoVal(${i}, 'qty', this.value)" />
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="inp-box">
+            <label>8. Sposób opakowania</label>
+            <input type="text" value="${esc(row.pack)}" oninput="updateCargoVal(${i}, 'pack', this.value)" />
+          </div>
+          <div class="inp-box">
+            <label>9. Rodzaj towaru</label>
+            <input type="text" value="${esc(row.goods)}" oninput="updateCargoVal(${i}, 'goods', this.value)" />
+          </div>
+        </div>
+        <div class="row-3">
+          <div class="inp-box">
+            <label>11. Waga brutto (kg)</label>
+            <input type="text" value="${esc(row.weight)}" oninput="updateCargoVal(${i}, 'weight', this.value)" />
+          </div>
+          <div class="inp-box">
+            <label>12. Objętość (m³)</label>
+            <input type="text" value="${esc(row.vol)}" oninput="updateCargoVal(${i}, 'vol', this.value)" />
+          </div>
+          <div class="inp-box">
+            <label>13. ADR</label>
+            <input type="text" value="${esc(row.adr)}" oninput="updateCargoVal(${i}, 'adr', this.value)" />
+          </div>
+        </div>
+      </div>
+    `).join("");
+    refreshCargoTotals();
+  }
+
+  function drawCmrPages() {
+    const host = document.getElementById("cmrPreview");
+    if (!host) return;
+
+    const list = appState.copyFilter === "all"
+      ? COPIES
+      : COPIES.filter((c) => String(c.n) === appState.copyFilter);
+
+    const rowsHtml = appState.cargo.map((row, i) => `
+      <tr>
+        <td><textarea class="cmr-goods-inp" data-max-pt="8.5" data-min-pt="6.2" data-cg-r="${i}" data-cg-c="marks" oninput="updateCargoVal(${i}, 'marks', this.value)">${esc(row.marks)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="8.5" data-min-pt="6.2" data-cg-r="${i}" data-cg-c="qty" oninput="updateCargoVal(${i}, 'qty', this.value)">${esc(row.qty)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="8.5" data-min-pt="6.2" data-cg-r="${i}" data-cg-c="pack" oninput="updateCargoVal(${i}, 'pack', this.value)">${esc(row.pack)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="8.5" data-min-pt="6.2" data-cg-r="${i}" data-cg-c="goods" oninput="updateCargoVal(${i}, 'goods', this.value)">${esc(row.goods)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="8.3" data-min-pt="6.2" data-cg-r="${i}" data-cg-c="stat" oninput="updateCargoVal(${i}, 'stat', this.value)">${esc(row.stat)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="8.5" data-min-pt="6.2" data-cg-r="${i}" data-cg-c="weight" oninput="updateCargoVal(${i}, 'weight', this.value)">${esc(row.weight)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="8.5" data-min-pt="6.2" data-cg-r="${i}" data-cg-c="vol" oninput="updateCargoVal(${i}, 'vol', this.value)">${esc(row.vol)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="8.3" data-min-pt="6.2" data-cg-r="${i}" data-cg-c="adr" oninput="updateCargoVal(${i}, 'adr', this.value)">${esc(row.adr)}</textarea></td>
+      </tr>
+    `).join("");
+
+    const sigBlock = appState.cmrSig
+      ? `<img src="${appState.cmrSig}" alt="Podpis nadawcy" class="sig-preview-img" />`
+      : "";
+
+    host.innerHTML = list.map((copy) => `
+      <article class="cmr-page ${copy.cls}">
+        <div>
+          <div class="cmr-top-strip">
+            <div class="cmr-strip-box">
+              <span>Do wypełnienia pod odpowiedzialnością nadawcy / Auszufüllen unter der Verantwortung des Absenders / To be completed on the sender's responsibility</span>
+              <span class="cmr-strip-tag">1–15 włącznie / einschl. / incl.</span>
+            </div>
+            <div class="cmr-strip-box">
+              <span>Rubryki obwiedzione tłustymi liniami wypełnia przewoźnik / Die mit fett gedruckten Linien eingerahmten Rubriken müssen vom Frachtführer ausgefüllt werden</span>
+              <span class="cmr-strip-tag">16+17+18+19+20</span>
+            </div>
+          </div>
+
+          <header class="cmr-head">
+            <div class="cmr-head-left">
+              <div class="cmr-head-title-wrap">
+                <span class="cmr-oval-badge">CMR</span>
+                <div>
+                  <h1 class="cmr-main-h1">Międzynarodowy List CMR</h1>
+                  <div class="cmr-main-sub">MIĘDZYNARODOWY SAMOCHODOWY LIST PRZEWOZOWY • INTERNATIONALER FRACHTBRIEF • INTERNATIONAL CONSIGNMENT</div>
+                </div>
+              </div>
+              <div class="cmr-conv-note">
+                Niniejszy przewóz podlega postanowieniom konwencji o umowie międzynarodowego przewozu drogowego towarów (CMR) bez względu na jakąkolwiek przeciwną klauzulę. Diese Beförderung unterliegt trotz einer gegenteiligen Abmachung den Bestimmungen des Übereinkommens über den Beförderungsvertrag im internationalen Straßengüterverkehr (CMR). This carriage is subject notwithstanding any clause to the contrary, to the Convention on the Contract for the international Carriage of goods by road (CMR).
+              </div>
+            </div>
+            <div class="cmr-head-right">
+              <div class="cmr-num-line">
+                <span>CMR No:</span>
+                <input type="text" data-max-pt="9" data-min-pt="7" data-cmr="cmr_no" value="${esc(appState.cmr.cmr_no)}" style="border:none;background:transparent;font-weight:800;width:72%;text-align:right;outline:none;" />
+              </div>
+              <div class="cmr-copy-box">
+                <span class="cmr-copy-circle">${copy.n}</span>
+                <div>
+                  <div class="cmr-copy-name">${copy.name}</div>
+                  <div class="cmr-copy-desc">${copy.desc}</div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <div class="cmr-upper-grid">
+            <div class="cmr-upper-col">
+              <div class="cmr-cell h-1-2">
+                <div class="cmr-cell-head"><span class="cmr-idx">1</span><div class="cmr-cap"><strong>Nadawca</strong> (nazwisko lub nazwa, adres, kraj) / Absender / Sender</div></div>
+                <textarea class="cmr-input" data-max-pt="9" data-min-pt="6.5" data-cmr="cmr_1">${esc(appState.cmr.cmr_1)}</textarea>
+              </div>
+              <div class="cmr-cell h-1-2">
+                <div class="cmr-cell-head"><span class="cmr-idx">2</span><div class="cmr-cap"><strong>Odbiorca</strong> (nazwisko lub nazwa, adres, kraj) / Empfänger / Consignee</div></div>
+                <textarea class="cmr-input" data-max-pt="9" data-min-pt="6.5" data-cmr="cmr_2">${esc(appState.cmr.cmr_2)}</textarea>
+              </div>
+              <div class="cmr-cell h-3-5">
+                <div class="cmr-cell-head"><span class="cmr-idx">3</span><div class="cmr-cap"><strong>Miejsce przeznaczenia</strong> (miejscowość, kraj) / Auslieferungsort / Place of delivery</div></div>
+                <textarea class="cmr-input" data-max-pt="9" data-min-pt="6.5" data-cmr="cmr_3">${esc(appState.cmr.cmr_3)}</textarea>
+              </div>
+              <div class="cmr-cell h-3-5">
+                <div class="cmr-cell-head"><span class="cmr-idx">4</span><div class="cmr-cap"><strong>Miejsce i data załadowania</strong> / Ort und Tag der Übernahme / Place and date</div></div>
+                <textarea class="cmr-input" data-max-pt="9" data-min-pt="6.5" data-cmr="cmr_4">${esc(appState.cmr.cmr_4)}</textarea>
+              </div>
+              <div class="cmr-cell h-3-5">
+                <div class="cmr-cell-head"><span class="cmr-idx">5</span><div class="cmr-cap"><strong>Załączone dokumenty</strong> / Beigefügte Dokumente / Documents attached</div></div>
+                <textarea class="cmr-input" data-max-pt="9" data-min-pt="6.5" data-cmr="cmr_5">${esc(appState.cmr.cmr_5)}</textarea>
+              </div>
+            </div>
+
+            <div class="cmr-upper-col">
+              <div class="cmr-cell h-16 carrier-box">
+                <div class="cmr-cell-head"><span class="cmr-idx">16</span><div class="cmr-cap"><strong>Przewoźnik</strong> (nazwisko lub nazwa, adres, kraj) / Frachtführer / Carrier</div></div>
+                <textarea class="cmr-input" data-max-pt="9" data-min-pt="6.5" data-cmr="cmr_16">${esc(appState.cmr.cmr_16)}</textarea>
+              </div>
+              <div class="cmr-cell h-17 carrier-box">
+                <div class="cmr-cell-head"><span class="cmr-idx">17</span><div class="cmr-cap"><strong>Kolejni przewoźnicy</strong> / Nachfolgende Frachtführer / Successive carriers</div></div>
+                <textarea class="cmr-input" data-max-pt="8.8" data-min-pt="6.5" data-cmr="cmr_17">${esc(appState.cmr.cmr_17)}</textarea>
+              </div>
+              <div class="cmr-cell h-18 carrier-box">
+                <div class="cmr-cell-head"><span class="cmr-idx">18</span><div class="cmr-cap"><strong>Zastrzeżenia i uwagi przewoźnika</strong> / Vorbehalte / Carrier's reservations</div></div>
+                <textarea class="cmr-input" data-max-pt="8.8" data-min-pt="6.5" data-cmr="cmr_18">${esc(appState.cmr.cmr_18)}</textarea>
+              </div>
+              <div class="cmr-cell h-19 carrier-box">
+                <div class="cmr-cell-head"><span class="cmr-idx">19</span><div class="cmr-cap"><strong>Postanowienia specjalne</strong> / Besondere Vereinbarungen / Special agreements</div></div>
+                <textarea class="cmr-input" data-max-pt="8.8" data-min-pt="6.5" data-cmr="cmr_19">${esc(appState.cmr.cmr_19)}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <table class="cmr-goods-tbl">
+            <thead>
+              <tr>
+                <th style="width:12%;">6 Cechy i numery<br/>Marks and Nos</th>
+                <th style="width:9%;">7 Ilość sztuk<br/>Packages</th>
+                <th style="width:12%;">8 Sposób opak.<br/>Method of packing</th>
+                <th style="width:27%;">9 Rodzaj towaru<br/>Nature of goods</th>
+                <th style="width:9%;">10 Nr statyst.<br/>Stat. number</th>
+                <th style="width:10%;">11 Waga brutto kg<br/>Gross weight</th>
+                <th style="width:8%;">12 Objętość m³<br/>Volume m³</th>
+                <th style="width:7%;">13 ADR<br/>Class/UN</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+
+        <div>
+          <div class="cmr-lower-grid">
+            <div class="cmr-lower-left">
+              <div class="cmr-lower-row"><div class="cmr-cap"><strong>13</strong> Instrukcje nadawcy / Weisungen des Absenders / Sender's instructions</div></div>
+              <div class="cmr-lower-row"><div class="cmr-cap"><strong>14</strong> Postanowienia odnośnie przewoźnego / Frachtzahlungsanweisungen / Instructions as to payment for carriage</div></div>
+              <div class="cmr-lower-row"><div class="cmr-cap"><strong>15</strong> Zwrot zaliczenia / Rückerstattung / Cash on delivery</div></div>
+            </div>
+            <div class="cmr-lower-right">
+              <div class="cmr-cap" style="margin-bottom:2px;"><strong>20</strong> Do zapłacenia / Zu zahlen / To be paid by:</div>
+              <table class="cmr-pay-tbl">
+                <thead>
+                  <tr><th>Wyszczególnienie</th><th>Nadawca</th><th>Waluta</th><th>Odbiorca</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Przewoźne</td><td></td><td></td><td></td></tr>
+                  <tr><td>Dodatki / Inne</td><td></td><td></td><td></td></tr>
+                  <tr><td>RAZEM / TOTAL</td><td></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="cmr-signs-grid">
+            <div class="cmr-sign-box">
+              <div class="cmr-cap"><strong>21</strong> Wystawiono w / Ausgefertigt in / Established in:</div>
+              <input type="text" class="cmr-input" data-max-pt="8.8" data-min-pt="6.5" data-cmr="cmr_21" value="${esc(appState.cmr.cmr_21)}" />
+            </div>
+            <div class="cmr-sign-box">
+              <div class="cmr-cap"><strong>22</strong> Podpis i stempel nadawcy / Unterschrift u. Stempel d. Absenders / Signature and stamp of sender:</div>
+              <input type="text" class="cmr-input" data-max-pt="8.6" data-min-pt="6.5" data-cmr="cmr_22" value="${esc(appState.cmr.cmr_22)}" />
+              ${sigBlock}
+            </div>
+            <div class="cmr-sign-box carrier-box">
+              <div class="cmr-cap"><strong>23</strong> Podpis i stempel przewoźnika / Unterschrift u. Stempel d. Frachtführers / Signature and stamp of carrier:</div>
+              <div style="font-size:6.8pt;color:#334155;">Przesyłkę przyjęto / Gut übernommen / Goods received</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    `).join("");
+
+    wireInputs();
+    runAutoFit();
+  }
+
+  window.addActionRow = function() {
+    appState.actions.push({ kind: "załadunek", placeDate: "", contact: "" });
+    drawActionsForm();
+    drawOrderPage();
+  };
+
+  window.removeActionRow = function(idx) {
+    if (appState.actions.length <= 1) return;
+    appState.actions.splice(idx, 1);
+    drawActionsForm();
+    drawOrderPage();
+  };
+
+  window.updateActionRow = function(idx, key, val) {
+    if (!appState.actions[idx]) return;
+    appState.actions[idx][key] = val;
+    drawOrderPage();
+  };
+
+  function drawActionsForm() {
+    const host = document.getElementById("actionsEditorContainer");
+    if (!host) return;
+    host.innerHTML = appState.actions.map((act, i) => `
+      <div class="item-card">
+        <div class="item-card-top">
+          <span>Akcja ${i + 1}</span>
+          ${appState.actions.length > 1 ? `<button type="button" class="btn" style="padding:2px 7px;font-size:10px;" onclick="removeActionRow(${i})">Usuń</button>` : ""}
+        </div>
+        <div class="row-3">
+          <div class="inp-box">
+            <label>Akcja</label>
+            <select onchange="updateActionRow(${i}, 'kind', this.value)">
+              <option value="załadunek" ${act.kind === "załadunek" ? "selected" : ""}>Załadunek</option>
+              <option value="rozładunek" ${act.kind === "rozładunek" ? "selected" : ""}>Rozładunek</option>
+            </select>
+          </div>
+          <div class="inp-box">
+            <label>Miejsce / data / godz.</label>
+            <input type="text" value="${esc(act.placeDate)}" oninput="updateActionRow(${i}, 'placeDate', this.value)" />
+          </div>
+          <div class="inp-box">
+            <label>Kontakt / ref.</label>
+            <input type="text" value="${esc(act.contact)}" oninput="updateActionRow(${i}, 'contact', this.value)" />
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  window.handleVatSelect = function() {
+    const sel = document.getElementById("f_ord_vat_sel").value;
+    const customInp = document.getElementById("f_ord_vat_inp");
+    if (sel === "custom") {
+      customInp.disabled = false;
+      appState.order.ord_vat = customInp.value || "23";
+    } else if (sel === "np") {
+      customInp.disabled = true;
+      appState.order.ord_vat = "np";
+    } else {
+      customInp.disabled = true;
+      customInp.value = sel;
+      appState.order.ord_vat = sel;
+    }
+    calcVatSummary();
+  };
+
+  window.calcVatSummary = function() {
+    const net = toNum(appState.order.ord_net);
+    const sel = document.getElementById("f_ord_vat_sel")?.value || "23";
+    let vatVal = 0;
+    let lbl = "VAT (23%)";
+
+    if (sel === "np") {
+      vatVal = 0;
+      lbl = "VAT (NP)";
+    } else {
+      const rate = sel === "custom" ? toNum(document.getElementById("f_ord_vat_inp")?.value) : toNum(sel);
+      appState.order.ord_vat = String(rate);
+      vatVal = net * (rate / 100);
+      lbl = `VAT (${rate}%)`;
+    }
+
+    const gross = net + vatVal;
+
+    document.getElementById("uiOrdNet").textContent = fmtNum(net) + " PLN";
+    document.getElementById("uiOrdVatLbl").textContent = lbl;
+    document.getElementById("uiOrdVat").textContent = fmtNum(vatVal) + " PLN";
+    document.getElementById("uiOrdGross").textContent = fmtNum(gross) + " PLN";
+
+    const pNet = document.getElementById("pOrdNet");
+    const pVatLbl = document.getElementById("pOrdVatLbl");
+    const pVat = document.getElementById("pOrdVat");
+    const pGross = document.getElementById("pOrdGross");
+    if (pNet) pNet.textContent = fmtNum(net) + " PLN";
+    if (pVatLbl) pVatLbl.textContent = lbl;
+    if (pVat) pVat.textContent = fmtNum(vatVal) + " PLN";
+    if (pGross) pGross.textContent = fmtNum(gross) + " PLN";
+  };
+
+  function drawOrderPage() {
+    const host = document.getElementById("orderPreview");
+    if (!host) return;
+
+    const actRows = appState.actions.map((a, i) => `
+      <tr>
+        <td style="width:10%;font-weight:700;">${i + 1}</td>
+        <td style="width:22%;font-weight:700;text-transform:uppercase;">${esc(a.kind)}</td>
+        <td style="width:40%;"><div data-max-pt="8.5" data-min-pt="6.5">${esc(a.placeDate)}</div></td>
+        <td style="width:28%;"><div data-max-pt="8.5" data-min-pt="6.5">${esc(a.contact)}</div></td>
+      </tr>
+    `).join("");
+
+    const clientSigImg = appState.orderSig
+      ? `<img src="${appState.orderSig}" alt="Podpis zleceniodawcy" class="sig-preview-img" />`
+      : "";
+
+    host.innerHTML = `
+      <article class="order-page">
+        <div>
+          <div class="ord-header">
+            <div>
+              <h1 class="ord-title">Zlecenie przewozowe</h1>
+              <div style="font-size:8pt;color:#475569;margin-top:2px;">Nr zlecenia: <strong data-ord="ord_no">${esc(appState.order.ord_no)}</strong></div>
+            </div>
+            <div style="text-align:right;font-size:8pt;">
+              <strong>wystawiony:</strong> <span data-ord="ord_date">${esc(appState.order.ord_date)}</span>
+            </div>
+          </div>
+
+          <div class="ord-grid-2">
+            <div class="ord-card" style="min-height:36mm;">
+              <div class="ord-card-title">ZLECENIODAWCA</div>
+              <div data-max-pt="8.8" data-min-pt="6.5" data-ord="ord_client" style="white-space:pre-line;">${esc(appState.order.ord_client)}</div>
+            </div>
+            <div class="ord-card" style="min-height:36mm;">
+              <div class="ord-card-title">ZLECENIOBIORCA</div>
+              <div data-max-pt="8.8" data-min-pt="6.5" data-ord="ord_carrier" style="white-space:pre-line;">${esc(appState.order.ord_carrier)}</div>
+            </div>
+          </div>
+
+          <div class="ord-card" style="min-height:24mm;margin-bottom:6px;">
+            <div class="ord-card-title">ŁADUNKI</div>
+            <div data-max-pt="8.8" data-min-pt="6.5" data-ord="ord_cargo" style="white-space:pre-line;">${esc(appState.order.ord_cargo)}</div>
+          </div>
+
+          <div class="ord-card" style="margin-bottom:6px;">
+            <div class="ord-card-title">AKCJE (załadunek / rozładunek)</div>
+            <table class="ord-tbl">
+              <thead>
+                <tr><th>Lp.</th><th>Akcja</th><th>Miejsce / data / godzina</th><th>Kontakt / uwagi</th></tr>
+              </thead>
+              <tbody>${actRows}</tbody>
+            </table>
+          </div>
+
+          <div class="ord-card" style="min-height:18mm;margin-bottom:6px;">
+            <div class="ord-card-title">POJAZD/KIEROWCA</div>
+            <div data-max-pt="8.8" data-min-pt="6.5" data-ord="ord_vehicle" style="white-space:pre-line;">${esc(appState.order.ord_vehicle)}</div>
+          </div>
+
+          <div class="ord-grid-2">
+            <div class="ord-card" style="min-height:24mm;">
+              <div class="ord-card-title">UWAGI</div>
+              <div data-max-pt="8.6" data-min-pt="6.5" data-ord="ord_remarks" style="white-space:pre-line;">${esc(appState.order.ord_remarks)}</div>
+            </div>
+            <div class="ord-card" style="min-height:24mm;">
+              <div class="ord-card-title">WARUNKI</div>
+              <div data-max-pt="8.6" data-min-pt="6.5" data-ord="ord_terms" style="white-space:pre-line;">${esc(appState.order.ord_terms)}</div>
+            </div>
+          </div>
+
+          <div class="ord-bottom-calc">
+            <div class="ord-card">
+              <div class="ord-card-title">PŁATNOŚĆ NETTO/TERMIN</div>
+              <div data-max-pt="8.8" data-min-pt="6.5" data-ord="ord_pay_terms" style="white-space:pre-line;">${esc(appState.order.ord_pay_terms)}</div>
+            </div>
+            <div class="ord-card" style="padding:0;">
+              <table class="ord-vat-tbl">
+                <tr><th>Wartość netto</th><td id="pOrdNet" style="text-align:right;font-weight:700;">0,00 PLN</td></tr>
+                <tr><th id="pOrdVatLbl">VAT (23%)</th><td id="pOrdVat" style="text-align:right;font-weight:700;">0,00 PLN</td></tr>
+                <tr><th style="background:#eef2ff;">Razem brutto</th><td id="pOrdGross" style="background:#eef2ff;text-align:right;font-weight:800;">0,00 PLN</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="ord-signs">
+            <div class="ord-sign-box">
+              <div class="ord-card-title" style="border:none;margin-bottom:2px;">podpis zleceniodawcy</div>
+              <div data-max-pt="8.6" data-min-pt="6.5" data-ord="ord_client_sign" style="font-weight:700;">${esc(appState.order.ord_client_sign)}</div>
+              ${clientSigImg}
+            </div>
+            <div class="ord-sign-box">
+              <div class="ord-card-title" style="border:none;margin-bottom:2px;">podpis zleceniobiorcy</div>
+              <div data-max-pt="8.4" data-min-pt="6.5" data-ord="ord_carrier_sign" style="font-weight:700;white-space:pre-line;">${esc(appState.order.ord_carrier_sign)}</div>
+            </div>
+          </div>
+
+          <div class="ord-foot">
+            <span>Pobrano z www.cargo.link</span>
+            <span>Strona 1 z 1</span>
+          </div>
+        </div>
+      </article>
+    `;
+
+    calcVatSummary();
+    runAutoFit();
+  }
+
+  function wireInputs() {
+    document.querySelectorAll("[data-cmr]").forEach((el) => {
+      const k = el.getAttribute("data-cmr");
+      if ("value" in el) {
+        if (el.value !== appState.cmr[k]) el.value = appState.cmr[k];
+        el.oninput = function() {
+          appState.cmr[k] = this.value;
+          document.querySelectorAll(`[data-cmr="${k}"]`).forEach((peer) => {
+            if (peer !== this && "value" in peer) peer.value = this.value;
+          });
+          runAutoFit();
+        };
+      }
+    });
+
+    document.querySelectorAll("[data-ord]").forEach((el) => {
+      const k = el.getAttribute("data-ord");
+      if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+        if (el.value !== appState.order[k]) el.value = appState.order[k];
+        el.oninput = function() {
+          appState.order[k] = this.value;
+          document.querySelectorAll(`[data-ord="${k}"]`).forEach((peer) => {
+            if (peer !== this) {
+              if ("value" in peer) peer.value = this.value;
+              else peer.textContent = this.value;
+            }
+          });
+          if (k === "ord_net") calcVatSummary();
+          runAutoFit();
+        };
+      } else {
+        el.textContent = appState.order[k];
+      }
+    });
+  }
+
+  function initPad(canvasId, propName) {
+    const c = document.getElementById(canvasId);
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    let active = false;
+    let lx = 0;
+    let ly = 0;
+
+    function pt(ev) {
+      const r = c.getBoundingClientRect();
+      const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      return { x: ((cx - r.left) / r.width) * c.width, y: ((cy - r.top) / r.height) * c.height };
+    }
+
+    function down(ev) {
+      ev.preventDefault();
+      active = true;
+      const p = pt(ev);
+      lx = p.x;
+      ly = p.y;
+    }
+
+    function move(ev) {
+      if (!active) return;
+      ev.preventDefault();
+      const p = pt(ev);
+      ctx.beginPath();
+      ctx.moveTo(lx, ly);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      lx = p.x;
+      ly = p.y;
+    }
+
+    function up() {
+      if (!active) return;
+      active = false;
+      appState[propName] = c.toDataURL("image/png");
+      if (propName === "cmrSig") drawCmrPages();
+      else drawOrderPage();
+    }
+
+    c.addEventListener("mousedown", down);
+    c.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    c.addEventListener("touchstart", down, { passive: false });
+    c.addEventListener("touchmove", move, { passive: false });
+    window.addEventListener("touchend", up);
+  }
+
+  window.wipePad = function(which) {
+    if (which === "cmr") {
+      const c = document.getElementById("padCmr");
+      if (c) c.getContext("2d").clearRect(0, 0, c.width, c.height);
+      appState.cmrSig = "";
+      drawCmrPages();
+    } else {
+      const c = document.getElementById("padOrder");
+      if (c) c.getContext("2d").clearRect(0, 0, c.width, c.height);
+      appState.orderSig = "";
+      drawOrderPage();
+    }
+  };
+
+  window.resetActiveForm = function() {
+    if (appState.mode === "cmr") {
+      Object.keys(appState.cmr).forEach((k) => { appState.cmr[k] = ""; });
+      appState.cargo = Array.from({ length: 5 }, () => ({
+        marks: "", qty: "", pack: "", goods: "", stat: "", weight: "", vol: "", adr: ""
+      }));
+      appState.cmrSig = "";
+      const c = document.getElementById("padCmr");
+      if (c) c.getContext("2d").clearRect(0, 0, c.width, c.height);
+      drawCargoForm();
+      drawCmrPages();
+    } else {
+      Object.keys(appState.order).forEach((k) => {
+        appState.order[k] = k === "ord_carrier_sign" ? DEFAULT_CARRIER_SIGN : (k === "ord_vat" ? "23" : "");
+      });
+      appState.actions = [
+        { kind: "załadunek", placeDate: "", contact: "" },
+        { kind: "rozładunek", placeDate: "", contact: "" }
+      ];
+      appState.orderSig = "";
+      const c = document.getElementById("padOrder");
+      if (c) c.getContext("2d").clearRect(0, 0, c.width, c.height);
+      document.getElementById("f_ord_vat_sel").value = "23";
+      document.getElementById("f_ord_vat_inp").value = "23";
+      document.getElementById("f_ord_vat_inp").disabled = true;
+      drawActionsForm();
+      drawOrderPage();
+    }
+  };
+
+  function boot() {
+    document.getElementById("f_ord_vat_inp").disabled = true;
+    drawCargoForm();
+    drawCmrPages();
+    drawActionsForm();
+    drawOrderPage();
+    initPad("padCmr", "cmrSig");
+    initPad("padOrder", "orderSig");
+    wireInputs();
+    runAutoFit();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+</body>
+</html>

@@ -13,6 +13,7 @@
             body * { visibility: hidden; }
             #print-modal, #print-modal * { visibility: visible; }
             #print-modal { position: absolute; left: 0; top: 0; width: 100%; background: white !important; color: black !important; padding: 10px; box-shadow: none !important; }
+            #print-modal-actions { display: none !important; }
             .print-no-shadow { box-shadow: none !important; border: 1px solid #000 !important; }
         }
     </style>
@@ -156,7 +157,7 @@
     <div id="print-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
         <div class="bg-white text-slate-900 p-6 rounded-xl max-w-3xl w-full space-y-4 shadow-xl print-no-shadow max-h-[90vh] overflow-y-auto">
             <div id="print-content" class="space-y-4"></div>
-            <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+            <div id="print-modal-actions" class="flex justify-end gap-3 pt-4 border-t border-slate-200">
                 <button onclick="closePrintModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded text-sm font-semibold">Zamknij</button>
                 <button id="modal-print-btn" onclick="window.print()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-sm font-semibold flex items-center gap-2">
                     <i data-lucide="printer" class="w-4 h-4"></i> Drukuj / Zapisz jako PDF
@@ -491,6 +492,23 @@
             "Przetwórstwo Warzywne 'PAPRYK'",
             "Inny Dostawca Krajowy Sp. z o.o."
         ];
+
+        const SUPPLIER_ADDRESSES = {
+            "Młyny Polskie S.A.": "ul. Hrubieszowska 2, 01-209 Warszawa",
+            "Fabryka Słodyczy 'Łakocie' Sp. z o.o.": "ul. Cukiernicza 14, 87-100 Toruń",
+            "Przetwórstwo Spożywcze 'Rolnik' S.A.": "ul. Przemysłowa 9, 86-300 Grudziądz",
+            "Agrofirma 'Złote Ziarno' Sp. z o.o.": "ul. Spichrzowa 22, 14-100 Ostróda",
+            "Cukrownia 'Polska-Kryształ' S.A.": "ul. Fabryczna 3, 88-100 Inowrocław",
+            "Pomorskie Przetwórstwo Warzyw 'Vita'": "ul. Ogrodowa 18, 83-110 Tczew",
+            "Zakłady Spożywcze 'GALA' Sp. z o.o.": "ul. Mleczna 7, 14-200 Iława",
+            "Przetwórstwo Warzywne 'PAPRYK'": "ul. Warzywna 11, 87-300 Brodnica",
+            "Inny Dostawca Krajowy Sp. z o.o.": "ul. Handlowa 4, 85-001 Bydgoszcz"
+        };
+
+        function getSupplierFullAddress(supplierName) {
+            if (!supplierName) return "Adres dostawcy nieokreślony";
+            return SUPPLIER_ADDRESSES[supplierName] || "ul. Magazynowa 1, 14-260 Lubawa";
+        }
 
         // WKLEJ TUTAJ SWÓJ ADRES URL WDROŻONEJ APLIKACJI GOOGLE APPS SCRIPT (lub ustaw przyciskiem koła zębatego w nagłówku)
         const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbzaQ8gvbTfDAPtRqpKzbJLLjsy_IfDs9zDRYhBus4iP8WlqiPhcDG22pROMnxY9wcYs/exec";
@@ -1390,7 +1408,7 @@ Czy chcesz potraktować to jako WOLNE MIEJSCE (awaryjnie / brak stałego)?`
                     </div>
                     <div class="bg-gray-100 p-2 rounded text-[11px] space-y-1">
                         <p><strong>Operacja:</strong> Przyjęcie Zewnętrzne dostawy – Grupa ${pz.group}</p>
-                        <p><strong>Dostawca:</strong> <span class="text-blue-900 font-bold">${pz.supplier || 'Brak danych'}</span></p>
+                        <p><strong>Dostawca:</strong> <span class="text-blue-900 font-bold">${pz.supplier || 'Brak danych'}</span> — <span class="text-gray-800">${getSupplierFullAddress(pz.supplier)}</span></p>
                     </div>
                     <table class="w-full text-left border-collapse border border-black">
                         <thead>
@@ -1438,6 +1456,9 @@ Czy chcesz potraktować to jako WOLNE MIEJSCE (awaryjnie / brak stałego)?`
                             <p class="font-bold">${pz.approver}</p>
                             <p class="text-gray-600">Zatwierdził (Kierownik)</p>
                         </div>
+                    </div>
+                    <div class="pt-3 mt-2 border-t border-gray-300 text-center text-[9px] text-gray-600">
+                        Wygenerowano z symulatora WMS Robert Curzydło
                     </div>
                 </div>
             `;

@@ -122,7 +122,10 @@
 
                 <div>
                     <label class="block text-slate-400 mb-1">Adres URL skryptu Google Apps Script (<code>/exec</code>):</label>
-                    <input type="text" id="auth-gas-url-input" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-white font-mono text-[11px]">
+                    <div class="flex gap-2">
+                        <input type="password" id="auth-gas-url-input" placeholder="Adres ukryty — wpisz nowy, aby zmienić" autocomplete="off" class="flex-1 bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-white font-mono text-[11px]">
+                        <button type="button" onclick="toggleGasUrlVisibility()" class="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-[11px] font-semibold">Pokaż/Ukryj</button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
@@ -584,6 +587,12 @@
             }
         }
 
+        function toggleGasUrlVisibility() {
+            const input = document.getElementById('auth-gas-url-input');
+            if (!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
         function configureApiUrl(actionMode = 'settings') {
             pendingAuthAction = actionMode;
             const modal = document.getElementById('sync-auth-modal');
@@ -596,7 +605,10 @@
             const fb = document.getElementById('sync-auth-feedback');
 
             if (fb) fb.classList.add('hidden');
-            if (urlInp) urlInp.value = GAS_WEB_APP_URL || '';
+            if (urlInp) {
+                urlInp.type = 'password';
+                urlInp.value = '';
+            }
             if (syncChk) syncChk.checked = SYNC_ENABLED;
             if (lockChk) lockChk.checked = SYNC_SETTINGS_LOCKED;
             if (passInp) passInp.value = '';
@@ -623,7 +635,7 @@
                 return;
             }
 
-            if (urlInp) {
+            if (urlInp && urlInp.value.trim() !== '') {
                 GAS_WEB_APP_URL = urlInp.value.trim();
                 localStorage.setItem('smakolyk_gas_url', GAS_WEB_APP_URL);
             }

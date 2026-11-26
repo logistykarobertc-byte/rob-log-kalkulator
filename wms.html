@@ -70,6 +70,9 @@
             <button onclick="setTab('wydanie')" id="tab-wydanie" class="px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-slate-800 text-slate-400 hover:text-white text-sm">
                 <i data-lucide="arrow-up-from-line" class="w-4 h-4"></i> 4. Dokumenty WZ
             </button>
+            <button onclick="setTab('faktury')" id="tab-faktury" class="px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-slate-800 text-slate-400 hover:text-white text-sm">
+                <i data-lucide="receipt" class="w-4 h-4"></i> 5. Faktury VAT
+            </button>
         </div>
 
         <main id="tab-content"></main>
@@ -251,6 +254,7 @@
         let inventory = JSON.parse(localStorage.getItem('smakolyk_inventory')) || [];
         let pzHistory = JSON.parse(localStorage.getItem('smakolyk_pz')) || [];
         let wzHistory = JSON.parse(localStorage.getItem('smakolyk_wz')) || [];
+        let invoiceHistory = JSON.parse(localStorage.getItem('smakolyk_fv')) || [];
         
         let pzRowsCount = 1;
         let pickRowsCount = 1;
@@ -317,6 +321,7 @@
             localStorage.setItem('smakolyk_inventory', JSON.stringify(inventory));
             localStorage.setItem('smakolyk_pz', JSON.stringify(pzHistory));
             localStorage.setItem('smakolyk_wz', JSON.stringify(wzHistory));
+            localStorage.setItem('smakolyk_fv', JSON.stringify(invoiceHistory));
         }
 
         async function syncFromCloud(showAlert = false) {
@@ -334,15 +339,20 @@
                     const prevInvJson = JSON.stringify(inventory);
                     const prevPzJson = JSON.stringify(pzHistory);
                     const prevWzJson = JSON.stringify(wzHistory);
+                    const prevFvJson = JSON.stringify(invoiceHistory);
 
                     inventory = data.inventory || [];
                     pzHistory = data.pzHistory || [];
                     wzHistory = data.wzHistory || [];
+                    if (Array.isArray(data.invoiceHistory)) {
+                        invoiceHistory = data.invoiceHistory;
+                    }
                     saveLocalCache();
 
                     const changed = prevInvJson !== JSON.stringify(inventory) ||
                                     prevPzJson !== JSON.stringify(pzHistory) ||
-                                    prevWzJson !== JSON.stringify(wzHistory);
+                                    prevWzJson !== JSON.stringify(wzHistory) ||
+                                    prevFvJson !== JSON.stringify(invoiceHistory);
 
                     const isTypingInPZ = activeTab === 'pzyczenie' && !pzHistory.find(p => Number(p.group) === Number(currentGroup));
                     const isTypingInPick = activeTab === 'kompletacja';
@@ -385,6 +395,9 @@
             inventory = data.inventory || [];
             pzHistory = data.pzHistory || [];
             wzHistory = data.wzHistory || [];
+            if (Array.isArray(data.invoiceHistory)) {
+                invoiceHistory = data.invoiceHistory;
+            }
             saveLocalCache();
             const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             updateSyncBadge('ok', `Zapisano (${now})`);
@@ -399,6 +412,7 @@
                 inventory = [];
                 pzHistory = [];
                 wzHistory = [];
+                invoiceHistory = [];
                 pzRowsCount = 1;
                 pickRowsCount = 1;
                 savedPZFormState = { supplier: '', rows: [] };
@@ -434,7 +448,7 @@
 
         async function setTab(tab) {
             activeTab = tab;
-            ['pzyczenie', 'składowanie', 'kompletacja', 'wydanie'].forEach(t => {
+            ['pzyczenie', 'składowanie', 'kompletacja', 'wydanie', 'faktury'].forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
                 if(t === tab) {
                     btn.className = "px-4 py-2.5 font-semibold rounded-t-lg transition flex items-center gap-2 bg-blue-600 text-white text-sm";
@@ -454,6 +468,7 @@
             else if(activeTab === 'składowanie') renderSkladowanie(main);
             else if(activeTab === 'kompletacja') renderKompletacja(main);
             else if(activeTab === 'wydanie') renderWydanie(main);
+            else if(activeTab === 'faktury') renderFaktury(main);
             lucide.createIcons();
         }
 
@@ -1448,6 +1463,9 @@
                                             <button onclick="printLabelOnly('${wz.wzNumber}')" class="w-full bg-purple-700 hover:bg-purple-600 text-white text-xs px-2 py-1 rounded flex items-center justify-center gap-1 font-semibold">
                                                 <i data-lucide="tag" class="w-3 h-3"></i> Etykieta GS1
                                             </button>
+                                            <button onclick="openInvoiceFromWZ('${wz.wzNumber}')" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-2 py-1 rounded flex items-center justify-center gap-1 font-semibold">
+                                                <i data-lucide="receipt" class="w-3 h-3"></i> Wystaw Fakturę
+                                            </button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -1555,6 +1573,279 @@
         function closePrintModal() {
             document.getElementById('print-modal').classList.add('hidden');
         }
+
+        let selectedWZForInvoice = '';
+
+        function openInvoiceFromWZ(wzNumber) {
+            selectedWZForInvoice = wzNumber;
+            setTab('faktury');
+        }
+
+        function renderFaktury(container) {
+            const availableWZ = wzHistory.filter(wz => !invoiceHistory.some(fv => fv.wzNumber === wz.wzNumber));
+            const chosenWZNumber = selectedWZForInvoice && wzHistory.some(w => w.wzNumber === selectedWZForInvoice)
+                ? selectedWZForInvoice
+                : (availableWZ[0] ? availableWZ[0].wzNumber : (wzHistory[0] ? wzHistory[0].wzNumber : ''));
+            const chosenWZ = wzHistory.find(w => w.wzNumber === chosenWZNumber) || null;
+
+            const chosenNet = chosenWZ ? chosenWZ.items.reduce((s, i) => s + (parseFloat(i.totalNetValue) || 0), 0) : 0;
+            const vatRate = 0.23;
+            const chosenVat = chosenNet * vatRate;
+            const chosenGross = chosenNet + chosenVat;
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+                        <div class="border-b border-slate-700 pb-3">
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="receipt" class="text-emerald-400"></i> Wystawianie Faktury VAT do WZ
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-1">Wybierz wydany dokument WZ, aby wygenerować fakturę sprzedaży (stawka VAT 23%).</p>
+                        </div>
+
+                        ${wzHistory.length === 0 ? `
+                            <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 text-xs text-slate-400">
+                                Najpierw skompletuj zamówienie i wystaw dokument WZ w zakładce <strong class="text-white">3. Kompletacja & WZ</strong>.
+                            </div>
+                        ` : `
+                            <form onsubmit="issueInvoiceFromWZ(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">Dokument WZ podstawą faktury:</label>
+                                    <select id="fv-wz-select" onchange="selectedWZForInvoice = this.value; renderFaktury(document.getElementById('tab-content')); lucide.createIcons();" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white font-bold" required>
+                                        ${wzHistory.map(wz => {
+                                            const already = invoiceHistory.some(fv => fv.wzNumber === wz.wzNumber);
+                                            return `<option value="${wz.wzNumber}" ${wz.wzNumber === chosenWZNumber ? 'selected' : ''}>${wz.wzNumber} — ${wz.client} (Grupa ${wz.group})${already ? ' [Faktura wystawiona]' : ''}</option>`;
+                                        }).join('')}
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-slate-400 mb-1">NIP Nabywcy:</label>
+                                        <input type="text" id="fv-buyer-nip" value="PL 744-100-20-30" required class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-slate-400 mb-1">Termin płatności:</label>
+                                        <select id="fv-payment-term" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white">
+                                            <option value="7 dni (Przelew)">7 dni (Przelew)</option>
+                                            <option value="14 dni (Przelew)" selected>14 dni (Przelew)</option>
+                                            <option value="30 dni (Przelew)">30 dni (Przelew)</option>
+                                            <option value="Gotówka przy odbiorze">Gotówka przy odbiorze</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                ${chosenWZ ? `
+                                    <div class="bg-slate-900 p-3.5 rounded-lg border border-slate-700 space-y-2 text-xs">
+                                        <div class="flex justify-between text-slate-400">
+                                            <span>Nabywca:</span>
+                                            <span class="text-white font-bold">${chosenWZ.client}</span>
+                                        </div>
+                                        <div class="flex justify-between text-slate-400">
+                                            <span>Adres dostawy:</span>
+                                            <span class="text-slate-200">${chosenWZ.address}</span>
+                                        </div>
+                                        <div class="border-t border-slate-800 pt-2 space-y-1">
+                                            <div class="flex justify-between text-slate-300">
+                                                <span>Wartość netto (z marżą 15%):</span>
+                                                <span class="font-mono font-bold">${chosenNet.toFixed(2)} zł</span>
+                                            </div>
+                                            <div class="flex justify-between text-slate-400">
+                                                <span>Podatek VAT (23%):</span>
+                                                <span class="font-mono">${chosenVat.toFixed(2)} zł</span>
+                                            </div>
+                                            <div class="flex justify-between text-emerald-400 font-bold text-sm pt-1 border-t border-slate-800">
+                                                <span>Razem brutto do zapłaty:</span>
+                                                <span class="font-mono">${chosenGross.toFixed(2)} zł</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg transition flex justify-center items-center gap-2 text-xs">
+                                    <i data-lucide="file-plus-2" class="w-4 h-4"></i> Wystaw i Drukuj Fakturę VAT
+                                </button>
+                            </form>
+                        `}
+                    </div>
+
+                    <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i data-lucide="files" class="text-blue-400"></i> Rejestr Wystawionych Faktur VAT
+                        </h2>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-900/50 text-slate-400 text-xs">
+                                        <th class="p-3">Nr Faktury / WZ</th>
+                                        <th class="p-3">Nabywca i NIP</th>
+                                        <th class="p-3">Netto</th>
+                                        <th class="p-3">VAT 23%</th>
+                                        <th class="p-3">Brutto</th>
+                                        <th class="p-3">Akcje</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-700 text-xs">
+                                    ${invoiceHistory.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">Nie wystawiono jeszcze żadnej faktury VAT.</td></tr>' : ''}
+                                    ${invoiceHistory.map(fv => `
+                                        <tr>
+                                            <td class="p-3 font-mono">
+                                                <span class="text-emerald-400 font-bold block">${fv.fvNumber}</span>
+                                                <span class="text-slate-400 text-[10px]">Podstawa: ${fv.wzNumber}</span>
+                                            </td>
+                                            <td class="p-3 text-white">
+                                                <strong class="block">${fv.client}</strong>
+                                                <span class="text-slate-400 font-mono text-[10px]">NIP: ${fv.buyerNip} | ${fv.paymentTerm}</span>
+                                            </td>
+                                            <td class="p-3 font-mono text-slate-200">${fv.totalNet.toFixed(2)} zł</td>
+                                            <td class="p-3 font-mono text-slate-400">${fv.totalVat.toFixed(2)} zł</td>
+                                            <td class="p-3 font-mono font-bold text-emerald-400">${fv.totalGross.toFixed(2)} zł</td>
+                                            <td class="p-3">
+                                                <button onclick="printInvoice('${fv.fvNumber}')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-2.5 py-1.5 rounded flex items-center gap-1 font-semibold">
+                                                    <i data-lucide="printer" class="w-3.5 h-3.5"></i> Drukuj FV
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function issueInvoiceFromWZ(e) {
+            e.preventDefault();
+            const wzNum = document.getElementById('fv-wz-select').value;
+            const buyerNip = document.getElementById('fv-buyer-nip').value.trim() || 'Brak';
+            const paymentTerm = document.getElementById('fv-payment-term').value;
+            const wz = wzHistory.find(w => w.wzNumber === wzNum);
+            if (!wz) return alert("Nie znaleziono wybranego dokumentu WZ.");
+
+            const totalNet = wz.items.reduce((s, i) => s + (parseFloat(i.totalNetValue) || 0), 0);
+            const totalVat = totalNet * 0.23;
+            const totalGross = totalNet + totalVat;
+
+            const fvNumber = `FV/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
+            const fvRecord = {
+                fvNumber: fvNumber,
+                wzNumber: wz.wzNumber,
+                group: wz.group,
+                client: wz.client,
+                address: wz.address,
+                buyerNip: buyerNip,
+                paymentTerm: paymentTerm,
+                items: wz.items,
+                totalNet: totalNet,
+                totalVat: totalVat,
+                totalGross: totalGross,
+                op1: wz.op1 || op1Name,
+                op2: wz.op2 || op2Name,
+                approver: wz.approver || 'Kierownik Magazynu (Smakołyk)',
+                date: new Date().toLocaleString()
+            };
+
+            invoiceHistory.unshift(fvRecord);
+            saveLocalCache();
+            render();
+            printInvoice(fvNumber);
+        }
+
+        function printInvoice(fvNumber) {
+            const fv = invoiceHistory.find(f => f.fvNumber === fvNumber);
+            if (!fv) return;
+
+            document.getElementById('modal-print-btn').style.display = 'flex';
+            document.getElementById('print-content').innerHTML = `
+                <div class="space-y-3 font-sans text-xs text-black bg-white p-2">
+                    <div class="flex justify-between border-b border-black pb-2">
+                        <div>
+                            <h3 class="font-bold text-sm">Hurtownia Spożywcza „Smakołyk” Sp. z o.o.</h3>
+                            <p class="text-[9px] text-gray-600">ul. Gdańska 25/34, 14-260 Lubawa | NIP: 744-785-12-10</p>
+                        </div>
+                        <div class="text-right">
+                            <h2 class="text-base font-bold text-emerald-800">FAKTURA VAT</h2>
+                            <p class="text-xs font-mono font-bold">${fv.fvNumber}</p>
+                            <p class="text-[9px] text-gray-500">Data wystawienia: ${fv.date}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 bg-gray-100 p-2 rounded text-[11px]">
+                        <div>
+                            <span class="text-[9px] text-gray-500 block uppercase">Nabywca:</span>
+                            <strong class="uppercase block">${fv.client}</strong>
+                            <span class="text-[10px] text-gray-700 block">${fv.address}</span>
+                            <span class="text-[10px] font-mono text-gray-800">NIP: ${fv.buyerNip}</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div>
+                                <span class="text-[9px] text-gray-500 block uppercase">Dokument powiązany:</span>
+                                <strong class="font-mono text-blue-900">${fv.wzNumber}</strong> (Grupa ${fv.group})
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-gray-500 block uppercase">Forma i termin płatności:</span>
+                                <strong>${fv.paymentTerm}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="w-full text-left border-collapse border border-black">
+                        <thead>
+                            <tr class="bg-gray-200 text-black">
+                                <th class="p-1.5 border border-black">Lp.</th>
+                                <th class="p-1.5 border border-black">Indeks</th>
+                                <th class="p-1.5 border border-black">Nazwa towaru</th>
+                                <th class="p-1.5 border border-black">Ilość</th>
+                                <th class="p-1.5 border border-black">Cena netto</th>
+                                <th class="p-1.5 border border-black">Wartość netto</th>
+                                <th class="p-1.5 border border-black">VAT 23%</th>
+                                <th class="p-1.5 border border-black">Wartość brutto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${fv.items.map((i, idx) => {
+                                const rowNet = parseFloat(i.totalNetValue) || 0;
+                                const rowVat = rowNet * 0.23;
+                                const rowGross = rowNet + rowVat;
+                                return `
+                                    <tr>
+                                        <td class="p-1.5 border border-black">${idx + 1}</td>
+                                        <td class="p-1.5 border border-black font-mono font-bold">${i.index}</td>
+                                        <td class="p-1.5 border border-black font-bold">${i.name}</td>
+                                        <td class="p-1.5 border border-black">${i.qty} ${i.unit}</td>
+                                        <td class="p-1.5 border border-black">${(parseFloat(i.netPrice) || 0).toFixed(2)} zł</td>
+                                        <td class="p-1.5 border border-black">${rowNet.toFixed(2)} zł</td>
+                                        <td class="p-1.5 border border-black">${rowVat.toFixed(2)} zł</td>
+                                        <td class="p-1.5 border border-black font-bold text-emerald-900">${rowGross.toFixed(2)} zł</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    <div class="text-right space-y-0.5 text-xs pt-1">
+                        <div>Razem Netto: <strong>${fv.totalNet.toFixed(2)} zł</strong></div>
+                        <div>Razem VAT (23%): <strong>${fv.totalVat.toFixed(2)} zł</strong></div>
+                        <div class="text-sm font-bold text-emerald-900">Razem Brutto do zapłaty: <span>${fv.totalGross.toFixed(2)} zł</span></div>
+                    </div>
+                    <div class="grid grid-cols-3 pt-6 gap-2 text-center text-[10px]">
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold">${fv.op1}</p>
+                            <p class="text-gray-600">Osoba upoważniona (Sprzedawca)</p>
+                        </div>
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold">${fv.approver}</p>
+                            <p class="text-gray-600">Zatwierdził</p>
+                        </div>
+                        <div class="border-t border-black pt-1">
+                            <p class="font-bold text-gray-400">&nbsp;</p>
+                            <p class="text-gray-600">Podpis Nabywcy</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('print-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
     </script>
 </body>
 </html>

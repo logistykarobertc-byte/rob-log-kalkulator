@@ -29,23 +29,25 @@
                 </div>
             </div>
             
-            <div class="flex flex-wrap items-end gap-3 shrink-0">
-                <div>
-                    <label class="block text-[10px] text-slate-400 uppercase font-semibold">Grupa Zespołowa:</label>
-                    <select id="group-select" onchange="changeGroup(this.value)" class="bg-slate-700 text-white px-3 py-1.5 rounded-lg border border-slate-600 font-bold text-sm">
-                        <!-- Generowane dynamicznie -->
-                    </select>
+            <div class="flex flex-wrap items-end gap-4 shrink-0">
+                <div class="flex flex-wrap items-end gap-3 shrink-0">
+                    <div>
+                        <label class="block text-[10px] text-slate-400 uppercase font-semibold">Grupa Zespołowa:</label>
+                        <select id="group-select" onchange="changeGroup(this.value)" class="bg-slate-700 text-white px-3 py-1.5 rounded-lg border border-slate-600 font-bold text-sm">
+                            <!-- Generowane dynamicznie -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 uppercase font-semibold">Magazynier 1:</label>
+                        <input type="text" id="op1-name" value="Jan Kowalski" oninput="op1Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 uppercase font-semibold">Magazynier 2:</label>
+                        <input type="text" id="op2-name" value="Anna Nowak" oninput="op2Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-[10px] text-slate-400 uppercase font-semibold">Magazynier 1:</label>
-                    <input type="text" id="op1-name" value="Jan Kowalski" oninput="op1Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-slate-400 uppercase font-semibold">Magazynier 2:</label>
-                    <input type="text" id="op2-name" value="Anna Nowak" oninput="op2Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
-                </div>
-                <div class="relative flex flex-col items-end gap-1.5 shrink-0">
-                    <div class="relative h-6 w-full flex justify-end">
+                <div class="flex flex-col items-end gap-1.5 shrink-0 ml-2">
+                    <div class="relative h-6 min-w-[220px] flex justify-end items-center">
                         <div id="sync-btn" class="w-max max-w-none whitespace-nowrap bg-slate-900/80 border border-slate-700 text-emerald-400 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default" title="Stan synchronizacji z Arkuszem Google">
                             <i data-lucide="cloud-check" class="w-3.5 h-3.5 shrink-0"></i> <span id="sync-status-text">Synchronizacja aktywna</span>
                         </div>

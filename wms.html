@@ -29,7 +29,7 @@
                 </div>
             </div>
             
-            <div class="flex flex-wrap items-center gap-3">
+            <div class="flex flex-wrap items-end gap-3 shrink-0">
                 <div>
                     <label class="block text-[10px] text-slate-400 uppercase font-semibold">Grupa Zespołowa:</label>
                     <select id="group-select" onchange="changeGroup(this.value)" class="bg-slate-700 text-white px-3 py-1.5 rounded-lg border border-slate-600 font-bold text-sm">
@@ -44,15 +44,17 @@
                     <label class="block text-[10px] text-slate-400 uppercase font-semibold">Magazynier 2:</label>
                     <input type="text" id="op2-name" value="Anna Nowak" oninput="op2Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
                 </div>
-                <div class="flex flex-col items-end gap-1.5">
-                    <div id="sync-btn" class="bg-slate-900/80 border border-slate-700 text-emerald-400 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default" title="Stan synchronizacji z Arkuszem Google">
-                        <i data-lucide="cloud-check" class="w-3.5 h-3.5"></i> <span id="sync-status-text">Synchronizacja aktywna</span>
+                <div class="relative flex flex-col items-end gap-1.5 shrink-0">
+                    <div class="relative h-6 w-full flex justify-end">
+                        <div id="sync-btn" class="w-max max-w-none whitespace-nowrap bg-slate-900/80 border border-slate-700 text-emerald-400 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default" title="Stan synchronizacji z Arkuszem Google">
+                            <i data-lucide="cloud-check" class="w-3.5 h-3.5 shrink-0"></i> <span id="sync-status-text">Synchronizacja aktywna</span>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="configureApiUrl()" class="bg-slate-700/70 hover:bg-slate-600 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg font-semibold transition" title="Ustaw adres URL skryptu Google Apps Script">
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="configureApiUrl()" class="bg-slate-700/70 hover:bg-slate-600 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0" title="Ustaw adres URL skryptu Google Apps Script">
                             <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                         </button>
-                        <button onclick="resetWarehouse()" class="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition" title="Wyczyść cały stan i zacznij od nowa">Reset</button>
+                        <button onclick="resetWarehouse()" class="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition shrink-0" title="Wyczyść cały stan i zacznij od nowa">Reset</button>
                     </div>
                 </div>
             </div>
@@ -471,13 +473,13 @@
             if (!badge || !label) return;
             label.textContent = text;
             if (status === 'ok') {
-                badge.className = "bg-slate-900/80 border border-emerald-700/50 text-emerald-400 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
+                badge.className = "w-max max-w-none whitespace-nowrap bg-slate-900/80 border border-emerald-700/50 text-emerald-400 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
             } else if (status === 'loading') {
-                badge.className = "bg-slate-900/80 border border-blue-700/50 text-blue-300 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
+                badge.className = "w-max max-w-none whitespace-nowrap bg-slate-900/80 border border-blue-700/50 text-blue-300 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
             } else if (status === 'error') {
-                badge.className = "bg-slate-900/80 border border-amber-700/50 text-amber-300 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
+                badge.className = "w-max max-w-none whitespace-nowrap bg-slate-900/80 border border-amber-700/50 text-amber-300 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
             } else {
-                badge.className = "bg-slate-900/80 border border-slate-700 text-slate-400 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
+                badge.className = "w-max max-w-none whitespace-nowrap bg-slate-900/80 border border-slate-700 text-slate-400 text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
             }
         }
 

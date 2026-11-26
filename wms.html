@@ -45,10 +45,10 @@
                     <input type="text" id="op2-name" value="Anna Nowak" oninput="op2Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
                 </div>
                 <div class="flex items-center gap-2 mt-4">
-                    <button onclick="syncFromCloud(true)" id="sync-btn" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5" title="Odśwież stany z Arkusza Google">
-                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span id="sync-status-text">Połącz z Arkuszem</span>
-                    </button>
-                    <button onclick="configureApiUrl()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-2.5 py-2 rounded-lg font-semibold transition" title="Ustaw adres URL skryptu Google Apps Script">
+                    <div id="sync-btn" class="bg-slate-900/80 border border-slate-700 text-emerald-400 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default" title="Stan synchronizacji z Arkuszem Google">
+                        <i data-lucide="cloud-check" class="w-3.5 h-3.5"></i> <span id="sync-status-text">Synchronizacja aktywna</span>
+                    </div>
+                    <button onclick="configureApiUrl()" class="bg-slate-700/70 hover:bg-slate-600 text-slate-300 text-xs px-2 py-2 rounded-lg font-semibold transition" title="Ustaw adres URL skryptu Google Apps Script">
                         <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                     </button>
                     <button onclick="resetWarehouse()" class="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-2 rounded-lg font-semibold transition" title="Wyczyść cały stan i zacznij od nowa">Reset</button>
@@ -284,18 +284,18 @@
         });
 
         function updateSyncBadge(status, text) {
-            const btn = document.getElementById('sync-btn');
+            const badge = document.getElementById('sync-btn');
             const label = document.getElementById('sync-status-text');
-            if (!btn || !label) return;
+            if (!badge || !label) return;
             label.textContent = text;
             if (status === 'ok') {
-                btn.className = "bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5";
+                badge.className = "bg-slate-900/80 border border-emerald-700/50 text-emerald-400 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
             } else if (status === 'loading') {
-                btn.className = "bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5";
+                badge.className = "bg-slate-900/80 border border-blue-700/50 text-blue-300 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
             } else if (status === 'error') {
-                btn.className = "bg-amber-700 hover:bg-amber-600 text-white text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5";
+                badge.className = "bg-slate-900/80 border border-amber-700/50 text-amber-300 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
             } else {
-                btn.className = "bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5";
+                badge.className = "bg-slate-900/80 border border-slate-700 text-slate-400 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5 select-none cursor-default";
             }
         }
 
@@ -321,8 +321,7 @@
 
         async function syncFromCloud(showAlert = false) {
             if (!GAS_WEB_APP_URL) {
-                if (showAlert) configureApiUrl();
-                updateSyncBadge('idle', 'Brak URL Arkusza');
+                updateSyncBadge('idle', 'Synchronizacja wyłączona');
                 return;
             }
             if (isSyncing) return;
@@ -332,32 +331,39 @@
                 const res = await fetch(`${GAS_WEB_APP_URL}?action=getState&t=${Date.now()}`);
                 const data = await res.json();
                 if (data.status === 'ok') {
+                    const prevInvJson = JSON.stringify(inventory);
+                    const prevPzJson = JSON.stringify(pzHistory);
+                    const prevWzJson = JSON.stringify(wzHistory);
+
                     inventory = data.inventory || [];
                     pzHistory = data.pzHistory || [];
                     wzHistory = data.wzHistory || [];
                     saveLocalCache();
-                    // Nie nadpisujemy widoku, jeśli użytkownik właśnie wpisuje coś w formularz PZ lub Kompletacji
+
+                    const changed = prevInvJson !== JSON.stringify(inventory) ||
+                                    prevPzJson !== JSON.stringify(pzHistory) ||
+                                    prevWzJson !== JSON.stringify(wzHistory);
+
                     const isTypingInPZ = activeTab === 'pzyczenie' && !pzHistory.find(p => Number(p.group) === Number(currentGroup));
                     const isTypingInPick = activeTab === 'kompletacja';
-                    if (!isTypingInPZ && !isTypingInPick) {
+
+                    if (changed && !isTypingInPZ && !isTypingInPick) {
                         render();
-                    } else if (isTypingInPick) {
-                        // Odśwież same listy wyboru towarów z magazynu w kompletacji
+                    } else if (changed && isTypingInPick) {
                         const pickContainer = document.getElementById('pick-rows-container');
                         if (pickContainer) {
                             capturePickFormState();
                             pickContainer.innerHTML = renderPickRowsHTML();
+                            lucide.createIcons();
                         }
                     }
-                    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    updateSyncBadge('ok', `Zsynchronizowano (${now})`);
+                    updateSyncBadge('ok', 'Synchronizacja aktywna');
                 } else {
                     throw new Error(data.message || 'Błąd odpowiedzi z Arkusza');
                 }
             } catch (err) {
                 console.error(err);
-                updateSyncBadge('error', 'Błąd połączenia');
-                if (showAlert) alert("Nie udało się połączyć z Arkuszem Google: " + err.message);
+                updateSyncBadge('error', 'Oczekiwanie na połączenie');
             } finally {
                 isSyncing = false;
             }
@@ -439,7 +445,6 @@
             render();
             if (GAS_WEB_APP_URL) {
                 await syncFromCloud(false);
-                render();
             }
         }
 

@@ -44,8 +44,14 @@
                     <label class="block text-[10px] text-slate-400 uppercase font-semibold">Magazynier 2:</label>
                     <input type="text" id="op2-name" value="Anna Nowak" oninput="op2Name = this.value" class="bg-slate-700 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 text-xs w-32 font-medium">
                 </div>
-                <div>
-                    <button onclick="resetWarehouse()" class="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-2 rounded-lg font-semibold transition mt-4" title="Wyczyść cały stan i zacznij od nowa">Reset</button>
+                <div class="flex items-center gap-2 mt-4">
+                    <button onclick="syncFromCloud(true)" id="sync-btn" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5" title="Odśwież stany z Arkusza Google">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span id="sync-status-text">Połącz z Arkuszem</span>
+                    </button>
+                    <button onclick="configureApiUrl()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-2.5 py-2 rounded-lg font-semibold transition" title="Ustaw adres URL skryptu Google Apps Script">
+                        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button onclick="resetWarehouse()" class="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-2 rounded-lg font-semibold transition" title="Wyczyść cały stan i zacznij od nowa">Reset</button>
                 </div>
             </div>
         </header>
@@ -233,6 +239,11 @@
             "Inny Dostawca Krajowy Sp. z o.o."
         ];
 
+        // WKLEJ TUTAJ SWÓJ ADRES URL WDROŻONEJ APLIKACJI GOOGLE APPS SCRIPT (lub ustaw przyciskiem koła zębatego w nagłówku)
+        const DEFAULT_GAS_URL = "";
+
+        let GAS_WEB_APP_URL = localStorage.getItem('smakolyk_gas_url') || DEFAULT_GAS_URL;
+        let isSyncing = false;
         let currentGroup = 1;
         let activeTab = 'pzyczenie';
         let op1Name = 'Jan Kowalski';
@@ -246,21 +257,139 @@
         let savedPZFormState = { supplier: '', rows: [] };
         let savedPickFormState = [];
 
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlGroup = parseInt(urlParams.get('grupa'));
+            if (urlGroup >= 1 && urlGroup <= 8) {
+                currentGroup = urlGroup;
+            }
+            const urlApi = urlParams.get('api');
+            if (urlApi) {
+                GAS_WEB_APP_URL = urlApi;
+                localStorage.setItem('smakolyk_gas_url', urlApi);
+            }
+
             initGroupSelect();
             render();
             lucide.createIcons();
+
+            if (GAS_WEB_APP_URL) {
+                await syncFromCloud(false);
+            }
+            setInterval(() => {
+                if (GAS_WEB_APP_URL && !isSyncing) {
+                    syncFromCloud(false);
+                }
+            }, 6000);
         });
 
-        function saveState() {
+        function updateSyncBadge(status, text) {
+            const btn = document.getElementById('sync-btn');
+            const label = document.getElementById('sync-status-text');
+            if (!btn || !label) return;
+            label.textContent = text;
+            if (status === 'ok') {
+                btn.className = "bg-emerald-700 hover:bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5";
+            } else if (status === 'loading') {
+                btn.className = "bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5";
+            } else if (status === 'error') {
+                btn.className = "bg-amber-700 hover:bg-amber-600 text-white text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5";
+            } else {
+                btn.className = "bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5";
+            }
+        }
+
+        function configureApiUrl() {
+            const current = GAS_WEB_APP_URL || "";
+            const input = prompt("Wklej adres URL aplikacji internetowej Google Apps Script (zakończony /exec):", current);
+            if (input !== null) {
+                GAS_WEB_APP_URL = input.trim();
+                localStorage.setItem('smakolyk_gas_url', GAS_WEB_APP_URL);
+                if (GAS_WEB_APP_URL) {
+                    syncFromCloud(true);
+                } else {
+                    updateSyncBadge('idle', 'Tryb lokalny');
+                }
+            }
+        }
+
+        function saveLocalCache() {
             localStorage.setItem('smakolyk_inventory', JSON.stringify(inventory));
             localStorage.setItem('smakolyk_pz', JSON.stringify(pzHistory));
             localStorage.setItem('smakolyk_wz', JSON.stringify(wzHistory));
         }
 
-        function resetWarehouse() {
-            if(confirm("Czy na pewno chcesz wyczyścić wszystkie dane i stany magazynowe?")) {
-                localStorage.clear();
+        async function syncFromCloud(showAlert = false) {
+            if (!GAS_WEB_APP_URL) {
+                if (showAlert) configureApiUrl();
+                updateSyncBadge('idle', 'Brak URL Arkusza');
+                return;
+            }
+            if (isSyncing) return;
+            isSyncing = true;
+            updateSyncBadge('loading', 'Synchronizacja...');
+            try {
+                const res = await fetch(`${GAS_WEB_APP_URL}?action=getState&t=${Date.now()}`);
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    inventory = data.inventory || [];
+                    pzHistory = data.pzHistory || [];
+                    wzHistory = data.wzHistory || [];
+                    saveLocalCache();
+                    // Nie nadpisujemy widoku, jeśli użytkownik właśnie wpisuje coś w formularz PZ lub Kompletacji
+                    const isTypingInPZ = activeTab === 'pzyczenie' && !pzHistory.find(p => Number(p.group) === Number(currentGroup));
+                    const isTypingInPick = activeTab === 'kompletacja';
+                    if (!isTypingInPZ && !isTypingInPick) {
+                        render();
+                    } else if (isTypingInPick) {
+                        // Odśwież same listy wyboru towarów z magazynu w kompletacji
+                        const pickContainer = document.getElementById('pick-rows-container');
+                        if (pickContainer) {
+                            capturePickFormState();
+                            pickContainer.innerHTML = renderPickRowsHTML();
+                        }
+                    }
+                    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    updateSyncBadge('ok', `Zsynchronizowano (${now})`);
+                } else {
+                    throw new Error(data.message || 'Błąd odpowiedzi z Arkusza');
+                }
+            } catch (err) {
+                console.error(err);
+                updateSyncBadge('error', 'Błąd połączenia');
+                if (showAlert) alert("Nie udało się połączyć z Arkuszem Google: " + err.message);
+            } finally {
+                isSyncing = false;
+            }
+        }
+
+        async function postToCloud(payload) {
+            if (!GAS_WEB_APP_URL) return null;
+            updateSyncBadge('loading', 'Zapisywanie w Arkuszu...');
+            const res = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.status !== 'ok') {
+                updateSyncBadge('error', 'Błąd zapisu');
+                throw new Error(data.message || 'Błąd zapisu w Arkuszu Google');
+            }
+            inventory = data.inventory || [];
+            pzHistory = data.pzHistory || [];
+            wzHistory = data.wzHistory || [];
+            saveLocalCache();
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            updateSyncBadge('ok', `Zapisano (${now})`);
+            return data;
+        }
+
+        async function resetWarehouse() {
+            if(confirm("Czy na pewno chcesz wyczyścić wszystkie dane i stany magazynowe (również w Arkuszu Google)?")) {
+                localStorage.removeItem('smakolyk_inventory');
+                localStorage.removeItem('smakolyk_pz');
+                localStorage.removeItem('smakolyk_wz');
                 inventory = [];
                 pzHistory = [];
                 wzHistory = [];
@@ -268,6 +397,13 @@
                 pickRowsCount = 1;
                 savedPZFormState = { supplier: '', rows: [] };
                 savedPickFormState = [];
+                if (GAS_WEB_APP_URL) {
+                    try {
+                        await postToCloud({ action: 'resetAll' });
+                    } catch (e) {
+                        alert("Błąd czyszczenia Arkusza Google: " + e.message);
+                    }
+                }
                 render();
             }
         }
@@ -290,7 +426,7 @@
             render();
         }
 
-        function setTab(tab) {
+        async function setTab(tab) {
             activeTab = tab;
             ['pzyczenie', 'składowanie', 'kompletacja', 'wydanie'].forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
@@ -301,6 +437,10 @@
                 }
             });
             render();
+            if (GAS_WEB_APP_URL) {
+                await syncFromCloud(false);
+                render();
+            }
         }
 
         function render() {
@@ -520,15 +660,11 @@
             container.innerHTML = html;
         }
 
-        function enablePZEdit(pzNumber) {
+        async function enablePZEdit(pzNumber) {
             const pzIndex = pzHistory.findIndex(p => p.pzNumber === pzNumber);
             if(pzIndex === -1) return;
             const pz = pzHistory[pzIndex];
 
-            // Wycofaj stany z inventory powiązane z tym PZ
-            inventory = inventory.filter(inv => Number(inv.sourceGroup) !== Number(currentGroup) || inv.pzRef !== pzNumber);
-
-            // Załaduj dane do formularza roboczego
             const rowsData = pz.items.map(item => {
                 const catIdx = masterCatalog.findIndex(c => c.index === item.index);
                 return {
@@ -541,16 +677,25 @@
                 };
             });
 
+            if (GAS_WEB_APP_URL) {
+                try {
+                    await postToCloud({ action: 'deletePZ', pzNumber: pzNumber, group: currentGroup });
+                } catch (e) {
+                    alert("Błąd wycofania PZ w Arkuszu Google: " + e.message);
+                    return;
+                }
+            } else {
+                inventory = inventory.filter(inv => Number(inv.sourceGroup) !== Number(currentGroup) || inv.pzRef !== pzNumber);
+                pzHistory.splice(pzIndex, 1);
+                saveLocalCache();
+            }
+
             savedPZFormState = { supplier: pz.supplier, rows: rowsData };
             pzRowsCount = rowsData.length > 0 ? rowsData.length : 1;
-
-            // Usuń stary dokument z historii PZ
-            pzHistory.splice(pzIndex, 1);
-            saveState();
             render();
         }
 
-        function issueCollectivePZ() {
+        async function issueCollectivePZ() {
             const supplierSelect = document.getElementById('supplier-select');
             const selectedSupplier = supplierSelect ? supplierSelect.value : "";
 
@@ -566,6 +711,7 @@
             const qualSelects = document.querySelectorAll('.pz-qual-select');
 
             const rowData = [];
+            const newInvItems = [];
             const pzNum = `PZ/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
 
             for(let i = 0; i < itemSelects.length; i++) {
@@ -605,8 +751,8 @@
                 });
 
                 if(pzQty > 0) {
-                    inventory.push({
-                        id: `inv-${i}-${Date.now()}`,
+                    newInvItems.push({
+                        id: `inv-${currentGroup}-${i}-${Date.now()}`,
                         index: catalogItem.index,
                         name: catalogItem.name,
                         qty: pzQty,
@@ -632,8 +778,19 @@
                 date: new Date().toLocaleString()
             };
 
-            pzHistory.push(pzRecord);
-            saveState();
+            if (GAS_WEB_APP_URL) {
+                try {
+                    await postToCloud({ action: 'addPZ', pzRecord: pzRecord, inventoryItems: newInvItems });
+                } catch (e) {
+                    alert("Nie udało się zapisać PZ w Arkuszu Google: " + e.message);
+                    return;
+                }
+            } else {
+                inventory.push(...newInvItems);
+                pzHistory.push(pzRecord);
+                saveLocalCache();
+            }
+
             savedPZFormState = { supplier: '', rows: [] };
             render();
             printPZ(pzNum);
@@ -1036,7 +1193,7 @@
             }
         }
 
-        function handlePick(e) {
+        async function handlePick(e) {
             e.preventDefault();
             const client = document.getElementById('client-select').value;
             const address = document.getElementById('client-address').value;
@@ -1048,6 +1205,7 @@
             const priceInputs = document.querySelectorAll('.pick-price-input');
 
             const pickedItems = [];
+            const stockDeductions = [];
 
             for(let i = 0; i < selects.length; i++) {
                 const indexVal = selects[i].value;
@@ -1069,7 +1227,7 @@
                 const totalSellingNetValue = priceVal * qtyVal;
 
                 pickedItems.push({
-                    stockIndex: parseInt(indexVal),
+                    stockId: stockItem.id,
                     index: stockItem.index || 'IND-???',
                     name: stockItem.name,
                     qty: qtyVal,
@@ -1078,16 +1236,12 @@
                     netPrice: priceVal,
                     totalNetValue: totalSellingNetValue
                 });
-            }
 
-            for(let item of pickedItems) {
-                const stockItem = inventory[item.stockIndex];
-                if(stockItem) {
-                    stockItem.qty -= item.qty;
-                }
+                stockDeductions.push({
+                    stockId: stockItem.id,
+                    qty: qtyVal
+                });
             }
-            inventory = inventory.filter(i => i.qty > 0);
-            savedPickFormState = [];
 
             const orderNo = `ZAM/${Math.floor(1000 + Math.random() * 9000)}`;
             const wzNumber = `WZ/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
@@ -1111,8 +1265,26 @@
                 date: new Date().toLocaleString()
             };
 
-            wzHistory.push(wzData);
-            saveState();
+            if (GAS_WEB_APP_URL) {
+                try {
+                    await postToCloud({ action: 'addWZ', wzRecord: wzData, deductions: stockDeductions });
+                } catch (err) {
+                    alert("Nie udało się zapisać WZ w Arkuszu Google: " + err.message);
+                    return;
+                }
+            } else {
+                for(let ded of stockDeductions) {
+                    const stockItem = inventory.find(inv => inv.id === ded.stockId);
+                    if(stockItem) {
+                        stockItem.qty -= ded.qty;
+                    }
+                }
+                inventory = inventory.filter(i => i.qty > 0);
+                wzHistory.push(wzData);
+                saveLocalCache();
+            }
+
+            savedPickFormState = [];
 
             const preview = document.getElementById('label-preview');
             preview.className = "bg-slate-800 p-6 rounded-xl border border-slate-700 flex flex-col items-center justify-start space-y-4";

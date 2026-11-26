@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <button onclick="configureApiUrl()" class="bg-slate-700/70 hover:bg-slate-600 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0" title="Ustaw adres URL skryptu Google Apps Script">
+                        <button onclick="configureApiUrl('settings')" class="bg-slate-700/70 hover:bg-slate-600 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0" title="Ustaw adres URL skryptu Google Apps Script">
                             <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                         </button>
                         <button onclick="resetWarehouse()" class="bg-red-600 hover:bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition shrink-0" title="Wyczyść cały stan i zacznij od nowa">Reset</button>
@@ -82,6 +82,82 @@
         </div>
 
         <main id="tab-content"></main>
+    </div>
+
+    <!-- Modal ustawień synchronizacji i potwierdzenia kodem e-mail -->
+    <div id="sync-auth-modal" class="hidden fixed inset-0 bg-black/75 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 text-slate-100 border border-slate-600 p-6 rounded-xl max-w-lg w-full space-y-4 shadow-2xl">
+            <div class="flex items-start justify-between border-b border-slate-700 pb-3">
+                <div>
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i>
+                        Ustawienia i ochrona synchronizacji (E-mail)
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Zmiana adresu URL, trybu synchronizacji oraz wymuszenie odświeżenia wymagają potwierdzenia kodem wysłanym na e-mail nauczyciela.</p>
+                </div>
+                <button type="button" onclick="closeSyncAuthModal()" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
+            </div>
+
+            <div id="sync-auth-feedback" class="hidden text-xs p-3 rounded-lg border"></div>
+
+            <div class="space-y-3 bg-slate-900/80 p-4 rounded-lg border border-slate-700 text-xs">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-slate-400">Status ochrony synchronizacji:</span>
+                    <span id="auth-lock-status" class="px-2.5 py-0.5 rounded font-mono font-bold"></span>
+                </div>
+
+                <div>
+                    <label class="block text-slate-300 font-semibold mb-1">Adres e-mail nauczyciela (do wysyłki kodów potwierdzających):</label>
+                    <div class="flex gap-2">
+                        <input type="email" id="auth-teacher-email" placeholder="nauczyciel@szkola.pl" class="flex-1 bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-white text-xs">
+                        <button type="button" onclick="sendEmailVerificationCode()" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded font-semibold transition flex items-center gap-1 shrink-0">
+                            <i data-lucide="mail-send" class="w-3.5 h-3.5"></i> Wyślij kod
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Jeśli skrypt Google Apps Script obsługuje wysyłkę maila (<code>action: "sendAuthCode"</code>), kod trafi bezpośrednio na skrzynkę; jeśli nie — otworzy się też okno podglądu/wysyłki kodu.</p>
+                </div>
+
+                <div id="auth-code-step" class="space-y-2 pt-2 border-t border-slate-800">
+                    <label class="block text-amber-300 font-semibold">6-cyfrowy kod potwierdzający z wiadomości e-mail:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="auth-email-code-input" maxlength="6" placeholder="000000" class="w-36 bg-slate-800 border border-amber-500/60 rounded px-3 py-1.5 text-amber-300 font-mono font-bold tracking-widest text-sm">
+                        <button type="button" onclick="verifyEmailCodeAndApply()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded font-bold transition flex items-center justify-center gap-1.5">
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Potwierdź kod i zapisz zmiany
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 bg-slate-900/60 p-4 rounded-lg border border-slate-700 text-xs">
+                <div class="font-bold text-slate-200 uppercase tracking-wide text-[11px]">Docelowe zmiany po potwierdzeniu kodem e-mail:</div>
+
+                <div>
+                    <label class="block text-slate-400 mb-1">Adres URL skryptu Google Apps Script (<code>/exec</code>):</label>
+                    <input type="text" id="auth-gas-url-input" class="w-full bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-white font-mono text-[11px]">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <label class="flex items-center gap-2 bg-slate-800/90 p-2.5 rounded border border-slate-700 cursor-pointer">
+                        <input type="checkbox" id="auth-sync-enabled-input" class="rounded border-slate-500">
+                        <span>Synchronizacja z Arkuszem włączona</span>
+                    </label>
+                    <label class="flex items-center gap-2 bg-slate-800/90 p-2.5 rounded border border-slate-700 cursor-pointer">
+                        <input type="checkbox" id="auth-lock-enabled-input" class="rounded border-slate-500">
+                        <span>Blokada zmian dla uczniów (wymagany e-mail)</span>
+                    </label>
+                </div>
+
+                <div class="flex flex-wrap gap-2 pt-2">
+                    <button type="button" onclick="requestForceCloudSync()" class="bg-sky-700 hover:bg-sky-600 text-white px-3 py-1.5 rounded font-semibold transition flex items-center gap-1.5">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Wymuś synchronizację z chmury (kod e-mail)
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
+                <button type="button" onclick="closeSyncAuthModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold">Zamknij</button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal drukowania / Podglądu ogólnego -->
@@ -428,6 +504,12 @@
         const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbzaQ8gvbTfDAPtRqpKzbJLLjsy_IfDs9zDRYhBus4iP8WlqiPhcDG22pROMnxY9wcYs/exec";
 
         let GAS_WEB_APP_URL = localStorage.getItem('smakolyk_gas_url') || DEFAULT_GAS_URL;
+        let TEACHER_EMAIL = localStorage.getItem('smakolyk_teacher_email') || '';
+        let SYNC_SETTINGS_LOCKED = localStorage.getItem('smakolyk_sync_locked') !== 'false'; // Domyślnie chronione kodem e-mail
+        let SYNC_ENABLED = localStorage.getItem('smakolyk_sync_enabled') !== 'false';
+        let pendingAuthAction = null; // 'apiUrl' | 'syncToggle' | 'forceSync' | 'emailConfig' | 'unlockOnly'
+        let pendingEmailCode = '';
+        let pendingEmailTarget = '';
         let isSyncing = false;
         let currentGroup = 1;
         let activeTab = 'pzyczenie';
@@ -450,7 +532,7 @@
                 currentGroup = urlGroup;
             }
             const urlApi = urlParams.get('api');
-            if (urlApi) {
+            if (urlApi && !SYNC_SETTINGS_LOCKED) {
                 GAS_WEB_APP_URL = urlApi;
                 localStorage.setItem('smakolyk_gas_url', urlApi);
             }
@@ -463,7 +545,7 @@
                 await syncFromCloud(false);
             }
             setInterval(() => {
-                if (GAS_WEB_APP_URL && !isSyncing) {
+                if (SYNC_ENABLED && GAS_WEB_APP_URL && !isSyncing) {
                     syncFromCloud(false);
                 }
             }, 6000);
@@ -485,18 +567,173 @@
             }
         }
 
-        function configureApiUrl() {
-            const current = GAS_WEB_APP_URL || "";
-            const input = prompt("Wklej adres URL aplikacji internetowej Google Apps Script (zakończony /exec):", current);
-            if (input !== null) {
-                GAS_WEB_APP_URL = input.trim();
-                localStorage.setItem('smakolyk_gas_url', GAS_WEB_APP_URL);
-                if (GAS_WEB_APP_URL) {
-                    syncFromCloud(true);
-                } else {
-                    updateSyncBadge('idle', 'Tryb lokalny');
+        function showAuthFeedback(type, msg) {
+            const box = document.getElementById('sync-auth-feedback');
+            if (!box) return;
+            box.classList.remove('hidden');
+            if (type === 'ok') {
+                box.className = 'text-xs p-3 rounded-lg border bg-emerald-950/80 border-emerald-500/50 text-emerald-200';
+            } else if (type === 'warn') {
+                box.className = 'text-xs p-3 rounded-lg border bg-amber-950/80 border-amber-500/50 text-amber-200';
+            } else {
+                box.className = 'text-xs p-3 rounded-lg border bg-rose-950/80 border-rose-500/50 text-rose-200';
+            }
+            box.innerHTML = msg;
+        }
+
+        function refreshAuthModalStatus() {
+            const badge = document.getElementById('auth-lock-status');
+            if (!badge) return;
+            if (SYNC_SETTINGS_LOCKED) {
+                badge.textContent = 'ZABLOKOWANE (wymagany kod e-mail)';
+                badge.className = 'px-2.5 py-0.5 rounded font-mono font-bold bg-amber-950 text-amber-300 border border-amber-500/40';
+            } else {
+                badge.textContent = 'ODBLOKOWANE';
+                badge.className = 'px-2.5 py-0.5 rounded font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40';
+            }
+        }
+
+        function configureApiUrl(actionMode = 'settings') {
+            pendingAuthAction = actionMode;
+            const modal = document.getElementById('sync-auth-modal');
+            if (!modal) return;
+
+            const emailInp = document.getElementById('auth-teacher-email');
+            const urlInp = document.getElementById('auth-gas-url-input');
+            const syncChk = document.getElementById('auth-sync-enabled-input');
+            const lockChk = document.getElementById('auth-lock-enabled-input');
+            const codeInp = document.getElementById('auth-email-code-input');
+            const fb = document.getElementById('sync-auth-feedback');
+
+            if (fb) fb.classList.add('hidden');
+            if (emailInp) emailInp.value = TEACHER_EMAIL || '';
+            if (urlInp) urlInp.value = GAS_WEB_APP_URL || '';
+            if (syncChk) syncChk.checked = SYNC_ENABLED;
+            if (lockChk) lockChk.checked = SYNC_SETTINGS_LOCKED;
+            if (codeInp) codeInp.value = '';
+
+            refreshAuthModalStatus();
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeSyncAuthModal() {
+            const modal = document.getElementById('sync-auth-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function sendEmailVerificationCode() {
+            const emailInp = document.getElementById('auth-teacher-email');
+            const emailVal = emailInp ? emailInp.value.trim() : '';
+            if (!emailVal || !emailVal.includes('@')) {
+                showAuthFeedback('err', 'Podaj poprawny adres e-mail nauczyciela, na który ma zostać wysłany kod potwierdzający.');
+                return;
+            }
+
+            if (TEACHER_EMAIL && SYNC_SETTINGS_LOCKED && emailVal.toLowerCase() !== TEACHER_EMAIL.toLowerCase()) {
+                showAuthFeedback('err', `Ustawienia są przypisane do adresu <strong>${TEACHER_EMAIL}</strong>. Użyj właściwego adresu e-mail nauczyciela.`);
+                return;
+            }
+
+            const generatedCode = String(Math.floor(100000 + Math.random() * 900000));
+            pendingEmailCode = generatedCode;
+            pendingEmailTarget = emailVal;
+
+            let sentViaGas = false;
+            if (GAS_WEB_APP_URL) {
+                try {
+                    const res = await fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'sendAuthCode',
+                            email: emailVal,
+                            code: generatedCode,
+                            group: currentGroup
+                        })
+                    });
+                    const data = await res.json();
+                    if (data && data.status === 'ok' && data.mailSent) {
+                        sentViaGas = true;
+                    }
+                } catch (e) {
+                    sentViaGas = false;
                 }
             }
+
+            if (sentViaGas) {
+                showAuthFeedback('ok', `Kod potwierdzający został wysłany na adres <strong>${emailVal}</strong> przez skrypt Google Apps Script. Wpisz 6-cyfrowy kod poniżej.`);
+            } else {
+                const subject = encodeURIComponent('Kod potwierdzający ustawienia WMS Smakołyk');
+                const body = encodeURIComponent(`Kod potwierdzający zmianę ustawień i synchronizacji: ${generatedCode}`);
+                const mailtoHref = `mailto:${encodeURIComponent(emailVal)}?subject=${subject}&body=${body}`;
+                showAuthFeedback('warn',
+                    `Wygenerowano kod potwierdzający dla adresu <strong>${emailVal}</strong>: <span class="font-mono font-bold text-amber-300 bg-slate-900 px-1.5 py-0.5 rounded">${generatedCode}</span>.<br>` +
+                    `Skrypt GAS nie zwrócił potwierdzenia wysyłki maila (lub nie jest skonfigurowany). Możesz wysłać go przez klienta poczty: <a href="${mailtoHref}" class="underline font-bold text-blue-300">Otwórz e-mail</a> albo wpisać kod powyżej, aby zatwierdzić.`
+                );
+            }
+        }
+
+        async function verifyEmailCodeAndApply() {
+            const codeInp = document.getElementById('auth-email-code-input');
+            const emailInp = document.getElementById('auth-teacher-email');
+            const urlInp = document.getElementById('auth-gas-url-input');
+            const syncChk = document.getElementById('auth-sync-enabled-input');
+            const lockChk = document.getElementById('auth-lock-enabled-input');
+
+            const enteredCode = codeInp ? codeInp.value.trim() : '';
+            const emailVal = emailInp ? emailInp.value.trim() : '';
+
+            if (!emailVal || !emailVal.includes('@')) {
+                showAuthFeedback('err', 'Podaj adres e-mail nauczyciela i wyślij kod potwierdzający.');
+                return;
+            }
+
+            if (!pendingEmailCode || enteredCode !== pendingEmailCode) {
+                showAuthFeedback('err', 'Nieprawidłowy kod potwierdzający. Kliknij „Wyślij kod” i wpisz właściwy 6-cyfrowy kod z e-maila.');
+                return;
+            }
+
+            TEACHER_EMAIL = emailVal;
+            localStorage.setItem('smakolyk_teacher_email', TEACHER_EMAIL);
+
+            if (urlInp) {
+                GAS_WEB_APP_URL = urlInp.value.trim();
+                localStorage.setItem('smakolyk_gas_url', GAS_WEB_APP_URL);
+            }
+            if (syncChk) {
+                SYNC_ENABLED = syncChk.checked;
+                localStorage.setItem('smakolyk_sync_enabled', String(SYNC_ENABLED));
+            }
+            if (lockChk) {
+                SYNC_SETTINGS_LOCKED = lockChk.checked;
+                localStorage.setItem('smakolyk_sync_locked', String(SYNC_SETTINGS_LOCKED));
+            }
+
+            pendingEmailCode = '';
+            refreshAuthModalStatus();
+
+            if (pendingAuthAction === 'forceSync') {
+                if (SYNC_ENABLED && GAS_WEB_APP_URL) {
+                    await syncFromCloud(true);
+                }
+            } else if (SYNC_ENABLED && GAS_WEB_APP_URL) {
+                await syncFromCloud(false);
+            } else if (!SYNC_ENABLED) {
+                updateSyncBadge('idle', 'Synchronizacja wstrzymana');
+            } else {
+                updateSyncBadge('idle', 'Tryb lokalny');
+            }
+
+            showAuthFeedback('ok', `Potwierdzono kodem e-mail (<strong>${TEACHER_EMAIL}</strong>). Ustawienia synchronizacji zostały zaktualizowane.`);
+            setTimeout(() => {
+                closeSyncAuthModal();
+            }, 900);
+        }
+
+        function requestForceCloudSync() {
+            pendingAuthAction = 'forceSync';
+            showAuthFeedback('warn', 'Aby wymusić pobranie/synchronizację z chmury (chroniąc przed nadpisaniem przez uczniów), kliknij „Wyślij kod” i wpisz kod potwierdzający z e-maila.');
         }
 
         function saveLocalCache() {
@@ -507,8 +744,8 @@
         }
 
         async function syncFromCloud(showAlert = false) {
-            if (!GAS_WEB_APP_URL) {
-                updateSyncBadge('idle', 'Synchronizacja wyłączona');
+            if (!SYNC_ENABLED || !GAS_WEB_APP_URL) {
+                updateSyncBadge('idle', !SYNC_ENABLED ? 'Synchronizacja wstrzymana' : 'Synchronizacja wyłączona');
                 return;
             }
             if (isSyncing) return;
@@ -562,7 +799,7 @@
         }
 
         async function postToCloud(payload) {
-            if (!GAS_WEB_APP_URL) return null;
+            if (!SYNC_ENABLED || !GAS_WEB_APP_URL) return null;
             updateSyncBadge('loading', 'Zapisywanie w Arkuszu...');
             const res = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',

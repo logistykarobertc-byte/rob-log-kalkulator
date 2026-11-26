@@ -1672,7 +1672,7 @@ Czy chcesz potraktować to jako WOLNE MIEJSCE (awaryjnie / brak stałego)?`
                     <div class="border-b border-black pb-2 flex justify-between items-center">
                         <div>
                             <h3 class="font-bold text-base text-purple-900">Podgląd Zamówień Klientów — Wszystkie Grupy (1–8)</h3>
-                            <p class="text-gray-600 text-xs">W zamówieniu musi być podane: odbiorca, adres dostawy, asortyment, ilość i jednostka miary (oraz regał WMS). Środek transportu, VAT i termin płatności uczeń ustala samodzielnie.</p>
+                            <p class="text-gray-600 text-xs">W zamówieniu musi być podane: odbiorca, adres dostawy, asortyment, ilość i jednostka miary (oraz regał WMS). Środek transportu musi być w treści zamówienia (uczeń ustala go samodzielnie wraz ze stawką VAT i terminem płatności).</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1725,7 +1725,8 @@ Czy chcesz potraktować to jako WOLNE MIEJSCE (awaryjnie / brak stałego)?`
                                 <strong class="text-amber-300">${currentGroupData.orderItems.map(i => `${i.name} (${i.qty} ${i.unit} z regału ${i.code})`).join(' | ')}</strong>
                             </div>
                             <div class="md:col-span-2 pt-2 border-t border-purple-800/50 space-y-1">
-                                <div><span class="text-purple-200 font-semibold">W zamówieniu musi być podane:</span> <strong class="text-white">Odbiorca i dokładny adres dostawy, wykaz asortymentu z dokładną ilością i jednostką miary (z dedykowanym regałem WMS), środek transportu oraz numer listu przewozowego (LP).</strong></div>
+                                <div><span class="text-purple-200 font-semibold">W zamówieniu musi być podane:</span> <strong class="text-white">Odbiorca i dokładny adres dostawy, wykaz asortymentu z dokładną ilością i jednostką miary (z dedykowanym regałem WMS), środek transportu (musi być w treści zamówienia/dyspozycji) oraz numer listu przewozowego (LP).</strong></div>
+                                <div><span class="text-cyan-300 font-semibold">Środek transportu w treści:</span> <strong class="text-white">Środek transportu musi być podany w treści zamówienia — uczeń sam musi odszukać i wpisać/wybrać właściwy środek transportu, a także ustalić stawkę VAT i termin płatności.</strong></div>
                                 <div><span class="text-slate-400">Transport, stawka VAT oraz termin płatności:</span> <strong class="text-amber-200">Brak podpowiedzi — uczeń sam musi odszukać i uzupełnić odpowiednie dane.</strong></div>
                             </div>
                         </div>
@@ -1848,7 +1849,7 @@ Czy chcesz potraktować to jako WOLNE MIEJSCE (awaryjnie / brak stałego)?`
                     <div class="border-b border-black pb-2 flex justify-between items-center">
                         <div>
                             <h3 class="font-bold text-base text-amber-800">Specyfikacja Zamówienia Klienta (Grupa ${currentGroup})</h3>
-                            <p class="text-gray-600 text-xs">Oficjalne zamówienie przypisane do realizacji w WMS — w zamówieniu musi być podane: nabywca/odbiorca, adres dostawy, środek transportu, nr listu przewozowego oraz pełny wykaz asortymentu wraz z ilościami, jednostkami i lokalizacją na regale.</p>
+                            <p class="text-gray-600 text-xs">Oficjalne zamówienie przypisane do realizacji w WMS — w zamówieniu musi być podane: nabywca/odbiorca, adres dostawy, środek transportu (w treści zamówienia), nr listu przewozowego oraz pełny wykaz asortymentu wraz z ilościami, jednostkami i lokalizacją na regale.</p>
                         </div>
                     </div>
                     

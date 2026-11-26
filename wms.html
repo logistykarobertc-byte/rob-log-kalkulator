@@ -1575,23 +1575,47 @@
         }
 
         let selectedWZForInvoice = '';
+        let selectedVatRateForInvoice = 0.23;
 
         function openInvoiceFromWZ(wzNumber) {
             selectedWZForInvoice = wzNumber;
             setTab('faktury');
         }
 
+        function onInvoiceWZSelectChange(wzNumber) {
+            selectedWZForInvoice = wzNumber;
+            const vatSel = document.getElementById('fv-vat-select');
+            if (vatSel) {
+                selectedVatRateForInvoice = parseFloat(vatSel.value);
+            }
+            renderFaktury(document.getElementById('tab-content'));
+            lucide.createIcons();
+        }
+
+        function onInvoiceVatSelectChange(val) {
+            selectedVatRateForInvoice = parseFloat(val);
+            const wzSel = document.getElementById('fv-wz-select');
+            if (wzSel) {
+                selectedWZForInvoice = wzSel.value;
+            }
+            renderFaktury(document.getElementById('tab-content'));
+            lucide.createIcons();
+        }
+
         function renderFaktury(container) {
-            const availableWZ = wzHistory.filter(wz => !invoiceHistory.some(fv => fv.wzNumber === wz.wzNumber));
             const chosenWZNumber = selectedWZForInvoice && wzHistory.some(w => w.wzNumber === selectedWZForInvoice)
                 ? selectedWZForInvoice
-                : (availableWZ[0] ? availableWZ[0].wzNumber : (wzHistory[0] ? wzHistory[0].wzNumber : ''));
+                : (wzHistory[0] ? wzHistory[0].wzNumber : '');
             const chosenWZ = wzHistory.find(w => w.wzNumber === chosenWZNumber) || null;
 
+            const vatRate = !isNaN(selectedVatRateForInvoice) ? selectedVatRateForInvoice : 0.23;
+            const vatPercentLabel = `${Math.round(vatRate * 100)}%`;
+
             const chosenNet = chosenWZ ? chosenWZ.items.reduce((s, i) => s + (parseFloat(i.totalNetValue) || 0), 0) : 0;
-            const vatRate = 0.23;
             const chosenVat = chosenNet * vatRate;
             const chosenGross = chosenNet + chosenVat;
+
+            const alreadyInvoiced = chosenWZ ? invoiceHistory.some(fv => fv.wzNumber === chosenWZ.wzNumber) : false;
 
             container.innerHTML = `
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1600,7 +1624,7 @@
                             <h2 class="text-lg font-bold text-white flex items-center gap-2">
                                 <i data-lucide="receipt" class="text-emerald-400"></i> Wystawianie Faktury VAT do WZ
                             </h2>
-                            <p class="text-xs text-slate-400 mt-1">Wybierz wydany dokument WZ, aby wygenerować fakturę sprzedaży (stawka VAT 23%).</p>
+                            <p class="text-xs text-slate-400 mt-1">Wybierz dokument WZ, sprawdź pozycje i stawki, wybierz stawkę VAT, a następnie zatwierdź i wydrukuj fakturę.</p>
                         </div>
 
                         ${wzHistory.length === 0 ? `
@@ -1610,19 +1634,24 @@
                         ` : `
                             <form onsubmit="issueInvoiceFromWZ(event)" class="space-y-4">
                                 <div>
-                                    <label class="block text-xs text-slate-400 mb-1">Dokument WZ podstawą faktury:</label>
-                                    <select id="fv-wz-select" onchange="selectedWZForInvoice = this.value; renderFaktury(document.getElementById('tab-content')); lucide.createIcons();" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white font-bold" required>
+                                    <label class="block text-xs text-slate-400 mb-1">1. Wybierz dokument WZ podstawę faktury:</label>
+                                    <select id="fv-wz-select" onchange="onInvoiceWZSelectChange(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white font-bold" required>
                                         ${wzHistory.map(wz => {
                                             const already = invoiceHistory.some(fv => fv.wzNumber === wz.wzNumber);
-                                            return `<option value="${wz.wzNumber}" ${wz.wzNumber === chosenWZNumber ? 'selected' : ''}>${wz.wzNumber} — ${wz.client} (Grupa ${wz.group})${already ? ' [Faktura wystawiona]' : ''}</option>`;
+                                            return `<option value="${wz.wzNumber}" ${wz.wzNumber === chosenWZNumber ? 'selected' : ''}>${wz.wzNumber} — ${wz.client} (Grupa ${wz.group})${already ? ' [Wystawiono FV]' : ''}</option>`;
                                         }).join('')}
                                     </select>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-xs text-slate-400 mb-1">NIP Nabywcy:</label>
-                                        <input type="text" id="fv-buyer-nip" value="PL 744-100-20-30" required class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white font-mono">
+                                        <label class="block text-xs text-slate-400 mb-1">2. Wybierz stawkę VAT:</label>
+                                        <select id="fv-vat-select" onchange="onInvoiceVatSelectChange(this.value)" class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-amber-300 font-bold" required>
+                                            <option value="0.23" ${Math.abs(vatRate - 0.23) < 0.001 ? 'selected' : ''}>23% (stawka podstawowa)</option>
+                                            <option value="0.08" ${Math.abs(vatRate - 0.08) < 0.001 ? 'selected' : ''}>8% (stawka obniżona)</option>
+                                            <option value="0.05" ${Math.abs(vatRate - 0.05) < 0.001 ? 'selected' : ''}>5% (stawka obniżona — żywność)</option>
+                                            <option value="0" ${Math.abs(vatRate - 0) < 0.001 ? 'selected' : ''}>0% (stawka 0%)</option>
+                                        </select>
                                     </div>
                                     <div>
                                         <label class="block text-xs text-slate-400 mb-1">Termin płatności:</label>
@@ -1635,9 +1664,38 @@
                                     </div>
                                 </div>
 
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">NIP Nabywcy:</label>
+                                    <input type="text" id="fv-buyer-nip" value="PL 744-100-20-30" required class="w-full bg-slate-900 border border-slate-600 rounded p-2 text-xs text-white font-mono">
+                                </div>
+
                                 ${chosenWZ ? `
                                     <div class="bg-slate-900 p-3.5 rounded-lg border border-slate-700 space-y-2 text-xs">
-                                        <div class="flex justify-between text-slate-400">
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-bold text-purple-300 uppercase text-[11px]">3. Sprawdzenie pozycji z ${chosenWZ.wzNumber}:</span>
+                                            ${alreadyInvoiced ? '<span class="text-[10px] bg-amber-900/70 text-amber-300 border border-amber-600/40 px-2 py-0.5 rounded font-semibold">Do tego WZ wystawiono już FV</span>' : ''}
+                                        </div>
+                                        <div class="overflow-x-auto border border-slate-800 rounded">
+                                            <table class="w-full text-left border-collapse text-[11px]">
+                                                <thead>
+                                                    <tr class="bg-slate-800 text-slate-400">
+                                                        <th class="p-1.5">Indeks / Towar</th>
+                                                        <th class="p-1.5">Ilość</th>
+                                                        <th class="p-1.5 text-right">Netto</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-800">
+                                                    ${chosenWZ.items.map(i => `
+                                                        <tr>
+                                                            <td class="p-1.5"><span class="font-mono text-amber-400 font-bold">[${i.index}]</span> <strong class="text-white">${i.name}</strong></td>
+                                                            <td class="p-1.5 font-mono text-slate-200">${i.qty} ${i.unit}</td>
+                                                            <td class="p-1.5 font-mono text-right text-slate-200">${(parseFloat(i.totalNetValue) || 0).toFixed(2)} zł</td>
+                                                        </tr>
+                                                    `).join('')}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="flex justify-between text-slate-400 pt-1">
                                             <span>Nabywca:</span>
                                             <span class="text-white font-bold">${chosenWZ.client}</span>
                                         </div>
@@ -1645,13 +1703,17 @@
                                             <span>Adres dostawy:</span>
                                             <span class="text-slate-200">${chosenWZ.address}</span>
                                         </div>
+                                        <div class="flex justify-between text-slate-400">
+                                            <span>Zatwierdza:</span>
+                                            <span class="text-blue-300 font-semibold">Dział Sprzedaży</span>
+                                        </div>
                                         <div class="border-t border-slate-800 pt-2 space-y-1">
                                             <div class="flex justify-between text-slate-300">
                                                 <span>Wartość netto (z marżą 15%):</span>
                                                 <span class="font-mono font-bold">${chosenNet.toFixed(2)} zł</span>
                                             </div>
                                             <div class="flex justify-between text-slate-400">
-                                                <span>Podatek VAT (23%):</span>
+                                                <span>Podatek VAT (${vatPercentLabel}):</span>
                                                 <span class="font-mono">${chosenVat.toFixed(2)} zł</span>
                                             </div>
                                             <div class="flex justify-between text-emerald-400 font-bold text-sm pt-1 border-t border-slate-800">
@@ -1660,10 +1722,15 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <label class="flex items-start gap-2 bg-slate-900/90 p-3 rounded-lg border border-slate-700 text-xs text-slate-200 cursor-pointer select-none">
+                                        <input type="checkbox" id="fv-confirm-check" required class="mt-0.5 rounded border-slate-500 text-emerald-600 focus:ring-emerald-500">
+                                        <span><strong>4. Zatwierdzam pozycje, stawkę VAT (${vatPercentLabel}) oraz wystawienie faktury przez Dział Sprzedaży.</strong></span>
+                                    </label>
                                 ` : ''}
 
                                 <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg transition flex justify-center items-center gap-2 text-xs">
-                                    <i data-lucide="file-plus-2" class="w-4 h-4"></i> Wystaw i Drukuj Fakturę VAT
+                                    <i data-lucide="file-plus-2" class="w-4 h-4"></i> Zatwierdź i Drukuj Fakturę VAT
                                 </button>
                             </form>
                         `}
@@ -1680,14 +1747,18 @@
                                         <th class="p-3">Nr Faktury / WZ</th>
                                         <th class="p-3">Nabywca i NIP</th>
                                         <th class="p-3">Netto</th>
-                                        <th class="p-3">VAT 23%</th>
+                                        <th class="p-3">VAT</th>
                                         <th class="p-3">Brutto</th>
+                                        <th class="p-3">Zatwierdził</th>
                                         <th class="p-3">Akcje</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-700 text-xs">
-                                    ${invoiceHistory.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-500">Nie wystawiono jeszcze żadnej faktury VAT.</td></tr>' : ''}
-                                    ${invoiceHistory.map(fv => `
+                                    ${invoiceHistory.length === 0 ? '<tr><td colspan="7" class="p-4 text-center text-slate-500">Nie wystawiono jeszcze żadnej faktury VAT.</td></tr>' : ''}
+                                    ${invoiceHistory.map(fv => {
+                                        const fvVatRate = typeof fv.vatRate === 'number' ? fv.vatRate : 0.23;
+                                        const fvVatLabel = fv.vatLabel || `${Math.round(fvVatRate * 100)}%`;
+                                        return `
                                         <tr>
                                             <td class="p-3 font-mono">
                                                 <span class="text-emerald-400 font-bold block">${fv.fvNumber}</span>
@@ -1697,16 +1768,17 @@
                                                 <strong class="block">${fv.client}</strong>
                                                 <span class="text-slate-400 font-mono text-[10px]">NIP: ${fv.buyerNip} | ${fv.paymentTerm}</span>
                                             </td>
-                                            <td class="p-3 font-mono text-slate-200">${fv.totalNet.toFixed(2)} zł</td>
-                                            <td class="p-3 font-mono text-slate-400">${fv.totalVat.toFixed(2)} zł</td>
-                                            <td class="p-3 font-mono font-bold text-emerald-400">${fv.totalGross.toFixed(2)} zł</td>
+                                            <td class="p-3 font-mono text-slate-200">${(parseFloat(fv.totalNet) || 0).toFixed(2)} zł</td>
+                                            <td class="p-3 font-mono text-slate-400">${(parseFloat(fv.totalVat) || 0).toFixed(2)} zł <span class="text-[10px] text-amber-300">(${fvVatLabel})</span></td>
+                                            <td class="p-3 font-mono font-bold text-emerald-400">${(parseFloat(fv.totalGross) || 0).toFixed(2)} zł</td>
+                                            <td class="p-3 text-xs text-blue-300 font-semibold">${fv.approver || 'Dział Sprzedaży'}</td>
                                             <td class="p-3">
                                                 <button onclick="printInvoice('${fv.fvNumber}')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-2.5 py-1.5 rounded flex items-center gap-1 font-semibold">
                                                     <i data-lucide="printer" class="w-3.5 h-3.5"></i> Drukuj FV
                                                 </button>
                                             </td>
                                         </tr>
-                                    `).join('')}
+                                    `; }).join('')}
                                 </tbody>
                             </table>
                         </div>
@@ -1718,13 +1790,22 @@
         function issueInvoiceFromWZ(e) {
             e.preventDefault();
             const wzNum = document.getElementById('fv-wz-select').value;
+            const vatRate = parseFloat(document.getElementById('fv-vat-select').value);
+            const vatLabel = `${Math.round((isNaN(vatRate) ? 0.23 : vatRate) * 100)}%`;
             const buyerNip = document.getElementById('fv-buyer-nip').value.trim() || 'Brak';
             const paymentTerm = document.getElementById('fv-payment-term').value;
+            const confirmCheck = document.getElementById('fv-confirm-check');
+
+            if (confirmCheck && !confirmCheck.checked) {
+                return alert("Zaznacz pole zatwierdzenia pozycji, stawki VAT oraz wystawienia faktury przez Dział Sprzedaży.");
+            }
+
             const wz = wzHistory.find(w => w.wzNumber === wzNum);
             if (!wz) return alert("Nie znaleziono wybranego dokumentu WZ.");
 
+            const effectiveVatRate = isNaN(vatRate) ? 0.23 : vatRate;
             const totalNet = wz.items.reduce((s, i) => s + (parseFloat(i.totalNetValue) || 0), 0);
-            const totalVat = totalNet * 0.23;
+            const totalVat = totalNet * effectiveVatRate;
             const totalGross = totalNet + totalVat;
 
             const fvNumber = `FV/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`;
@@ -1736,13 +1817,15 @@
                 address: wz.address,
                 buyerNip: buyerNip,
                 paymentTerm: paymentTerm,
+                vatRate: effectiveVatRate,
+                vatLabel: vatLabel,
                 items: wz.items,
                 totalNet: totalNet,
                 totalVat: totalVat,
                 totalGross: totalGross,
                 op1: wz.op1 || op1Name,
                 op2: wz.op2 || op2Name,
-                approver: wz.approver || 'Kierownik Magazynu (Smakołyk)',
+                approver: 'Dział Sprzedaży',
                 date: new Date().toLocaleString()
             };
 
@@ -1755,6 +1838,10 @@
         function printInvoice(fvNumber) {
             const fv = invoiceHistory.find(f => f.fvNumber === fvNumber);
             if (!fv) return;
+
+            const fvVatRate = typeof fv.vatRate === 'number' ? fv.vatRate : 0.23;
+            const fvVatLabel = fv.vatLabel || `${Math.round(fvVatRate * 100)}%`;
+            const approverName = fv.approver || 'Dział Sprzedaży';
 
             document.getElementById('modal-print-btn').style.display = 'flex';
             document.getElementById('print-content').innerHTML = `
@@ -1797,14 +1884,14 @@
                                 <th class="p-1.5 border border-black">Ilość</th>
                                 <th class="p-1.5 border border-black">Cena netto</th>
                                 <th class="p-1.5 border border-black">Wartość netto</th>
-                                <th class="p-1.5 border border-black">VAT 23%</th>
+                                <th class="p-1.5 border border-black">VAT ${fvVatLabel}</th>
                                 <th class="p-1.5 border border-black">Wartość brutto</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${fv.items.map((i, idx) => {
                                 const rowNet = parseFloat(i.totalNetValue) || 0;
-                                const rowVat = rowNet * 0.23;
+                                const rowVat = rowNet * fvVatRate;
                                 const rowGross = rowNet + rowVat;
                                 return `
                                     <tr>
@@ -1822,17 +1909,17 @@
                         </tbody>
                     </table>
                     <div class="text-right space-y-0.5 text-xs pt-1">
-                        <div>Razem Netto: <strong>${fv.totalNet.toFixed(2)} zł</strong></div>
-                        <div>Razem VAT (23%): <strong>${fv.totalVat.toFixed(2)} zł</strong></div>
-                        <div class="text-sm font-bold text-emerald-900">Razem Brutto do zapłaty: <span>${fv.totalGross.toFixed(2)} zł</span></div>
+                        <div>Razem Netto: <strong>${(parseFloat(fv.totalNet) || 0).toFixed(2)} zł</strong></div>
+                        <div>Razem VAT (${fvVatLabel}): <strong>${(parseFloat(fv.totalVat) || 0).toFixed(2)} zł</strong></div>
+                        <div class="text-sm font-bold text-emerald-900">Razem Brutto do zapłaty: <span>${(parseFloat(fv.totalGross) || 0).toFixed(2)} zł</span></div>
                     </div>
                     <div class="grid grid-cols-3 pt-6 gap-2 text-center text-[10px]">
                         <div class="border-t border-black pt-1">
                             <p class="font-bold">${fv.op1}</p>
-                            <p class="text-gray-600">Osoba upoważniona (Sprzedawca)</p>
+                            <p class="text-gray-600">Osoba wystawiająca (Sprzedawca)</p>
                         </div>
                         <div class="border-t border-black pt-1">
-                            <p class="font-bold">${fv.approver}</p>
+                            <p class="font-bold">${approverName}</p>
                             <p class="text-gray-600">Zatwierdził</p>
                         </div>
                         <div class="border-t border-black pt-1">

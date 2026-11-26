@@ -736,11 +736,65 @@
             showAuthFeedback('warn', 'Aby wymusić pobranie/synchronizację z chmury (chroniąc przed nadpisaniem przez uczniów), kliknij „Wyślij kod” i wpisz kod potwierdzający z e-maila.');
         }
 
+        
+        const SYNC_PASS_REQUIRED = "0147+*";
+        let cloudStateRevision = localStorage.getItem("smakolyk_cloud_revision") || "";
+        let cloudStateHash = localStorage.getItem("smakolyk_cloud_hash") || "";
+        let syncPassVerifiedInSession = sessionStorage.getItem("smakolyk_sync_pass_ok") === "1";
+
+        function computeWarehouseStateHash(inv, pz, wz, fv) {
+            const raw = JSON.stringify({
+                inventory: inv || [],
+                pzHistory: pz || [],
+                wzHistory: wz || [],
+                invoiceHistory: fv || []
+            });
+            let h = 0x811c9dc5;
+            for (let i = 0; i < raw.length; i++) {
+                h ^= raw.charCodeAt(i);
+                h = Math.imul(h, 0x01000193);
+            }
+            return (h >>> 0).toString(16).padStart(8, "0");
+        }
+
+        function ensureSyncProtectionPass(promptMessage = "Podaj hasło zabezpieczające synchronizację wspólnego magazynu:") {
+            if (syncPassVerifiedInSession) return true;
+            const entered = window.prompt(promptMessage);
+            if (entered === null) {
+                return false;
+            }
+            if (entered !== SYNC_PASS_REQUIRED) {
+                alert("Nieprawidłowe hasło! Operacja zablokowana w celu ochrony spójności wspólnego magazynu.");
+                return false;
+            }
+            syncPassVerifiedInSession = true;
+            sessionStorage.setItem("smakolyk_sync_pass_ok", "1");
+            return true;
+        }
+
+        function updateCloudBaselineFromData(data) {
+            if (data && data.revision !== undefined && data.revision !== null && String(data.revision) !== "") {
+                cloudStateRevision = String(data.revision);
+                localStorage.setItem("smakolyk_cloud_revision", cloudStateRevision);
+            }
+            cloudStateHash = computeWarehouseStateHash(
+                inventory,
+                pzHistory,
+                wzHistory,
+                invoiceHistory
+            );
+            localStorage.setItem("smakolyk_cloud_hash", cloudStateHash);
+        }
+
         function saveLocalCache() {
             localStorage.setItem('smakolyk_inventory', JSON.stringify(inventory));
             localStorage.setItem('smakolyk_pz', JSON.stringify(pzHistory));
             localStorage.setItem('smakolyk_wz', JSON.stringify(wzHistory));
             localStorage.setItem('smakolyk_fv', JSON.stringify(invoiceHistory));
+            if (!cloudStateHash) {
+                cloudStateHash = computeWarehouseStateHash(inventory, pzHistory, wzHistory, invoiceHistory);
+                localStorage.setItem('smakolyk_cloud_hash', cloudStateHash);
+            }
         }
 
         async function syncFromCloud(showAlert = false) {
@@ -760,11 +814,34 @@
                     const prevWzJson = JSON.stringify(wzHistory);
                     const prevFvJson = JSON.stringify(invoiceHistory);
 
-                    inventory = data.inventory || [];
-                    pzHistory = data.pzHistory || [];
-                    wzHistory = data.wzHistory || [];
-                    if (Array.isArray(data.invoiceHistory)) {
-                        invoiceHistory = data.invoiceHistory;
+                    const incomingInv = data.inventory || [];
+                    const incomingPz = data.pzHistory || [];
+                    const incomingWz = data.wzHistory || [];
+                    const incomingFv = Array.isArray(data.invoiceHistory) ? data.invoiceHistory : invoiceHistory;
+                    const incomingHash = computeWarehouseStateHash(incomingInv, incomingPz, incomingWz, incomingFv);
+                    const localHash = computeWarehouseStateHash(inventory, pzHistory, wzHistory, invoiceHistory);
+
+                    // Wykrycie lokalnych zmian względem ostatniego znanego stanu chmury
+                    const hasUnpushedLocalChanges = cloudStateHash && localHash !== cloudStateHash && incomingHash !== cloudStateHash;
+                    if (hasUnpushedLocalChanges && data.revision && cloudStateRevision && String(data.revision) !== String(cloudStateRevision)) {
+                        if (!ensureSyncProtectionPass("Wykryto równoległe zmiany w Arkuszu Google (desynchronizacja). Podaj hasło, aby bezpiecznie pobrać aktualny stan:")) {
+                            updateSyncBadge('error', 'Konflikt wersji — wymagane hasło');
+                            if (showAlert) {
+                                alert("Wykryto zmianę we wspólnym magazynie w Arkuszu Google. Podaj poprawne hasło, aby zsynchronizować stan.");
+                            }
+                            return;
+                        }
+                    }
+
+                    inventory = incomingInv;
+                    pzHistory = incomingPz;
+                    wzHistory = incomingWz;
+                    invoiceHistory = incomingFv;
+                    cloudStateHash = incomingHash;
+                    localStorage.setItem('smakolyk_cloud_hash', cloudStateHash);
+                    if (data.revision !== undefined && data.revision !== null && String(data.revision) !== "") {
+                        cloudStateRevision = String(data.revision);
+                        localStorage.setItem('smakolyk_cloud_revision', cloudStateRevision);
                     }
                     saveLocalCache();
 
@@ -798,25 +875,47 @@
             }
         }
 
-        async function postToCloud(payload) {
+        async function postToCloud(payload, requirePass = false) {
             if (!SYNC_ENABLED || !GAS_WEB_APP_URL) return null;
+
+            if (requirePass && !ensureSyncProtectionPass("Operacja zapisu/zmiany wspólnego magazynu wymaga hasła:")) {
+                throw new Error("Anulowano zapis — brak autoryzacji hasłem.");
+            }
+
+            const outgoingPayload = {
+                ...payload,
+                syncPass: SYNC_PASS_REQUIRED,
+                expectedRevision: cloudStateRevision,
+                expectedStateHash: cloudStateHash,
+                clientGroup: currentGroup
+            };
+
             updateSyncBadge('loading', 'Zapisywanie w Arkuszu...');
             const res = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(outgoingPayload)
             });
             const data = await res.json();
+
+            if (data.status === 'conflict') {
+                updateSyncBadge('error', 'Wykryto konflikt wersji');
+                await syncFromCloud(true);
+                throw new Error("Wykryto desynchronizację z Arkuszem Google (ktoś inny zaktualizował magazyn). Stan został odświeżony — powtórz operację.");
+            }
+
             if (data.status !== 'ok') {
                 updateSyncBadge('error', 'Błąd zapisu');
                 throw new Error(data.message || 'Błąd zapisu w Arkuszu Google');
             }
+
             inventory = data.inventory || [];
             pzHistory = data.pzHistory || [];
             wzHistory = data.wzHistory || [];
             if (Array.isArray(data.invoiceHistory)) {
                 invoiceHistory = data.invoiceHistory;
             }
+            updateCloudBaselineFromData(data);
             saveLocalCache();
             const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             updateSyncBadge('ok', `Zapisano (${now})`);
@@ -824,10 +923,18 @@
         }
 
         async function resetWarehouse() {
+            if (!ensureSyncProtectionPass("Wyczyszczenie wspólnego magazynu i Arkusza Google wymaga hasła:")) {
+                return;
+            }
             if(confirm("Czy na pewno chcesz wyczyścić wszystkie dane i stany magazynowe (również w Arkuszu Google)?")) {
                 localStorage.removeItem('smakolyk_inventory');
                 localStorage.removeItem('smakolyk_pz');
                 localStorage.removeItem('smakolyk_wz');
+                localStorage.removeItem('smakolyk_fv');
+                localStorage.removeItem('smakolyk_cloud_revision');
+                localStorage.removeItem('smakolyk_cloud_hash');
+                cloudStateRevision = "";
+                cloudStateHash = "";
                 inventory = [];
                 pzHistory = [];
                 wzHistory = [];
@@ -838,7 +945,7 @@
                 savedPickFormState = [];
                 if (GAS_WEB_APP_URL) {
                     try {
-                        await postToCloud({ action: 'resetAll' });
+                        await postToCloud({ action: 'resetAll', forceReset: true }, false);
                     } catch (e) {
                         alert("Błąd czyszczenia Arkusza Google: " + e.message);
                     }
@@ -847,7 +954,7 @@
             }
         }
 
-        function initGroupSelect() {
+function initGroupSelect() {
             const select = document.getElementById('group-select');
             select.innerHTML = '';
             for(let i=1; i<=8; i++) {

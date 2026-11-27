@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CMR &amp; Zlecenie Transportowe — Generator Edukacyjny</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Crect x='8' y='20' width='28' height='18' rx='3' fill='%2338bdf8'/%3E%3Cpath d='M38 24h10l6 7v7H38V24z' fill='%23f8fafc'/%3E%3Crect x='41' y='27' width='6' height='5' rx='1' fill='%230f172a'/%3E%3Ccircle cx='18' cy='42' r='5.5' fill='%23e2e8f0' stroke='%230f172a' stroke-width='2'/%3E%3Ccircle cx='46' cy='42' r='5.5' fill='%23e2e8f0' stroke='%230f172a' stroke-width='2'/%3E%3C/svg%3E" />
 <style>
   :root {
     --bg-app: #eef2f6;
@@ -43,6 +44,16 @@
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+
+  .logo-truck {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
   }
 
   .logo-oval {
@@ -121,9 +132,9 @@
     border: 1px solid #94a3b8;
     background: #ffffff;
     color: #0f172a;
-    padding: 6px 12px;
+    padding: 6px 11px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
   }
@@ -139,197 +150,156 @@
   }
 
   .btn-primary:hover {
-    background: #172554;
+    background: #172e6e;
   }
 
-  .btn-clear {
-    border-color: #dc2626;
-    color: #b91c1c;
-    background: #fef2f2;
+  .btn-danger {
+    background: #fff1f2;
+    border-color: #fda4af;
+    color: #9f1239;
   }
 
-  .btn-clear:hover {
-    background: #fee2e2;
-  }
-
-  .copy-select {
-    padding: 6px 10px;
-    border-radius: 6px;
+  .select-filter {
     border: 1px solid #94a3b8;
-    font-size: 13px;
-    font-weight: 600;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-weight: 700;
     background: #ffffff;
     color: #0f172a;
   }
 
-  /* Główny układ: lewy panel edycji + prawy podgląd A4 */
+  /* Główny układ: formularz po lewej + podgląd A4 po prawej */
   .main-grid {
     display: grid;
-    grid-template-columns: minmax(360px, 445px) minmax(0, 1fr);
+    grid-template-columns: 430px 1fr;
     gap: 18px;
-    padding: 16px 18px 36px;
+    padding: 16px 18px 28px;
     align-items: start;
-  }
-
-  @media (max-width: 1120px) {
-    .main-grid {
-      grid-template-columns: 1fr;
-    }
   }
 
   .form-panel {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 9px;
+    border-radius: 10px;
     padding: 14px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   }
 
-  .form-group-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 7px;
-    padding: 10px 11px;
+  .panel-title {
+    margin: 0 0 10px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+  }
+
+  .sec-box {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px;
     margin-bottom: 11px;
     background: #f8fafc;
   }
 
-  .form-group-title {
-    font-size: 11.5px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--brand);
-    margin: 0 0 8px;
+  .sec-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #1e293b;
   }
 
   .row-2 {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-bottom: 8px;
   }
 
   .row-3 {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .row-1 {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin-bottom: 8px;
   }
 
   .inp-box {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+    margin-bottom: 7px;
+  }
+
+  .inp-box:last-child {
+    margin-bottom: 0;
   }
 
   .inp-box label {
+    display: block;
     font-size: 11px;
     font-weight: 700;
     color: #334155;
+    margin-bottom: 2px;
   }
 
   .inp-box input,
   .inp-box textarea,
   .inp-box select {
     width: 100%;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #94a3b8;
     border-radius: 5px;
-    padding: 6px 8px;
+    padding: 5px 7px;
+    font-size: 12px;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 13px;
-    color: #0f172a;
     background: #ffffff;
+    color: #0f172a;
   }
 
   .inp-box textarea {
-    min-height: 48px;
+    min-height: 52px;
     resize: vertical;
   }
 
   .item-card {
-    background: #ffffff;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    background: #ffffff;
+    border-radius: 7px;
     padding: 8px;
     margin-bottom: 8px;
   }
 
   .item-card-top {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     font-size: 11px;
-    font-weight: 700;
-    color: #475569;
+    font-weight: 800;
+    color: #1e3a8a;
     margin-bottom: 6px;
   }
 
-  .totals-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
+  .summary-strip {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #1e3a8a;
+    font-weight: 700;
     margin-top: 6px;
   }
 
-  .total-pill {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 5px;
-    padding: 6px 8px;
-  }
-
-  .total-pill .k {
-    font-size: 10px;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-  }
-
-  .total-pill .v {
-    font-size: 13px;
-    font-weight: 800;
-    color: #0f172a;
-    margin-top: 2px;
-  }
-
-  .pad-wrap {
+  .sig-pad {
     border: 1px dashed #64748b;
     border-radius: 6px;
     background: #ffffff;
-    padding: 6px;
-  }
-
-  canvas.pad {
     width: 100%;
-    height: 76px;
+    height: 92px;
     display: block;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    background: #ffffff;
-    touch-action: none;
     cursor: crosshair;
+    touch-action: none;
   }
 
-  .pad-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 5px;
-    font-size: 11px;
-    color: #475569;
-  }
-
-  /* Panel podglądu na żywo */
+  /* Podgląd stron A4 */
   .preview-col {
     display: flex;
     flex-direction: column;
@@ -337,109 +307,114 @@
     gap: 18px;
   }
 
-  /* =====================================================================
-     ARKUSZ A4 — KONWENCYJNY LIST PRZEWOZOWY CMR (RUBRYKI 1–24)
-     ===================================================================== */
   .cmr-page {
-    --accent-cmr: #c62828;
-    --tint-cmr: #fdecec;
-    --soft-cmr: #fff8f8;
     width: 210mm;
     min-height: 297mm;
     background: #ffffff;
-    border: 2px solid var(--accent-cmr);
-    padding: 4mm 4.5mm;
-    color: #0f172a;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+    padding: 4.5mm 5.5mm;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    border: 1px solid #cbd5e1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
 
+  /* Kolorystyczne rozróżnienie 4 egzemplarzy CMR */
+  .cmr-page.egz-1 {
+    --accent-cmr: #b91c1c;
+    --tint-cmr: #fef2f2;
+    --soft-cmr: #fff5f5;
+  }
+
   .cmr-page.egz-2 {
-    --accent-cmr: #1565c0;
-    --tint-cmr: #e8f1fc;
-    --soft-cmr: #f5f9ff;
+    --accent-cmr: #15803d;
+    --tint-cmr: #f0fdf4;
+    --soft-cmr: #f6fef9;
   }
 
   .cmr-page.egz-3 {
-    --accent-cmr: #2e7d32;
-    --tint-cmr: #e9f6ea;
-    --soft-cmr: #f4fbf5;
+    --accent-cmr: #1d4ed8;
+    --tint-cmr: #eff6ff;
+    --soft-cmr: #f5f9ff;
   }
 
   .cmr-page.egz-4 {
-    --accent-cmr: #111111;
-    --tint-cmr: #eceef1;
-    --soft-cmr: #f8f9fa;
+    --accent-cmr: #b45309;
+    --tint-cmr: #fffbeb;
+    --soft-cmr: #fffcf2;
   }
 
   .cmr-top-strip {
     display: grid;
-    grid-template-columns: 1.22fr 1fr;
-    gap: 4px;
-    margin-bottom: 3px;
-    font-size: 5.9pt;
-    line-height: 1.12;
+    grid-template-columns: 1fr 1fr;
+    border: 1.5px solid var(--accent-cmr);
+    margin-bottom: 2mm;
+    background: var(--soft-cmr);
   }
 
   .cmr-strip-box {
-    border: 1.2px solid var(--accent-cmr);
-    background: var(--soft-cmr);
-    padding: 2px 5px;
+    padding: 2mm 2.5mm;
+    font-size: 6.1pt;
+    line-height: 1.15;
+    color: var(--accent-cmr);
+    font-weight: 700;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 5px;
+    justify-content: space-between;
+    gap: 2mm;
+  }
+
+  .cmr-strip-box:first-child {
+    border-right: 1.5px solid var(--accent-cmr);
   }
 
   .cmr-strip-tag {
-    border: 1.5px solid var(--accent-cmr);
-    background: #ffffff;
-    color: var(--accent-cmr);
-    padding: 1px 4px;
+    border: 1px solid var(--accent-cmr);
+    padding: 0.6mm 1.5mm;
+    font-size: 6.2pt;
     font-weight: 800;
-    font-size: 6pt;
     white-space: nowrap;
+    background: #ffffff;
   }
 
-  /* Główne pudło formularza CMR */
   .cmr-sheet-grid {
-    border-top: 1.6px solid var(--accent-cmr);
-    border-left: 1.6px solid var(--accent-cmr);
+    border: 1.5px solid var(--accent-cmr);
+    background: #ffffff;
+  }
+
+  .cmr-top-two-cols {
+    display: grid;
+    grid-template-columns: 49% 51%;
+    border-bottom: 1.5px solid var(--accent-cmr);
+  }
+
+  .cmr-col-left {
+    border-right: 1.5px solid var(--accent-cmr);
     display: flex;
     flex-direction: column;
   }
 
-  /* Górna połowa: 2 kolumny */
-  .cmr-top-two-cols {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .cmr-col-left,
   .cmr-col-right {
     display: flex;
     flex-direction: column;
   }
 
   .cmr-box {
-    border-right: 1.5px solid var(--accent-cmr);
-    border-bottom: 1.5px solid var(--accent-cmr);
-    padding: 2px 4.5px;
-    background: #ffffff;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    border-bottom: 1px solid var(--accent-cmr);
+    padding: 1.8mm 2.2mm;
+    position: relative;
+    background: var(--soft-cmr);
   }
 
-  /* Tłuste ramki dla pól przewoźnika 16, 17, 18, 19, 20, 23 */
+  .cmr-box:last-child {
+    border-bottom: none;
+  }
+
   .cmr-box.carrier-bold {
-    border-right: 2.7px solid var(--accent-cmr);
-    border-left: 2.2px solid var(--accent-cmr);
-    border-top: 2.2px solid var(--accent-cmr);
-    border-bottom: 2.2px solid var(--accent-cmr);
-    background: var(--soft-cmr);
+    border-left: 2.6px solid var(--accent-cmr);
+    border-right: 2.6px solid var(--accent-cmr);
+    border-bottom: 2px solid var(--accent-cmr);
+    background: var(--tint-cmr);
   }
 
   .cmr-box.carrier-bold + .cmr-box.carrier-bold {
@@ -454,215 +429,237 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    overflow: visible;
+    min-height: 36mm;
   }
 
   .cmr-title-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 6px;
-  }
-
-  .cmr-oval-badge {
-    border: 2.2px solid var(--accent-cmr);
-    border-radius: 999px;
-    padding: 1px 9px;
-    font-size: 11pt;
-    font-weight: 900;
-    color: var(--accent-cmr);
-    background: #ffffff;
-    flex-shrink: 0;
+    gap: 2mm;
   }
 
   .cmr-doc-name {
-    font-size: 8.6pt;
+    font-size: 8.8pt;
     font-weight: 900;
     color: var(--accent-cmr);
-    line-height: 1.1;
+    letter-spacing: 0.02em;
+    line-height: 1.12;
   }
 
   .cmr-doc-sub {
-    font-size: 5.6pt;
+    font-size: 5.9pt;
     font-weight: 700;
+    color: var(--accent-cmr);
+    margin-top: 0.6mm;
+  }
+
+  .cmr-oval-badge {
+    border: 2px solid var(--accent-cmr);
+    border-radius: 999px;
+    padding: 0.8mm 3.6mm;
+    font-size: 9.2pt;
+    font-weight: 900;
+    color: var(--accent-cmr);
+    background: #ffffff;
+    line-height: 1.05;
+    white-space: nowrap;
+  }
+
+  .cmr-conv-clause {
+    font-size: 5.45pt;
+    line-height: 1.12;
     color: #1e293b;
+    margin-top: 1.2mm;
   }
 
   .cmr-copy-strip {
+    margin-top: 1.5mm;
+    border-top: 1px solid var(--accent-cmr);
+    padding-top: 1.2mm;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 6px;
-    margin-top: 2px;
-    padding: 2px 4px;
-    background: #ffffff;
-    border: 1px solid var(--accent-cmr);
-    border-radius: 2px;
+    gap: 2mm;
   }
 
   .cmr-copy-pill {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 2mm;
   }
 
   .cmr-copy-num {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--accent-cmr);
-    color: #ffffff;
-    font-size: 8.2pt;
-    font-weight: 900;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    width: 5.2mm;
+    height: 5.2mm;
+    border-radius: 50%;
+    background: var(--accent-cmr);
+    color: #ffffff;
+    font-size: 7.4pt;
+    font-weight: 900;
   }
 
   .cmr-copy-lbl {
-    font-size: 7pt;
+    font-size: 7.1pt;
     font-weight: 900;
     color: var(--accent-cmr);
-    line-height: 1.1;
+    line-height: 1.05;
   }
 
   .cmr-copy-sublbl {
-    font-size: 5.4pt;
-    color: #1e293b;
-  }
-
-  .cmr-conv-clause {
-    font-size: 5.1pt;
-    line-height: 1.08;
-    color: #1f2937;
-    margin-top: 1.5px;
+    font-size: 5.2pt;
+    font-weight: 700;
+    color: #334155;
+    line-height: 1.05;
   }
 
   .cmr-lbl-row {
     display: flex;
     align-items: flex-start;
-    gap: 4px;
-    margin-bottom: 1px;
+    gap: 1.5mm;
+    margin-bottom: 1mm;
   }
 
   .cmr-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 4.3mm;
+    height: 4.3mm;
+    padding: 0 0.8mm;
     background: var(--accent-cmr);
     color: #ffffff;
-    font-size: 6.3pt;
-    font-weight: 800;
-    padding: 0.4px 3.5px;
+    font-size: 6.4pt;
+    font-weight: 900;
     border-radius: 2px;
+    line-height: 1;
     flex-shrink: 0;
-    line-height: 1.15;
   }
 
   .cmr-lbl {
-    font-size: 5.8pt;
-    line-height: 1.1;
+    font-size: 5.65pt;
+    line-height: 1.12;
     color: #1e293b;
   }
 
   .cmr-lbl strong {
     color: var(--accent-cmr);
+    font-weight: 800;
   }
 
   .cmr-val {
     width: 100%;
-    flex: 1;
     border: none;
     background: transparent;
-    padding: 0;
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11.5pt;
-    font-weight: 700;
     color: #0f172a;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10.5pt;
+    font-weight: 600;
+    line-height: 1.14;
     resize: none;
     outline: none;
+    padding: 0;
   }
 
-  /* Wysokości pól zgodne z klasycznym CMR */
-  .box-h1 { height: 30mm; }
-  .box-h2 { height: 25.5mm; }
-  .box-h3 { height: 15.5mm; }
-  .box-h4 { height: 15.5mm; }
-  .box-h5 { height: 15.5mm; }
+  .box-h1 { min-height: 29mm; }
+  .box-h2 { min-height: 27mm; }
+  .box-h3 { min-height: 15mm; }
+  .box-h4 { min-height: 15mm; }
+  .box-h5 { min-height: 16mm; flex: 1; }
 
-  .box-hdr { min-height: 30mm; height: auto; }
-  .box-h16 { height: 30mm; }
-  .box-h17 { height: 15.5mm; }
-  .box-h18 { height: 15.5mm; }
-  .box-h19 { height: 15.5mm; }
+  .box-h16 { min-height: 23mm; }
+  .box-h17 { min-height: 15mm; }
+  .box-h18 { min-height: 19mm; }
+  .box-h19 { min-height: 12mm; flex: 1; }
 
-  /* Tabela towarowa: kolumny 6, 7, 8, 9, 10, 11, 12 */
+  .box-h1 .cmr-val { min-height: 20mm; }
+  .box-h2 .cmr-val { min-height: 18mm; }
+  .box-h3 .cmr-val { min-height: 8mm; }
+  .box-h4 .cmr-val { min-height: 8mm; }
+  .box-h5 .cmr-val { min-height: 9mm; }
+
+  .box-h16 .cmr-val { min-height: 14mm; }
+  .box-h17 .cmr-val { min-height: 8mm; }
+  .box-h18 .cmr-val { min-height: 11mm; }
+  .box-h19 .cmr-val { min-height: 7mm; }
+
+  /* Tabela towarowa 6–12 */
   .cmr-goods-tbl {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-  }
-
-  .cmr-goods-tbl th,
-  .cmr-goods-tbl td {
-    border-right: 1.3px solid var(--accent-cmr);
-    border-bottom: 1.3px solid var(--accent-cmr);
-    padding: 2px 3.5px;
-    vertical-align: top;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
+    border-bottom: 1.5px solid var(--accent-cmr);
   }
 
   .cmr-goods-tbl th {
-    font-size: 5.6pt;
-    line-height: 1.08;
+    border-right: 1px solid var(--accent-cmr);
+    border-bottom: 1.5px solid var(--accent-cmr);
     background: var(--tint-cmr);
-    font-weight: 700;
-    text-align: left;
+    color: var(--accent-cmr);
+    font-size: 5.5pt;
+    font-weight: 800;
+    line-height: 1.1;
+    padding: 1.5mm 1.2mm;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .cmr-goods-tbl th:last-child {
+    border-right: none;
   }
 
   .cmr-goods-tbl td {
-    height: 12.8mm;
+    border-right: 1px solid var(--accent-cmr);
+    border-bottom: 1px solid var(--accent-cmr);
+    padding: 1mm 1.2mm;
+    height: 9.2mm;
+    vertical-align: top;
     background: #ffffff;
+  }
+
+  .cmr-goods-tbl td:last-child {
+    border-right: none;
+  }
+
+  .cmr-goods-tbl tr:last-child td {
+    border-bottom: none;
   }
 
   .cmr-goods-inp {
     width: 100%;
     height: 100%;
+    min-height: 7.2mm;
     border: none;
     background: transparent;
-    padding: 0;
-    margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 11.5pt;
-    font-weight: 700;
+    font-size: 10.5pt;
+    font-weight: 600;
     color: #0f172a;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
     resize: none;
     outline: none;
+    padding: 0;
+    line-height: 1.14;
   }
 
-  /* Pasek ADR pod tabelą towarową (Klasa / Liczba / Litera / ADR) */
+  /* Pasek ADR + suma masy i objętości */
   .cmr-adr-strip {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;
-    border-right: 1.5px solid var(--accent-cmr);
+    grid-template-columns: 1fr 1fr 1fr 1.2fr 1.2fr;
     border-bottom: 1.5px solid var(--accent-cmr);
     background: var(--soft-cmr);
-    font-size: 5.7pt;
   }
 
   .cmr-adr-cell {
     border-right: 1px solid var(--accent-cmr);
-    padding: 2px 4px;
+    padding: 1.4mm 2mm;
+    font-size: 5.7pt;
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: space-between;
+    gap: 1.5mm;
   }
 
   .cmr-adr-cell:last-child {
@@ -671,35 +668,49 @@
 
   .cmr-adr-inp {
     width: 100%;
+    max-width: 24mm;
     border: none;
+    border-bottom: 1px dotted var(--accent-cmr);
     background: transparent;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11.5pt;
+    font-size: 9pt;
     font-weight: 700;
     color: #0f172a;
     outline: none;
+    padding: 0;
   }
 
-  /* Środkowa dolna część: lewa (13, 14) + prawa (20) */
+  /* Środkowa część: 13–14 po lewej, 20 po prawej */
   .cmr-mid-lower {
     display: grid;
-    grid-template-columns: 1.05fr 1fr;
+    grid-template-columns: 49% 51%;
+    border-bottom: 1.5px solid var(--accent-cmr);
   }
 
   .cmr-mid-left {
+    border-right: 1.5px solid var(--accent-cmr);
     display: flex;
     flex-direction: column;
   }
 
-  .box-h13 { height: 23mm; }
-  .box-h14 { height: 14.5mm; }
+  .box-h13 {
+    min-height: 17mm;
+    border-bottom: 1px solid var(--accent-cmr);
+  }
+
+  .box-h14 {
+    min-height: 18mm;
+    flex: 1;
+    border-bottom: none;
+  }
+
+  .box-h13 .cmr-val { min-height: 10mm; }
+  .box-h14 .cmr-val { min-height: 11mm; }
 
   .cmr-box-20 {
-    border-right: 2.7px solid var(--accent-cmr);
-    border-left: 2.2px solid var(--accent-cmr);
-    border-bottom: 2.2px solid var(--accent-cmr);
-    background: var(--soft-cmr);
-    padding: 2px 4px;
+    border-left: 2.6px solid var(--accent-cmr);
+    border-right: 2.6px solid var(--accent-cmr);
+    background: var(--tint-cmr);
+    padding: 1.6mm 2mm;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -709,89 +720,95 @@
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 5.6pt;
+    margin-top: 1mm;
     background: #ffffff;
-    margin-top: 2px;
   }
 
   .cmr-pay-tbl th,
   .cmr-pay-tbl td {
     border: 1px solid var(--accent-cmr);
-    padding: 1.5px 2.5px;
-    height: 4.5mm;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
+    font-size: 5.3pt;
+    padding: 0.9mm 1.2mm;
+    line-height: 1.08;
   }
 
   .cmr-pay-tbl th {
     background: var(--tint-cmr);
+    color: var(--accent-cmr);
     font-weight: 800;
+    text-align: center;
   }
 
   .cmr-pay-inp {
     width: 100%;
     border: none;
     background: transparent;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 11pt;
+    font-size: 7.8pt;
     font-weight: 700;
     color: #0f172a;
     outline: none;
     padding: 0;
+    text-align: center;
   }
 
-  /* Pasek rubryk 21 oraz 15 (Zwrot zaliczenia) */
+  /* Rubryka 21 i 15 */
   .cmr-row-21-15 {
     display: grid;
-    grid-template-columns: 1.05fr 1fr;
+    grid-template-columns: 49% 51%;
+    border-bottom: 1.5px solid var(--accent-cmr);
   }
 
-  .box-h21 { height: 11.5mm; }
-  .box-h15 { height: 11.5mm; }
+  .box-h21 {
+    border-right: 1.5px solid var(--accent-cmr);
+    min-height: 12mm;
+  }
 
-  /* Dolne podpisy: rubryki 22, 23, 24 */
+  .box-h15 {
+    min-height: 12mm;
+  }
+
+  /* Rubryki podpisów 22, 23, 24 */
   .cmr-bottom-22-24 {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    min-height: 27mm;
+    grid-template-columns: 1fr 1fr 1fr;
+    min-height: 29mm;
   }
 
   .cmr-sign-cell {
     border-right: 1.5px solid var(--accent-cmr);
-    border-bottom: 1.8px solid var(--accent-cmr);
-    padding: 2.5px 4.5px;
+    padding: 1.8mm 2.2mm;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: #ffffff;
+    background: var(--soft-cmr);
+  }
+
+  .cmr-sign-cell:last-child {
+    border-right: none;
   }
 
   .cmr-sign-cell.carrier-bold {
-    border: 2.4px solid var(--accent-cmr);
-    border-top: none;
-    background: var(--soft-cmr);
+    border-left: 2.6px solid var(--accent-cmr);
+    border-right: 2.6px solid var(--accent-cmr);
+    background: var(--tint-cmr);
   }
 
   .sig-preview-img {
     max-height: 13mm;
     max-width: 100%;
     object-fit: contain;
-    display: block;
-    margin: 2px auto 0;
+    align-self: flex-start;
+    margin-top: 1mm;
   }
 
-  /* =====================================================================
-     ARKUSZ A4 — ZLECENIE TRANSPORTU DROGOWEGO
-     ===================================================================== */
+  /* Strona Zlecenia Przewozowego */
   .order-page {
     width: 210mm;
     min-height: 297mm;
     background: #ffffff;
-    border: 1.5px solid #1e293b;
-    padding: 7mm 8mm;
-    color: #0f172a;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+    padding: 10mm 12mm;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    border: 1px solid #cbd5e1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -810,6 +827,8 @@
   .ord-title {
     font-size: 14.5pt;
     font-weight: 900;
+    letter-spacing: 0.02em;
+    color: #0f172a;
     margin: 0;
   }
 
@@ -821,41 +840,41 @@
   }
 
   .ord-card {
-    border: 1px solid #475569;
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
     padding: 5px 7px;
     background: #ffffff;
   }
 
   .ord-card-title {
-    font-size: 7.4pt;
+    font-size: 7.2pt;
     font-weight: 800;
     text-transform: uppercase;
     color: #1e3a8a;
-    border-bottom: 1px solid #cbd5e1;
+    border-bottom: 1px solid #e2e8f0;
     padding-bottom: 2px;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 
   .ord-tbl {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 7.8pt;
   }
 
   .ord-tbl th,
   .ord-tbl td {
-    border: 1px solid #475569;
-    padding: 4px 5px;
+    border: 1px solid #94a3b8;
+    padding: 3px 5px;
+    font-size: 7.8pt;
     vertical-align: top;
-    white-space: normal;
     word-break: break-word;
-    overflow-wrap: anywhere;
   }
 
   .ord-tbl th {
     background: #f1f5f9;
     font-weight: 800;
+    color: #0f172a;
     text-align: left;
   }
 
@@ -863,37 +882,58 @@
     display: grid;
     grid-template-columns: 1.2fr 1fr;
     gap: 6px;
-    margin-bottom: 6px;
+    margin-top: 6px;
   }
 
   .ord-vat-tbl {
     width: 100%;
     border-collapse: collapse;
-    font-size: 8pt;
   }
 
   .ord-vat-tbl th,
   .ord-vat-tbl td {
-    border: 1px solid #475569;
-    padding: 4px 6px;
+    border: 1px solid #94a3b8;
+    padding: 3.5px 6px;
+    font-size: 8pt;
   }
 
   .ord-vat-tbl th {
     background: #f8fafc;
     text-align: left;
-    width: 55%;
+    font-weight: 700;
+  }
+
+  .ord-provisions-box {
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
+    padding: 5px 7px;
+    background: #f8fafc;
+    font-size: 6.5pt;
+    line-height: 1.24;
+    color: #1e293b;
+    white-space: pre-line;
+    margin-top: 6px;
+  }
+
+  .ord-provisions-title {
+    font-size: 7.2pt;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 2px;
   }
 
   .ord-signs {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+    margin-top: 6px;
   }
 
   .ord-sign-box {
-    border: 1px solid #475569;
-    padding: 6px 8px;
-    min-height: 35mm;
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
+    padding: 5px 7px;
+    min-height: 22mm;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -901,7 +941,7 @@
 
   .ord-foot {
     margin-top: 6px;
-    padding-top: 4px;
+    padding-top: 3px;
     border-top: 1px solid #cbd5e1;
     display: flex;
     justify-content: space-between;
@@ -909,6 +949,7 @@
     color: #475569;
   }
 
+  /* Druk / PDF */
   @media print {
     @page {
       size: A4 portrait;
@@ -916,6 +957,7 @@
     }
 
     html, body {
+      width: 210mm;
       background: #ffffff !important;
       margin: 0 !important;
       padding: 0 !important;
@@ -942,10 +984,11 @@
 
     .cmr-page,
     .order-page {
-      box-shadow: none !important;
-      margin: 0 !important;
       width: 210mm !important;
       min-height: 297mm !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
       page-break-after: always;
       break-after: page;
     }
@@ -963,391 +1006,325 @@
   <!-- Pasek logo -->
   <div class="top-brand-bar">
     <div class="brand-left">
+      <span class="logo-truck" aria-hidden="true">
+        <svg viewBox="0 0 48 24" width="32" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="4" width="24" height="12" rx="2" fill="#38bdf8" />
+          <path d="M28 7h8l5 5v4H28V7z" fill="#ffffff" />
+          <rect x="30" y="9" width="5" height="3.5" rx="0.8" fill="#0f172a" />
+          <circle cx="10" cy="18.5" r="3.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5" />
+          <circle cx="34" cy="18.5" r="3.5" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5" />
+        </svg>
+      </span>
       <span class="logo-oval">CMR</span>
       <div>
         <div class="brand-name">CMR &amp; Zlecenie Transportowe — Generator Edukacyjny</div>
-        <div class="brand-meta">Format A4 • Konwencyjny układ CMR (rubryki 1–24) + Zlecenie transportowe</div>
+        <div class="brand-meta">Format A4 • Konwencyjny układ CMR (rubryki 1–24) + Zlecenie</div>
       </div>
     </div>
-    <span class="brand-meta">PL / DE / EN</span>
+    <div class="brand-meta">Podgląd na żywo • Druk / Zapis do PDF</div>
   </div>
 
-  <!-- Pasek narzędzi -->
+  <!-- Pasek nawigacji -->
   <div class="nav-bar">
     <div class="nav-tabs">
-      <button type="button" class="nav-tab active" id="btnTabCmr" onclick="setMode('cmr')">
-        List przewozowy CMR (4 egz.)
-      </button>
-      <button type="button" class="nav-tab" id="btnTabOrder" onclick="setMode('order')">
-        Zlecenie transportowe
-      </button>
+      <button type="button" id="btnTabCmr" class="nav-tab active" onclick="setMode('cmr')">List przewozowy CMR</button>
+      <button type="button" id="btnTabOrder" class="nav-tab" onclick="setMode('order')">Zlecenie transportowe</button>
     </div>
 
     <div class="nav-actions">
-      <select id="copyFilter" class="copy-select" onchange="changeCopyFilter()">
+      <select id="copyFilter" class="select-filter" onchange="changeCopyFilter()">
         <option value="all">Wszystkie 4 egzemplarze</option>
-        <option value="1">1. Czerwony — Nadawca</option>
-        <option value="2">2. Niebieski — Odbiorca</option>
-        <option value="3">3. Zielony — Przewoźnik</option>
-        <option value="4">4. Czarny — Rozliczeniowy</option>
+        <option value="1">Egzemplarz 1 — Nadawca</option>
+        <option value="2">Egzemplarz 2 — Odbiorca</option>
+        <option value="3">Egzemplarz 3 — Przewoźnik</option>
+        <option value="4">Egzemplarz 4 — Rozliczeniowy</option>
       </select>
-
-      <button type="button" class="btn btn-clear" onclick="resetActiveForm()">
-        Wyczyść pola
-      </button>
-
-      <button type="button" class="btn btn-primary" onclick="window.print()">
-        Drukuj / Zapisz PDF
-      </button>
+      <button type="button" class="btn btn-danger" onclick="resetActiveForm()">Wyczyść formularz</button>
+      <button type="button" class="btn btn-primary" onclick="window.print()">Drukuj / Zapisz PDF</button>
     </div>
   </div>
 
   <div class="main-grid">
-    <!-- FORMULARZ (LEWA STRONA) -->
+    <!-- Lewy panel formularza -->
     <aside class="form-panel">
-
-      <!-- FORMULARZ CMR -->
+      <!-- Formularz CMR -->
       <div id="formCmr">
-        <div class="form-group-card">
-          <div class="form-group-title">1. Strony i trasa przewozu (1–5)</div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_cmr_no">Nr listu CMR</label>
-              <input type="text" id="f_cmr_no" data-cmr="cmr_no" placeholder="np. CMR/2026/01" />
-            </div>
-            <div class="inp-box">
-              <label for="f_cmr_5">5. Załączone dokumenty</label>
-              <input type="text" id="f_cmr_5" data-cmr="cmr_5" placeholder="np. Faktura VAT, WZ" />
-            </div>
+        <h2 class="panel-title">Dane listu przewozowego CMR</h2>
+
+        <div class="sec-box">
+          <div class="sec-head"><span>Nagłówek i strony (1–5)</span></div>
+          <div class="inp-box">
+            <label>Numer CMR (No)</label>
+            <input type="text" data-cmr="cmr_no" />
           </div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_cmr_1">1. Nadawca (nazwisko lub nazwa, adres, kraj)</label>
-              <textarea id="f_cmr_1" data-cmr="cmr_1"></textarea>
-            </div>
+          <div class="inp-box">
+            <label>1. Nadawca (nazwa, adres, kraj)</label>
+            <textarea data-cmr="cmr_1"></textarea>
           </div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_cmr_2">2. Odbiorca (nazwisko lub nazwa, adres, kraj)</label>
-              <textarea id="f_cmr_2" data-cmr="cmr_2"></textarea>
-            </div>
+          <div class="inp-box">
+            <label>2. Odbiorca (nazwa, adres, kraj)</label>
+            <textarea data-cmr="cmr_2"></textarea>
           </div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_cmr_3">3. Miejsce przeznaczenia (miejscowość, kraj)</label>
-              <input type="text" id="f_cmr_3" data-cmr="cmr_3" />
-            </div>
-            <div class="inp-box">
-              <label for="f_cmr_4">4. Miejsce i data załadowania</label>
-              <input type="text" id="f_cmr_4" data-cmr="cmr_4" />
-            </div>
+          <div class="inp-box">
+            <label>3. Miejsce przeznaczenia (miejscowość, kraj)</label>
+            <input type="text" data-cmr="cmr_3" />
+          </div>
+          <div class="inp-box">
+            <label>4. Miejsce i data załadowania</label>
+            <input type="text" data-cmr="cmr_4" />
+          </div>
+          <div class="inp-box">
+            <label>5. Załączone dokumenty</label>
+            <input type="text" data-cmr="cmr_5" />
           </div>
         </div>
 
-        <div class="form-group-card">
-          <div class="form-group-title">
-            <span>2. Specyfikacja towaru (6–12) i ADR</span>
-            <button type="button" class="btn" style="padding:2px 8px;font-size:11px;" onclick="addCargoItem()">
-              + Dodaj pozycję
-            </button>
+        <div class="sec-box">
+          <div class="sec-head">
+            <span>Pozycje towarowe (rubryki 6–12)</span>
+            <button type="button" class="btn" style="padding:3px 8px;font-size:11px;" onclick="addCargoItem()">+ Dodaj pozycję</button>
           </div>
           <div id="cargoEditorContainer"></div>
-          <div class="row-3" style="margin-top:6px;">
-            <div class="inp-box">
-              <label for="f_adr_class">ADR: Klasa</label>
-              <input type="text" id="f_adr_class" data-cmr="adr_class" />
-            </div>
-            <div class="inp-box">
-              <label for="f_adr_num">ADR: Liczba / UN</label>
-              <input type="text" id="f_adr_num" data-cmr="adr_num" />
-            </div>
-            <div class="inp-box">
-              <label for="f_adr_let">ADR: Litera / Grupa</label>
-              <input type="text" id="f_adr_let" data-cmr="adr_let" />
-            </div>
+          <div class="summary-strip">
+            Pozycji: <span id="sumCargoCount">4</span> •
+            Suma masy: <span id="sumCargoWeight">0,00 kg</span> •
+            Suma obj.: <span id="sumCargoVol">0,00 m³</span>
           </div>
-          <div class="totals-row">
-            <div class="total-pill">
-              <div class="k">Pozycji</div>
-              <div class="v" id="sumCargoCount">4</div>
+        </div>
+
+        <div class="sec-box">
+          <div class="sec-head"><span>Klasyfikacja ADR</span></div>
+          <div class="row-3">
+            <div class="inp-box">
+              <label>Klasa</label>
+              <input type="text" data-cmr="adr_class" />
             </div>
-            <div class="total-pill">
-              <div class="k">Suma masy brutto (11)</div>
-              <div class="v" id="sumCargoWeight">0,00 kg</div>
+            <div class="inp-box">
+              <label>Liczba</label>
+              <input type="text" data-cmr="adr_num" />
             </div>
-            <div class="total-pill">
-              <div class="k">Suma objętości (12)</div>
-              <div class="v" id="sumCargoVol">0,00 m³</div>
+            <div class="inp-box">
+              <label>Litera</label>
+              <input type="text" data-cmr="adr_let" />
             </div>
           </div>
         </div>
 
-        <div class="form-group-card">
-          <div class="form-group-title">3. Instrukcje nadawcy (13–15)</div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_cmr_13">13. Instrukcje nadawcy (formalności celne i inne)</label>
-              <textarea id="f_cmr_13" data-cmr="cmr_13"></textarea>
-            </div>
+        <div class="sec-box">
+          <div class="sec-head"><span>Instrukcje, przewoźne i zaliczenie (13–15, 20)</span></div>
+          <div class="inp-box">
+            <label>13. Instrukcje nadawcy</label>
+            <textarea data-cmr="cmr_13"></textarea>
           </div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_cmr_14">14. Postanowienia odnośnie przewoźnego</label>
-              <input type="text" id="f_cmr_14" data-cmr="cmr_14" placeholder="np. Przewoźne zapłacone / nieopłacone" />
-            </div>
-            <div class="inp-box">
-              <label for="f_cmr_15">15. Zwrot zaliczenia (pobranie)</label>
-              <input type="text" id="f_cmr_15" data-cmr="cmr_15" />
-            </div>
+          <div class="inp-box">
+            <label>14. Postanowienia odnośnie przewoźnego</label>
+            <input type="text" data-cmr="cmr_14" />
           </div>
-        </div>
-
-        <div class="form-group-card">
-          <div class="form-group-title">4. Przewoźnik (16–19) i rozliczenie (20)</div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_cmr_16">16. Przewoźnik (nazwisko lub nazwa, adres, kraj)</label>
-              <textarea id="f_cmr_16" data-cmr="cmr_16"></textarea>
-            </div>
-          </div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_cmr_17">17. Kolejni przewoźnicy (nazwisko lub nazwa, adres, kraj)</label>
-              <input type="text" id="f_cmr_17" data-cmr="cmr_17" />
-            </div>
-          </div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_cmr_18">18. Zastrzeżenia i uwagi przewoźnika</label>
-              <textarea id="f_cmr_18" data-cmr="cmr_18"></textarea>
-            </div>
-            <div class="inp-box">
-              <label for="f_cmr_19">19. Postanowienia specjalne</label>
-              <textarea id="f_cmr_19" data-cmr="cmr_19"></textarea>
-            </div>
+          <div class="inp-box">
+            <label>15. Zwrot zaliczenia</label>
+            <input type="text" data-cmr="cmr_15" />
           </div>
           <div class="row-3">
             <div class="inp-box">
-              <label for="f_cmr_20_s">20. Przewoźne — Nadawca</label>
-              <input type="text" id="f_cmr_20_s" data-cmr="cmr_20_s" />
+              <label>20. Nadawca</label>
+              <input type="text" data-cmr="cmr_20_s" />
             </div>
             <div class="inp-box">
-              <label for="f_cmr_20_c">20. Waluta</label>
-              <input type="text" id="f_cmr_20_c" data-cmr="cmr_20_c" placeholder="EUR / PLN" />
+              <label>20. Waluta</label>
+              <input type="text" data-cmr="cmr_20_c" />
             </div>
             <div class="inp-box">
-              <label for="f_cmr_20_r">20. Przewoźne — Odbiorca</label>
-              <input type="text" id="f_cmr_20_r" data-cmr="cmr_20_r" />
+              <label>20. Odbiorca</label>
+              <input type="text" data-cmr="cmr_20_r" />
             </div>
           </div>
         </div>
 
-        <div class="form-group-card">
-          <div class="form-group-title">5. Wystawienie i podpisy (21–24)</div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_cmr_21">21. Wystawiono w / dnia</label>
-              <input type="text" id="f_cmr_21" data-cmr="cmr_21" />
-            </div>
-            <div class="inp-box">
-              <label for="f_cmr_22">22. Podpis i stempel nadawcy</label>
-              <input type="text" id="f_cmr_22" data-cmr="cmr_22" />
-            </div>
+        <div class="sec-box">
+          <div class="sec-head"><span>Przewoźnik i uwagi (16–19)</span></div>
+          <div class="inp-box">
+            <label>16. Przewoźnik (nazwa, adres, kraj)</label>
+            <textarea data-cmr="cmr_16"></textarea>
           </div>
-          <div class="pad-wrap" style="margin-bottom:8px;">
-            <canvas id="padCmr" class="pad" width="410" height="76"></canvas>
-            <div class="pad-footer">
-              <span>Podpis odręczny nadawcy (rubryka 22)</span>
-              <button type="button" class="btn" style="padding:2px 7px;font-size:10px;" onclick="wipePad('cmr')">
-                Wyczyść podpis
-              </button>
-            </div>
+          <div class="inp-box">
+            <label>17. Kolejni przewoźnicy</label>
+            <input type="text" data-cmr="cmr_17" />
           </div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_cmr_23">23. Podpis i stempel przewoźnika</label>
-              <input type="text" id="f_cmr_23" data-cmr="cmr_23" />
-            </div>
-            <div class="inp-box">
-              <label for="f_cmr_24">24. Przesyłkę otrzymano (miejscowość, data, odbiorca)</label>
-              <input type="text" id="f_cmr_24" data-cmr="cmr_24" />
+          <div class="inp-box">
+            <label>18. Zastrzeżenia i uwagi przewoźnika</label>
+            <textarea data-cmr="cmr_18"></textarea>
+          </div>
+          <div class="inp-box">
+            <label>19. Postanowienia specjalne</label>
+            <input type="text" data-cmr="cmr_19" />
+          </div>
+        </div>
+
+        <div class="sec-box">
+          <div class="sec-head"><span>Wystawienie i podpisy (21–24)</span></div>
+          <div class="inp-box">
+            <label>21. Wystawiono w / dnia</label>
+            <input type="text" data-cmr="cmr_21" />
+          </div>
+          <div class="inp-box">
+            <label>22. Podpis i stempel nadawcy (tekst)</label>
+            <input type="text" data-cmr="cmr_22" />
+          </div>
+          <div class="inp-box">
+            <label>23. Podpis i stempel przewoźnika</label>
+            <input type="text" data-cmr="cmr_23" />
+          </div>
+          <div class="inp-box">
+            <label>24. Przesyłkę otrzymano (miejsce, data, odbiorca)</label>
+            <input type="text" data-cmr="cmr_24" />
+          </div>
+          <div class="inp-box">
+            <label>Podpis odręczny (rubryka 22)</label>
+            <canvas id="padCmr" class="sig-pad" width="380" height="92"></canvas>
+            <div style="margin-top:5px;">
+              <button type="button" class="btn" style="padding:3px 8px;font-size:11px;" onclick="wipePad('cmr')">Wyczyść podpis</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- FORMULARZ ZLECENIA TRANSPORTOWEGO -->
+      <!-- Formularz Zlecenia Transportowego -->
       <div id="formOrder" style="display:none;">
-        <div class="form-group-card">
-          <div class="form-group-title">1. Numer i data wystawienia</div>
+        <h2 class="panel-title">Dane zlecenia transportowego</h2>
+
+        <div class="sec-box">
+          <div class="sec-head"><span>Numer i data</span></div>
           <div class="row-2">
             <div class="inp-box">
-              <label for="f_ord_no">Nr zlecenia</label>
-              <input type="text" id="f_ord_no" data-ord="ord_no" />
+              <label>Nr zlecenia</label>
+              <input type="text" data-ord="ord_no" />
             </div>
             <div class="inp-box">
-              <label for="f_ord_date">Wystawiony (miejscowość, data)</label>
-              <input type="text" id="f_ord_date" data-ord="ord_date" />
+              <label>Wystawiony (data / miejsce)</label>
+              <input type="text" data-ord="ord_date" />
             </div>
           </div>
         </div>
 
-        <div class="form-group-card">
-          <div class="form-group-title">2. Zleceniodawca i Zleceniobiorca</div>
-          <div class="row-1">
+        <div class="sec-box">
+          <div class="sec-head"><span>Strony</span></div>
+          <div class="inp-box">
+            <label>Zleceniodawca</label>
+            <textarea data-ord="ord_client"></textarea>
+          </div>
+          <div class="inp-box">
+            <label>Zleceniobiorca</label>
+            <textarea data-ord="ord_carrier"></textarea>
+          </div>
+        </div>
+
+        <div class="sec-box">
+          <div class="sec-head"><span>Ładunki</span></div>
+          <div class="inp-box">
+            <label>Opis ładunków</label>
+            <textarea data-ord="ord_cargo"></textarea>
+          </div>
+          <div class="row-2">
             <div class="inp-box">
-              <label for="f_ord_client">Zleceniodawca</label>
-              <textarea id="f_ord_client" data-ord="ord_client"></textarea>
+              <label>Masa brutto</label>
+              <input type="text" data-ord="ord_gross_weight" />
+            </div>
+            <div class="inp-box">
+              <label>Objętość brutto</label>
+              <input type="text" data-ord="ord_gross_vol" />
             </div>
           </div>
-          <div class="row-1">
+          <div class="row-2">
             <div class="inp-box">
-              <label for="f_ord_carrier">Zleceniobiorca</label>
-              <textarea id="f_ord_carrier" data-ord="ord_carrier"></textarea>
+              <label>ADR</label>
+              <input type="text" data-ord="ord_adr" />
+            </div>
+            <div class="inp-box">
+              <label>ATP</label>
+              <input type="text" data-ord="ord_atp" />
             </div>
           </div>
         </div>
 
-        <div class="form-group-card">
-          <div class="form-group-title">
-            <span>3. Ładunki i akcje</span>
-            <button type="button" class="btn" style="padding:2px 8px;font-size:11px;" onclick="addActionRow()">
-              + Dodaj akcję
-            </button>
-          </div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_ord_cargo">Ładunki</label>
-              <textarea id="f_ord_cargo" data-ord="ord_cargo"></textarea>
-            </div>
-          </div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_ord_gross_weight">Masa brutto</label>
-              <input type="text" id="f_ord_gross_weight" data-ord="ord_gross_weight" placeholder="np. 24 000 kg" />
-            </div>
-            <div class="inp-box">
-              <label for="f_ord_gross_vol">Objętość brutto</label>
-              <input type="text" id="f_ord_gross_vol" data-ord="ord_gross_vol" placeholder="np. 82 m³" />
-            </div>
-          </div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_ord_adr">ADR</label>
-              <input type="text" id="f_ord_adr" data-ord="ord_adr" placeholder="np. Nie / Klasa 3, UN 1203" />
-            </div>
-            <div class="inp-box">
-              <label for="f_ord_atp">ATP</label>
-              <input type="text" id="f_ord_atp" data-ord="ord_atp" placeholder="np. Nie / FRC / +2°C...+6°C" />
-            </div>
+        <div class="sec-box">
+          <div class="sec-head">
+            <span>Akcje (załadunek / rozładunek)</span>
+            <button type="button" class="btn" style="padding:3px 8px;font-size:11px;" onclick="addActionRow()">+ Dodaj akcję</button>
           </div>
           <div id="actionsEditorContainer"></div>
         </div>
 
-        <div class="form-group-card">
-          <div class="form-group-title">4. Pojazd/kierowca, uwagi i warunki</div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_ord_vehicle">Pojazd / kierowca</label>
-              <input type="text" id="f_ord_vehicle" data-ord="ord_vehicle" />
-            </div>
+        <div class="sec-box">
+          <div class="sec-head"><span>Pojazd/kierowca i uwagi</span></div>
+          <div class="inp-box">
+            <label>Pojazd/kierowca</label>
+            <textarea data-ord="ord_vehicle"></textarea>
           </div>
-          <div class="row-2">
-            <div class="inp-box">
-              <label for="f_ord_remarks">Uwagi</label>
-              <textarea id="f_ord_remarks" data-ord="ord_remarks"></textarea>
-            </div>
-            <div class="inp-box">
-              <label for="f_ord_terms">Warunki</label>
-              <textarea id="f_ord_terms" data-ord="ord_terms" style="min-height:130px;">WARUNKI ZLECENIA TRANSPORTOWEGO
-1. Podstawa prawna i akceptacja: W sprawach nieuregulowanych stosuje się przepisy Prawa przewozowego lub Konwencji CMR. Brak pisemnej odmowy w ciągu 30 minut od otrzymania zlecenia oznacza jego pełną akceptację.
-2. Realizacja i OCP: Przewoźnik gwarantuje sprawny i czysty pojazd oraz aktualne ubezpieczenie OCP (obejmujące kradzież i rabunek) na sumę nie niższą niż wartość towaru. Zakazuje się przeładunków, doładunków oraz podzlecania przewozu osobom trzecim bez pisemnej zgody Zleceniodawcy.
-3. Dokumenty i płatność: Podstawą płatności jest dostarczenie oryginałów dokumentów przewozowych (CMR, WZ) bez zastrzeżeń w terminie do 14 dni od rozładunku. Termin płatności wynosi [np. 45] dni od otrzymania prawidłowej faktury wraz z kompletem dokumentów.
-4. Postoje i kary umowne: Pierwsze 24 godziny postoju na załadunku i rozładunku (z wyłączeniem dni wolnych od pracy) są wolne od opłat. Zleceniodawca ma prawo naliczyć karę umowną w wysokości 100% frachtu za niepodstawienie auta lub odstąpienie od zlecenia oraz 100 EUR za każdą rozpoczętą dobę opóźnienia.
-5. Palety: Przewoźnik zobowiązany jest do zwrotu pobranych palet wymiennych (EPAL) lub przedstawienia kwitu paletowego pod rygorem obciążenia kosztem 15 EUR za każdą brakującą sztukę.
-6. Ochrona klienta: Przewoźnik zobowiązuje się nie kontaktować i nie składać ofert bezpośrednio kontrahentom Zleceniodawcy wskazanym w zleceniu przez okres 12 miesięcy od jego realizacji, pod rygorem kary umownej w wysokości 10 000 EUR.
-7. Postanowienia końcowe: Wszelkie zmiany wymagają formy pisemnej lub e-mailowej. Spory rozstrzyga sąd właściwy dla siedziby Zleceniodawcy.</textarea>
-            </div>
+          <div class="inp-box">
+            <label>Uwagi</label>
+            <textarea data-ord="ord_remarks"></textarea>
           </div>
         </div>
 
-        <div class="form-group-card">
-          <div class="form-group-title">5. Płatność netto / termin i VAT</div>
+        <div class="sec-box">
+          <div class="sec-head"><span>Płatność netto/termin i VAT</span></div>
+          <div class="inp-box">
+            <label>Płatność netto/termin</label>
+            <textarea data-ord="ord_pay_terms"></textarea>
+          </div>
           <div class="row-3">
             <div class="inp-box">
-              <label for="f_ord_net">Kwota netto (PLN)</label>
-              <input type="number" step="0.01" min="0" id="f_ord_net" data-ord="ord_net" oninput="calcVatSummary()" />
+              <label>Wartość netto (PLN)</label>
+              <input type="text" data-ord="ord_net" oninput="calcVatSummary()" />
             </div>
             <div class="inp-box">
-              <label for="f_ord_vat_sel">Stawka VAT</label>
+              <label>Stawka VAT</label>
               <select id="f_ord_vat_sel" onchange="handleVatSelect()">
-                <option value="23">23%</option>
+                <option value="23" selected>23%</option>
                 <option value="8">8%</option>
                 <option value="5">5%</option>
                 <option value="0">0%</option>
                 <option value="np">NP</option>
-                <option value="custom">Inna %</option>
+                <option value="custom">Inna (%)</option>
               </select>
             </div>
             <div class="inp-box">
-              <label for="f_ord_vat_inp">VAT własny (%)</label>
-              <input type="number" step="0.1" min="0" id="f_ord_vat_inp" value="23" oninput="calcVatSummary()" />
+              <label>VAT % (własna)</label>
+              <input type="text" id="f_ord_vat_inp" value="23" oninput="calcVatSummary()" />
             </div>
           </div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_ord_pay_terms">Płatność netto / termin</label>
-              <input type="text" id="f_ord_pay_terms" data-ord="ord_pay_terms" />
-            </div>
-          </div>
-          <div class="totals-row">
-            <div class="total-pill">
-              <div class="k">Netto</div>
-              <div class="v" id="uiOrdNet">0,00 PLN</div>
-            </div>
-            <div class="total-pill">
-              <div class="k" id="uiOrdVatLbl">VAT (23%)</div>
-              <div class="v" id="uiOrdVat">0,00 PLN</div>
-            </div>
-            <div class="total-pill">
-              <div class="k">Brutto</div>
-              <div class="v" id="uiOrdGross">0,00 PLN</div>
-            </div>
+          <div class="summary-strip">
+            Netto: <span id="uiOrdNet">0,00 PLN</span> •
+            <span id="uiOrdVatLbl">VAT (23%)</span>: <span id="uiOrdVat">0,00 PLN</span> •
+            Brutto: <span id="uiOrdGross">0,00 PLN</span>
           </div>
         </div>
 
-        <div class="form-group-card">
-          <div class="form-group-title">6. Podpisy stron</div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_ord_client_sign">Podpis zleceniodawcy (imię i nazwisko / uczeń)</label>
-              <input type="text" id="f_ord_client_sign" data-ord="ord_client_sign" />
+        <div class="sec-box">
+          <div class="sec-head"><span>Podpisy</span></div>
+          <div class="inp-box">
+            <label>Podpis zleceniodawcy (tekst)</label>
+            <input type="text" data-ord="ord_client_sign" />
+          </div>
+          <div class="inp-box">
+            <label>Podpis odręczny zleceniodawcy</label>
+            <canvas id="padOrder" class="sig-pad" width="380" height="92"></canvas>
+            <div style="margin-top:5px;">
+              <button type="button" class="btn" style="padding:3px 8px;font-size:11px;" onclick="wipePad('order')">Wyczyść podpis</button>
             </div>
           </div>
-          <div class="pad-wrap" style="margin-bottom:8px;">
-            <canvas id="padOrder" class="pad" width="410" height="76"></canvas>
-            <div class="pad-footer">
-              <span>Podpis odręczny zleceniodawcy</span>
-              <button type="button" class="btn" style="padding:2px 7px;font-size:10px;" onclick="wipePad('order')">
-                Wyczyść podpis
-              </button>
-            </div>
-          </div>
-          <div class="row-1">
-            <div class="inp-box">
-              <label for="f_ord_carrier_sign">Podpis zleceniobiorcy</label>
-              <input type="text" id="f_ord_carrier_sign" data-ord="ord_carrier_sign" />
-            </div>
+          <div class="inp-box">
+            <label>Podpis zleceniobiorcy</label>
+            <textarea data-ord="ord_carrier_sign"></textarea>
           </div>
         </div>
       </div>
-
     </aside>
 
-    <!-- PODGLĄD NA ŻYWO (PRAWA STRONA) -->
+    <!-- Prawa kolumna podglądu A4 -->
     <main class="preview-col">
-      <div id="cmrPreview" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:18px;"></div>
-      <div id="orderPreview" style="display:none;width:100%;flex-direction:column;align-items:center;gap:18px;"></div>
+      <div id="cmrPreview" style="display:flex;flex-direction:column;align-items:center;gap:18px;"></div>
+      <div id="orderPreview" style="display:none;flex-direction:column;align-items:center;gap:18px;"></div>
     </main>
   </div>
 
@@ -1360,7 +1337,7 @@
     { n: 4, cls: "egz-4", name: "EGZEMPLARZ ROZLICZENIOWY", desc: "Exemplar für Abrechnung • Copy for accounting" }
   ];
 
-  const DEFAULT_TERMS = 'WARUNKI ZLECENIA TRANSPORTOWEGO\n1. Podstawa prawna i akceptacja: W sprawach nieuregulowanych stosuje się przepisy Prawa przewozowego lub Konwencji CMR. Brak pisemnej odmowy w ciągu 30 minut od otrzymania zlecenia oznacza jego pełną akceptację.\n2. Realizacja i OCP: Przewoźnik gwarantuje sprawny i czysty pojazd oraz aktualne ubezpieczenie OCP (obejmujące kradzież i rabunek) na sumę nie niższą niż wartość towaru. Zakazuje się przeładunków, doładunków oraz podzlecania przewozu osobom trzecim bez pisemnej zgody Zleceniodawcy.\n3. Dokumenty i płatność: Podstawą płatności jest dostarczenie oryginałów dokumentów przewozowych (CMR, WZ) bez zastrzeżeń w terminie do 14 dni od rozładunku. Termin płatności wynosi [np. 45] dni od otrzymania prawidłowej faktury wraz z kompletem dokumentów.\n4. Postoje i kary umowne: Pierwsze 24 godziny postoju na załadunku i rozładunku (z wyłączeniem dni wolnych od pracy) są wolne od opłat. Zleceniodawca ma prawo naliczyć karę umowną w wysokości 100% frachtu za niepodstawienie auta lub odstąpienie od zlecenia oraz 100 EUR za każdą rozpoczętą dobę opóźnienia.\n5. Palety: Przewoźnik zobowiązany jest do zwrotu pobranych palet wymiennych (EPAL) lub przedstawienia kwitu paletowego pod rygorem obciążenia kosztem 15 EUR za każdą brakującą sztukę.\n6. Ochrona klienta: Przewoźnik zobowiązuje się nie kontaktować i nie składać ofert bezpośrednio kontrahentom Zleceniodawcy wskazanym w zleceniu przez okres 12 miesięcy od jego realizacji, pod rygorem kary umownej w wysokości 10 000 EUR.\n7. Postanowienia końcowe: Wszelkie zmiany wymagają formy pisemnej lub e-mailowej. Spory rozstrzyga sąd właściwy dla siedziby Zleceniodawcy.';
+  const DEFAULT_TERMS = 'WARUNKI ZLECENIA TRANSPORTOWEGO\n1. Podstawa prawna i akceptacja: W sprawach nieuregulowanych stosuje się przepisy Prawa przewozowego lub Konwencji CMR. Brak pisemnej odmowy w ciągu 30 minut od otrzymania zlecenia oznacza jego pełną akceptację.\n2. Realizacja i OCP: Przewoźnik gwarantuje sprawny i czysty pojazd oraz aktualne ubezpieczenie OCP (obejmujące kradzież i rabunek) na sumę nie niższą niż wartość towaru. Zakazuje się przeładunków, doładunków oraz podzlecania przewozu osobom trzecim bez pisemnej zgody Zleceniodawcy.\n3. Dokumenty i płatność: Podstawą płatności jest dostarczenie oryginałów dokumentów przewozowych (CMR, WZ) bez zastrzeżeń w terminie do 14 dni od rozładunku. Termin płatności wynosi [np. 45] dni od otrzymania prawidłowej faktury wraz z kompletem dokumentów.\n4. Postoje i kary umowne: Pierwsze 24 godziny postoju na załadunku i rozładunku (z wyłączeniem dni wolnych od pracy) są wolne od opłat. Zleceniodawca ma prawo naliczyć karę umowną w wysokości 100% frachtu za niepodstawienie auta lub odstąpienie od zlecenia oraz 100 EUR za każdą rozpoczętą dobę opóźnienia.\n5. Palety: Przewoźnik zobowiązany jest do zwrotu pobranych palet wymiennych (EPAL) lub przedstawienia kwitu paletowego pod rygorem obciążenia kosztem 15 EUR za każdą brakującą sztukę.\n6. Ochrona klienta: Przewoźnik zobowiązuje się nie kontaktować i nie składać ofert bezpośrednio kontrahentom Zleceniodawcy wskazanym w zleceniu przez okres 12 miesięcy od jego realizacji, pod rygorem kary umowną w wysokości 10 000 EUR.\n7. Postanowienia końcowe: Wszelkie zmiany wymagają formy pisemnej lub e-mailowej. Spory rozstrzyga sąd właściwy dla siedziby Zleceniodawcy.';
 
   const DEFAULT_CARRIER_SIGN = "Agnieszka Sokołowska, Piotr Sokołowski Transport Ciężarowy S.C. (ul. Przemysłowa 7/2, 14-260 Lubawa, NIP: 744-527-12-70)";
 
@@ -1616,7 +1593,6 @@
           </div>
 
           <div class="cmr-sheet-grid">
-            <!-- GÓRNA POŁOWA: LEWA (1–5) + PRAWA (NAGŁÓWEK CMR + 16–19) -->
             <div class="cmr-top-two-cols">
               <div class="cmr-col-left">
                 <div class="cmr-box box-h1">
@@ -1689,7 +1665,6 @@
               </div>
             </div>
 
-            <!-- TABELA TOWAROWA: RUBRYKI 6–12 -->
             <table class="cmr-goods-tbl">
               <thead>
                 <tr>
@@ -1705,7 +1680,6 @@
               <tbody>${rowsHtml}</tbody>
             </table>
 
-            <!-- PASEK KLASYFIKACJI ADR ORAZ OSOBNE RUBRYKI MASY (11) I OBJĘTOŚCI (12) -->
             <div class="cmr-adr-strip">
               <div class="cmr-adr-cell"><strong>Klasa / Klasse / Class:</strong><input type="text" class="cmr-adr-inp" data-cmr="adr_class" value="${esc(appState.cmr.adr_class)}" /></div>
               <div class="cmr-adr-cell"><strong>Liczba / Ziffer / Number:</strong><input type="text" class="cmr-adr-inp" data-cmr="adr_num" value="${esc(appState.cmr.adr_num)}" /></div>
@@ -1714,7 +1688,6 @@
               <div class="cmr-adr-cell"><strong>12 Objętość (m³):</strong><span style="font-size:8.5pt;font-weight:900;color:#0f172a;" data-sum-vol>0,00 m³</span></div>
             </div>
 
-            <!-- RUBRYKI 13, 14 PO LEWEJ ORAZ TABELA 20 PO PRAWEJ -->
             <div class="cmr-mid-lower">
               <div class="cmr-mid-left">
                 <div class="cmr-box box-h13">
@@ -1755,7 +1728,6 @@
               </div>
             </div>
 
-            <!-- RUBRYKA 21 PO LEWEJ ORAZ RUBRYKA 15 PO PRAWEJ -->
             <div class="cmr-row-21-15">
               <div class="cmr-box box-h21">
                 <div class="cmr-lbl-row"><span class="cmr-num">21</span><div class="cmr-lbl"><strong>Wystawiono w</strong> / Ausgefertigt in / Established in — <strong>dnia</strong> / am / on:</div></div>
@@ -1767,7 +1739,6 @@
               </div>
             </div>
 
-            <!-- DOLNE RUBRYKI PODPISÓW: 22, 23, 24 -->
             <div class="cmr-bottom-22-24">
               <div class="cmr-sign-cell">
                 <div class="cmr-lbl-row"><span class="cmr-num">22</span><div class="cmr-lbl"><strong>Podpis i stempel nadawcy</strong> / Unterschrift und Stempel des Absenders / Signature and stamp of the sender</div></div>
@@ -1971,15 +1942,9 @@
             <div data-max-pt="8.8" data-min-pt="6.5" data-ord="ord_vehicle" style="white-space:pre-line;">${esc(appState.order.ord_vehicle)}</div>
           </div>
 
-          <div class="ord-grid-2">
-            <div class="ord-card" style="min-height:24mm;">
-              <div class="ord-card-title">UWAGI</div>
-              <div data-max-pt="8.6" data-min-pt="6.5" data-ord="ord_remarks" style="white-space:pre-line;">${esc(appState.order.ord_remarks)}</div>
-            </div>
-            <div class="ord-card" style="min-height:48mm;">
-              <div class="ord-card-title">WARUNKI</div>
-              <div data-max-pt="7.4" data-min-pt="5.4" data-ord="ord_terms" style="white-space:pre-line;line-height:1.18;">${esc(appState.order.ord_terms)}</div>
-            </div>
+          <div class="ord-card" style="min-height:20mm;margin-bottom:6px;">
+            <div class="ord-card-title">UWAGI</div>
+            <div data-max-pt="8.6" data-min-pt="6.5" data-ord="ord_remarks" style="white-space:pre-line;">${esc(appState.order.ord_remarks)}</div>
           </div>
 
           <div class="ord-bottom-calc">
@@ -1998,6 +1963,16 @@
         </div>
 
         <div>
+          <div class="ord-provisions-box">
+            <div class="ord-provisions-title">WARUNKI ZLECENIA TRANSPORTOWEGO — POSTANOWIENIA</div>1. Podstawa prawna i akceptacja: W sprawach nieuregulowanych stosuje się przepisy Prawa przewozowego lub Konwencji CMR. Brak pisemnej odmowy w ciągu 30 minut od otrzymania zlecenia oznacza jego pełną akceptację.
+2. Realizacja i OCP: Przewoźnik gwarantuje sprawny i czysty pojazd oraz aktualne ubezpieczenie OCP (obejmujące kradzież i rabunek) na sumę nie niższą niż wartość towaru. Zakazuje się przeładunków, doładunków oraz podzlecania przewozu osobom trzecim bez pisemnej zgody Zleceniodawcy.
+3. Dokumenty i płatność: Podstawą płatności jest dostarczenie oryginałów dokumentów przewozowych (CMR, WZ) bez zastrzeżeń w terminie do 14 dni od rozładunku. Termin płatności wynosi [np. 45] dni od otrzymania prawidłowej faktury wraz z kompletem dokumentów.
+4. Postoje i kary umowne: Pierwsze 24 godziny postoju na załadunku i rozładunku (z wyłączeniem dni wolnych od pracy) są wolne od opłat. Zleceniodawca ma prawo naliczyć karę umowną w wysokości 100% frachtu za niepodstawienie auta lub odstąpienie od zlecenia oraz 100 EUR za każdą rozpoczętą dobę opóźnienia.
+5. Palety: Przewoźnik zobowiązany jest do zwrotu pobranych palet wymiennych (EPAL) lub przedstawienia kwitu paletowego pod rygorem obciążenia kosztem 15 EUR za każdą brakującą sztukę.
+6. Ochrona klienta: Przewoźnik zobowiązuje się nie kontaktować i nie składać ofert bezpośrednio kontrahentom Zleceniodawcy wskazanym w zleceniu przez okres 12 miesięcy od jego realizacji, pod rygorem kary umowną w wysokości 10 000 EUR.
+7. Postanowienia końcowe: Wszelkie zmiany wymagają formy pisemnej lub e-mailowej. Spory rozstrzyga sąd właściwy dla siedziby Zleceniodawcy.
+          </div>
+
           <div class="ord-signs">
             <div class="ord-sign-box">
               <div class="ord-card-title" style="border:none;margin-bottom:2px;">podpis zleceniodawcy</div>
@@ -2179,3 +2154,4 @@
 </script>
 </body>
 </html>
+```[cite: 12]

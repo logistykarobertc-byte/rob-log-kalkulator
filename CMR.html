@@ -1218,6 +1218,26 @@
               <textarea id="f_ord_cargo" data-ord="ord_cargo"></textarea>
             </div>
           </div>
+          <div class="row-2">
+            <div class="inp-box">
+              <label for="f_ord_gross_weight">Masa brutto</label>
+              <input type="text" id="f_ord_gross_weight" data-ord="ord_gross_weight" placeholder="np. 24 000 kg" />
+            </div>
+            <div class="inp-box">
+              <label for="f_ord_gross_vol">Objętość brutto</label>
+              <input type="text" id="f_ord_gross_vol" data-ord="ord_gross_vol" placeholder="np. 82 m³" />
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="inp-box">
+              <label for="f_ord_adr">ADR</label>
+              <input type="text" id="f_ord_adr" data-ord="ord_adr" placeholder="np. Nie / Klasa 3, UN 1203" />
+            </div>
+            <div class="inp-box">
+              <label for="f_ord_atp">ATP</label>
+              <input type="text" id="f_ord_atp" data-ord="ord_atp" placeholder="np. Nie / FRC / +2°C...+6°C" />
+            </div>
+          </div>
           <div id="actionsEditorContainer"></div>
         </div>
 
@@ -1385,6 +1405,10 @@
       ord_client: "",
       ord_carrier: "",
       ord_cargo: "",
+      ord_gross_weight: "",
+      ord_gross_vol: "",
+      ord_adr: "",
+      ord_atp: "",
       ord_vehicle: "",
       ord_remarks: "",
       ord_terms: DEFAULT_TERMS,
@@ -1903,7 +1927,25 @@
 
           <div class="ord-card" style="min-height:24mm;margin-bottom:6px;">
             <div class="ord-card-title">ŁADUNKI</div>
-            <div data-max-pt="8.8" data-min-pt="6.5" data-ord="ord_cargo" style="white-space:pre-line;">${esc(appState.order.ord_cargo)}</div>
+            <div data-max-pt="8.8" data-min-pt="6.5" data-ord="ord_cargo" style="white-space:pre-line;margin-bottom:5px;">${esc(appState.order.ord_cargo)}</div>
+            <table class="ord-tbl" style="margin-top:4px;">
+              <thead>
+                <tr>
+                  <th style="width:25%;">Masa brutto</th>
+                  <th style="width:25%;">Objętość brutto</th>
+                  <th style="width:25%;">ADR</th>
+                  <th style="width:25%;">ATP</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div data-max-pt="8.5" data-min-pt="6.5" data-ord="ord_gross_weight" style="font-weight:700;">${esc(appState.order.ord_gross_weight)}</div></td>
+                  <td><div data-max-pt="8.5" data-min-pt="6.5" data-ord="ord_gross_vol" style="font-weight:700;">${esc(appState.order.ord_gross_vol)}</div></td>
+                  <td><div data-max-pt="8.5" data-min-pt="6.5" data-ord="ord_adr" style="font-weight:700;">${esc(appState.order.ord_adr)}</div></td>
+                  <td><div data-max-pt="8.5" data-min-pt="6.5" data-ord="ord_atp" style="font-weight:700;">${esc(appState.order.ord_atp)}</div></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div class="ord-card" style="margin-bottom:6px;">

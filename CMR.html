@@ -572,7 +572,7 @@
     padding: 0;
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 8.6pt;
+    font-size: 9.5pt;
     font-weight: 700;
     color: #0f172a;
     white-space: normal;
@@ -622,7 +622,7 @@
   }
 
   .cmr-goods-tbl td {
-    height: 10.2mm;
+    height: 11.4mm;
     background: #ffffff;
   }
 
@@ -634,8 +634,8 @@
     padding: 0;
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 8.3pt;
-    font-weight: 600;
+    font-size: 9.5pt;
+    font-weight: 700;
     color: #0f172a;
     white-space: normal;
     word-break: break-word;
@@ -671,7 +671,7 @@
     border: none;
     background: transparent;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 8pt;
+    font-size: 9.5pt;
     font-weight: 700;
     color: #0f172a;
     outline: none;
@@ -731,7 +731,7 @@
     border: none;
     background: transparent;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 7.4pt;
+    font-size: 9pt;
     font-weight: 700;
     color: #0f172a;
     outline: none;
@@ -1556,13 +1556,13 @@
 
     const rowsHtml = appState.cargo.map((row, i) => `
       <tr>
-        <td><textarea class="cmr-goods-inp" data-max-pt="8.3" data-min-pt="6.0" data-cg-r="${i}" data-cg-c="marks" oninput="updateCargoVal(${i}, 'marks', this.value)">${esc(row.marks)}</textarea></td>
-        <td><textarea class="cmr-goods-inp" data-max-pt="8.3" data-min-pt="6.0" data-cg-r="${i}" data-cg-c="qty" oninput="updateCargoVal(${i}, 'qty', this.value)">${esc(row.qty)}</textarea></td>
-        <td><textarea class="cmr-goods-inp" data-max-pt="8.3" data-min-pt="6.0" data-cg-r="${i}" data-cg-c="pack" oninput="updateCargoVal(${i}, 'pack', this.value)">${esc(row.pack)}</textarea></td>
-        <td><textarea class="cmr-goods-inp" data-max-pt="8.3" data-min-pt="6.0" data-cg-r="${i}" data-cg-c="goods" oninput="updateCargoVal(${i}, 'goods', this.value)">${esc(row.goods)}</textarea></td>
-        <td><textarea class="cmr-goods-inp" data-max-pt="8.1" data-min-pt="6.0" data-cg-r="${i}" data-cg-c="stat" oninput="updateCargoVal(${i}, 'stat', this.value)">${esc(row.stat)}</textarea></td>
-        <td><textarea class="cmr-goods-inp" data-max-pt="8.3" data-min-pt="6.0" data-cg-r="${i}" data-cg-c="weight" oninput="updateCargoVal(${i}, 'weight', this.value)">${esc(row.weight)}</textarea></td>
-        <td><textarea class="cmr-goods-inp" data-max-pt="8.3" data-min-pt="6.0" data-cg-r="${i}" data-cg-c="vol" oninput="updateCargoVal(${i}, 'vol', this.value)">${esc(row.vol)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="9.5" data-min-pt="7.5" data-cg-r="${i}" data-cg-c="marks" oninput="updateCargoVal(${i}, 'marks', this.value)">${esc(row.marks)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="9.5" data-min-pt="7.5" data-cg-r="${i}" data-cg-c="qty" oninput="updateCargoVal(${i}, 'qty', this.value)">${esc(row.qty)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="9.5" data-min-pt="7.5" data-cg-r="${i}" data-cg-c="pack" oninput="updateCargoVal(${i}, 'pack', this.value)">${esc(row.pack)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="9.5" data-min-pt="7.5" data-cg-r="${i}" data-cg-c="goods" oninput="updateCargoVal(${i}, 'goods', this.value)">${esc(row.goods)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="9.5" data-min-pt="7.5" data-cg-r="${i}" data-cg-c="stat" oninput="updateCargoVal(${i}, 'stat', this.value)">${esc(row.stat)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="9.5" data-min-pt="7.5" data-cg-r="${i}" data-cg-c="weight" oninput="updateCargoVal(${i}, 'weight', this.value)">${esc(row.weight)}</textarea></td>
+        <td><textarea class="cmr-goods-inp" data-max-pt="9.5" data-min-pt="7.5" data-cg-r="${i}" data-cg-c="vol" oninput="updateCargoVal(${i}, 'vol', this.value)">${esc(row.vol)}</textarea></td>
       </tr>
     `).join("");
 
@@ -1590,23 +1590,23 @@
               <div class="cmr-col-left">
                 <div class="cmr-box box-h1">
                   <div class="cmr-lbl-row"><span class="cmr-num">1</span><div class="cmr-lbl"><strong>Nadawca</strong> (nazwisko lub nazwa, adres, kraj) / Absender (Name, Anschrift, Land) / Sender (name, address, country)</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.6" data-min-pt="6.2" data-cmr="cmr_1">${esc(appState.cmr.cmr_1)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_1">${esc(appState.cmr.cmr_1)}</textarea>
                 </div>
                 <div class="cmr-box box-h2">
                   <div class="cmr-lbl-row"><span class="cmr-num">2</span><div class="cmr-lbl"><strong>Odbiorca</strong> (nazwisko lub nazwa, adres, kraj) / Empfänger (Name, Anschrift, Land) / Consignee (name, address, country)</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.6" data-min-pt="6.2" data-cmr="cmr_2">${esc(appState.cmr.cmr_2)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_2">${esc(appState.cmr.cmr_2)}</textarea>
                 </div>
                 <div class="cmr-box box-h3">
                   <div class="cmr-lbl-row"><span class="cmr-num">3</span><div class="cmr-lbl"><strong>Miejsce przeznaczenia</strong> (miejscowość, kraj) / Auslieferungsort des Gutes (Ort, Land) / Place of delivery of the goods (place, country)</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.6" data-min-pt="6.2" data-cmr="cmr_3">${esc(appState.cmr.cmr_3)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_3">${esc(appState.cmr.cmr_3)}</textarea>
                 </div>
                 <div class="cmr-box box-h4">
                   <div class="cmr-lbl-row"><span class="cmr-num">4</span><div class="cmr-lbl"><strong>Miejsce i data załadowania</strong> (miejscowość, kraj, data) / Ort und Tag der Übernahme des Gutes / Place and date of taking over the goods</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.6" data-min-pt="6.2" data-cmr="cmr_4">${esc(appState.cmr.cmr_4)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_4">${esc(appState.cmr.cmr_4)}</textarea>
                 </div>
                 <div class="cmr-box box-h5">
                   <div class="cmr-lbl-row"><span class="cmr-num">5</span><div class="cmr-lbl"><strong>Załączone dokumenty</strong> / Beigefügte Dokumente / Documents attached</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.6" data-min-pt="6.2" data-cmr="cmr_5">${esc(appState.cmr.cmr_5)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_5">${esc(appState.cmr.cmr_5)}</textarea>
                 </div>
               </div>
 
@@ -1641,19 +1641,19 @@
 
                 <div class="cmr-box box-h16 carrier-bold">
                   <div class="cmr-lbl-row"><span class="cmr-num">16</span><div class="cmr-lbl"><strong>Przewoźnik</strong> (nazwisko lub nazwa, adres, kraj) / Frachtführer (Name, Anschrift, Land) / Carrier (name, address, country)</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.6" data-min-pt="6.2" data-cmr="cmr_16">${esc(appState.cmr.cmr_16)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_16">${esc(appState.cmr.cmr_16)}</textarea>
                 </div>
                 <div class="cmr-box box-h17 carrier-bold">
                   <div class="cmr-lbl-row"><span class="cmr-num">17</span><div class="cmr-lbl"><strong>Kolejni przewoźnicy</strong> (nazwisko lub nazwa, adres, kraj) / Nachfolgende Frachtführer / Successive carriers</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.4" data-min-pt="6.2" data-cmr="cmr_17">${esc(appState.cmr.cmr_17)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_17">${esc(appState.cmr.cmr_17)}</textarea>
                 </div>
                 <div class="cmr-box box-h18 carrier-bold">
                   <div class="cmr-lbl-row"><span class="cmr-num">18</span><div class="cmr-lbl"><strong>Zastrzeżenia i uwagi przewoźnika</strong> / Vorbehalte und Bemerkungen des Frachtführers / Carrier's reservations and observations</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.4" data-min-pt="6.2" data-cmr="cmr_18">${esc(appState.cmr.cmr_18)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_18">${esc(appState.cmr.cmr_18)}</textarea>
                 </div>
                 <div class="cmr-box box-h19 carrier-bold">
                   <div class="cmr-lbl-row"><span class="cmr-num">19</span><div class="cmr-lbl"><strong>Postanowienia specjalne</strong> / Besondere Vereinbarungen / Special agreements</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.4" data-min-pt="6.2" data-cmr="cmr_19">${esc(appState.cmr.cmr_19)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_19">${esc(appState.cmr.cmr_19)}</textarea>
                 </div>
               </div>
             </div>
@@ -1687,11 +1687,11 @@
               <div class="cmr-mid-left">
                 <div class="cmr-box box-h13">
                   <div class="cmr-lbl-row"><span class="cmr-num">13</span><div class="cmr-lbl"><strong>Instrukcje nadawcy</strong> / Weisungen des Absenders / Sender's instructions</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.4" data-min-pt="6.2" data-cmr="cmr_13">${esc(appState.cmr.cmr_13)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_13">${esc(appState.cmr.cmr_13)}</textarea>
                 </div>
                 <div class="cmr-box box-h14">
                   <div class="cmr-lbl-row"><span class="cmr-num">14</span><div class="cmr-lbl"><strong>Postanowienia odnośnie przewoźnego</strong> / Frachtzahlungsanweisungen / Instructions as to payment for carriage</div></div>
-                  <textarea class="cmr-val" data-max-pt="8.4" data-min-pt="6.2" data-cmr="cmr_14">${esc(appState.cmr.cmr_14)}</textarea>
+                  <textarea class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_14">${esc(appState.cmr.cmr_14)}</textarea>
                 </div>
               </div>
 
@@ -1727,11 +1727,11 @@
             <div class="cmr-row-21-15">
               <div class="cmr-box box-h21">
                 <div class="cmr-lbl-row"><span class="cmr-num">21</span><div class="cmr-lbl"><strong>Wystawiono w</strong> / Ausgefertigt in / Established in — <strong>dnia</strong> / am / on:</div></div>
-                <input type="text" class="cmr-val" data-max-pt="8.5" data-min-pt="6.2" data-cmr="cmr_21" value="${esc(appState.cmr.cmr_21)}" />
+                <input type="text" class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_21" value="${esc(appState.cmr.cmr_21)}" />
               </div>
               <div class="cmr-box box-h15">
                 <div class="cmr-lbl-row"><span class="cmr-num">15</span><div class="cmr-lbl"><strong>Zwrot zaliczenia</strong> / Rückerstattung / Cash on delivery:</div></div>
-                <input type="text" class="cmr-val" data-max-pt="8.5" data-min-pt="6.2" data-cmr="cmr_15" value="${esc(appState.cmr.cmr_15)}" />
+                <input type="text" class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_15" value="${esc(appState.cmr.cmr_15)}" />
               </div>
             </div>
 
@@ -1739,16 +1739,16 @@
             <div class="cmr-bottom-22-24">
               <div class="cmr-sign-cell">
                 <div class="cmr-lbl-row"><span class="cmr-num">22</span><div class="cmr-lbl"><strong>Podpis i stempel nadawcy</strong> / Unterschrift und Stempel des Absenders / Signature and stamp of the sender</div></div>
-                <input type="text" class="cmr-val" data-max-pt="8.4" data-min-pt="6.2" data-cmr="cmr_22" value="${esc(appState.cmr.cmr_22)}" />
+                <input type="text" class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_22" value="${esc(appState.cmr.cmr_22)}" />
                 ${sigBlock}
               </div>
               <div class="cmr-sign-cell carrier-bold">
                 <div class="cmr-lbl-row"><span class="cmr-num">23</span><div class="cmr-lbl"><strong>Podpis i stempel przewoźnika</strong> / Unterschrift und Stempel des Frachtführers / Signature and stamp of the carrier</div></div>
-                <input type="text" class="cmr-val" data-max-pt="8.4" data-min-pt="6.2" data-cmr="cmr_23" value="${esc(appState.cmr.cmr_23)}" />
+                <input type="text" class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_23" value="${esc(appState.cmr.cmr_23)}" />
               </div>
               <div class="cmr-sign-cell">
                 <div class="cmr-lbl-row"><span class="cmr-num">24</span><div class="cmr-lbl"><strong>Przesyłkę otrzymano</strong> / Gut empfangen / Goods received — Miejscowość / Ort / Place — dnia / am / on:</div></div>
-                <input type="text" class="cmr-val" data-max-pt="8.4" data-min-pt="6.2" data-cmr="cmr_24" value="${esc(appState.cmr.cmr_24)}" />
+                <input type="text" class="cmr-val" data-max-pt="9.5" data-min-pt="7.6" data-cmr="cmr_24" value="${esc(appState.cmr.cmr_24)}" />
                 <div style="font-size:5.6pt;color:#475569;">Podpis i stempel odbiorcy / Unterschrift u. Stempel d. Empfängers</div>
               </div>
             </div>

@@ -449,11 +449,12 @@
   .cmr-title-header {
     border-right: 1.5px solid var(--accent-cmr);
     border-bottom: 1.5px solid var(--accent-cmr);
-    padding: 3px 5px;
+    padding: 2.5px 5px;
     background: var(--tint-cmr);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow: visible;
   }
 
   .cmr-title-row {
@@ -492,9 +493,11 @@
     align-items: center;
     justify-content: space-between;
     gap: 6px;
-    margin-top: 2.5px;
-    padding-top: 2px;
-    border-top: 1px solid var(--accent-cmr);
+    margin-top: 2px;
+    padding: 2px 4px;
+    background: #ffffff;
+    border: 1px solid var(--accent-cmr);
+    border-radius: 2px;
   }
 
   .cmr-copy-pill {
@@ -518,7 +521,7 @@
   }
 
   .cmr-copy-lbl {
-    font-size: 6.4pt;
+    font-size: 7pt;
     font-weight: 900;
     color: var(--accent-cmr);
     line-height: 1.1;
@@ -530,10 +533,10 @@
   }
 
   .cmr-conv-clause {
-    font-size: 5.4pt;
-    line-height: 1.13;
+    font-size: 5.1pt;
+    line-height: 1.08;
     color: #1f2937;
-    margin-top: 2px;
+    margin-top: 1.5px;
   }
 
   .cmr-lbl-row {
@@ -583,14 +586,14 @@
   }
 
   /* Wysokości pól zgodne z klasycznym CMR */
-  .box-h1 { height: 25.5mm; }
+  .box-h1 { height: 30mm; }
   .box-h2 { height: 25.5mm; }
   .box-h3 { height: 15.5mm; }
   .box-h4 { height: 15.5mm; }
   .box-h5 { height: 15.5mm; }
 
-  .box-hdr { height: 24.5mm; }
-  .box-h16 { height: 25.5mm; }
+  .box-hdr { min-height: 30mm; height: auto; }
+  .box-h16 { height: 30mm; }
   .box-h17 { height: 15.5mm; }
   .box-h18 { height: 15.5mm; }
   .box-h19 { height: 15.5mm; }
@@ -1517,9 +1520,13 @@
       w += toNum(row.weight);
       v += toNum(row.vol);
     });
+    const wStr = fmtNum(w) + " kg";
+    const vStr = fmtNum(v) + " m³";
     document.getElementById("sumCargoCount").textContent = String(appState.cargo.length);
-    document.getElementById("sumCargoWeight").textContent = fmtNum(w) + " kg";
-    document.getElementById("sumCargoVol").textContent = fmtNum(v) + " m³";
+    document.getElementById("sumCargoWeight").textContent = wStr;
+    document.getElementById("sumCargoVol").textContent = vStr;
+    document.querySelectorAll("[data-sum-weight]").forEach((el) => { el.textContent = wStr; });
+    document.querySelectorAll("[data-sum-vol]").forEach((el) => { el.textContent = vStr; });
   }
 
   function drawCargoForm() {
@@ -1686,24 +1693,25 @@
             <table class="cmr-goods-tbl">
               <thead>
                 <tr>
-                  <th style="width:13%;">6 Cechy i numery<br/>Kennzeichen und Nummern<br/>Marks and Nos</th>
-                  <th style="width:9%;">7 Ilość sztuk<br/>Anzahl der Packstücke<br/>Number of packages</th>
-                  <th style="width:13%;">8 Sposób opakowania<br/>Art der Verpackung<br/>Method of packing</th>
-                  <th style="width:34%;">9 Rodzaj towaru<br/>Bezeichnung des Gutes<br/>Nature of the goods</th>
+                  <th style="width:12%;">6 Cechy i numery<br/>Kennzeichen und Nummern<br/>Marks and Nos</th>
+                  <th style="width:8%;">7 Ilość sztuk<br/>Anzahl der Packstücke<br/>Number of packages</th>
+                  <th style="width:12%;">8 Sposób opakowania<br/>Art der Verpackung<br/>Method of packing</th>
+                  <th style="width:30%;">9 Rodzaj towaru<br/>Bezeichnung des Gutes<br/>Nature of the goods</th>
                   <th style="width:10%;">10 Nr statyst.<br/>Statistiknummer<br/>Statistical number</th>
-                  <th style="width:11%;">11 Waga brutto kg<br/>Bruttogewicht in kg<br/>Gross weight in kg</th>
-                  <th style="width:10%;">12 Objętość m³<br/>Umfang m³<br/>Volume in m³</th>
+                  <th style="width:14%;">11 Masa brutto (kg)<br/>Bruttogewicht / Gross weight</th>
+                  <th style="width:14%;">12 Objętość (m³)<br/>Umfang / Volume</th>
                 </tr>
               </thead>
               <tbody>${rowsHtml}</tbody>
             </table>
 
-            <!-- PASEK KLASYFIKACJI ADR POD TABELĄ -->
+            <!-- PASEK KLASYFIKACJI ADR ORAZ OSOBNE RUBRYKI MASY (11) I OBJĘTOŚCI (12) -->
             <div class="cmr-adr-strip">
               <div class="cmr-adr-cell"><strong>Klasa / Klasse / Class:</strong><input type="text" class="cmr-adr-inp" data-cmr="adr_class" value="${esc(appState.cmr.adr_class)}" /></div>
               <div class="cmr-adr-cell"><strong>Liczba / Ziffer / Number:</strong><input type="text" class="cmr-adr-inp" data-cmr="adr_num" value="${esc(appState.cmr.adr_num)}" /></div>
               <div class="cmr-adr-cell"><strong>Litera / Buchstabe / Letter:</strong><input type="text" class="cmr-adr-inp" data-cmr="adr_let" value="${esc(appState.cmr.adr_let)}" /></div>
-              <div class="cmr-adr-cell" style="grid-column:span 2;justify-content:center;font-weight:800;color:var(--accent-cmr);">(ADR*)</div>
+              <div class="cmr-adr-cell"><strong>11 Masa (kg):</strong><span style="font-size:8.5pt;font-weight:900;color:#0f172a;" data-sum-weight>0,00 kg</span></div>
+              <div class="cmr-adr-cell"><strong>12 Objętość (m³):</strong><span style="font-size:8.5pt;font-weight:900;color:#0f172a;" data-sum-vol>0,00 m³</span></div>
             </div>
 
             <!-- RUBRYKI 13, 14 PO LEWEJ ORAZ TABELA 20 PO PRAWEJ -->
